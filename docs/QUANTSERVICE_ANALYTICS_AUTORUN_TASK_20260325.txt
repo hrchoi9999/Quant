@@ -1,0 +1,14 @@
+Quant 쪽에서 internal admin analytics preview 데이터가 일일 배치에 자동 연결되었습니다.
+
+참고 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_AUTORUN_HANDOFF_20260325.md
+
+핵심:
+1. run_daily_quant_pipeline.py 실행 시 analytics preview도 같이 갱신됩니다.
+2. 대상은 아래 internal preview 경로입니다.
+- D:\Quanteports\service_analytics_review60325\p1_bundle
+- D:\Quanteports\service_analytics_review60325\p2_bundle
+- D:\Quanteports\service_analytics_review60325\p3_bundle
+3. public web payload/current snapshot에는 아직 연결하지 마세요.
+4. internal_preview_only=true, web_publish_enabled=false 규칙을 유지하세요.
+5. 필요시 Quant 배치에서만 --skip-service-analytics 로 제외할 수 있습니다.

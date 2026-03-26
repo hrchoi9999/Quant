@@ -1,0 +1,8 @@
+﻿issue
+[SUMMARY] extra_cols in current: ['market_exit_mult']
+[NUM] col=cagr max_abs_diff=0.0610715 tol=1e-09
+[NUM] col=sharpe max_abs_diff=0.128429 tol=1e-09
+[NUM] col=mdd max_abs_diff=0.125203 tol=1e-09
+[NUM] col=avg_daily_ret max_abs_diff=0.000257465 tol=1e-09
+[NUM] col=vol_daily max_abs_diff=0.00393856 tol=1e-09
+[NUM] col=market_sma_mult max_abs_diff=0.02 tol=1e-09

@@ -1,0 +1,110 @@
+﻿QuantService 수정 작업지시 요약 (2026-03-20)
+
+1. snapshot 경로는 그대로 사용
+- D:\Quant\service_platform\web\public_data\current\publish_manifest.json
+- D:\Quant\service_platform\web\public_data\current\user_model_catalog.json
+- D:\Quant\service_platform\web\public_data\current\user_recommendation_report.json
+- D:\Quant\service_platform\web\public_data\current\user_performance_summary.json
+- D:\Quant\service_platform\web\public_data\current\user_recent_changes.json
+
+2. 사용자 모델명 변경
+- Redbot 안정형 -> 안정형
+- Redbot 균형형 -> 균형형
+- Redbot 성장형 -> 성장형
+- Redbot 자동전환형 -> 자동전환형
+
+3. 포트폴리오 항목에 security_code 추가
+- allocation_items[].security_code
+- 6자리 문자열
+- 예: 005930, 069500, 192720
+- cash-like row만 null 가능
+- number 변환 금지
+
+4. recent changes 구조 변경
+기존:
+- 문자열 배열
+현재:
+- 객체 배열
+필드:
+- display_name
+- security_code
+- delta_weight
+- direction
+
+5. 성능 데이터는 stable / balanced / growth / auto 별로 분리
+- auto와 balanced가 같을 수 있음
+- 현재 국면이 neutral이면 정상
+
+6. 일일 배치가 웹 snapshot까지 자동 갱신함
+- 별도 수동 export를 가정하지 말 것
+
+7. API 골격 추가
+- /api/v1/manifest
+- /api/v1/user-models
+- /api/v1/recommendation/today
+- /api/v1/recommendation/{service_profile}
+- /api/v1/performance/summary
+- /api/v1/changes/recent
+
+8. 필수 수정 작업
+- 모델명 교체
+- security_code 표시
+- recent changes 렌더러 수정
+- profile별 성능값 반영 확인
+- stale-data 표시를 publish_manifest 기준으로 연결
+
+상세 문서:
+D:\Quant\docs\QUANTSERVICE_WEBSERVICE_UPDATE_HANDOFF_20260320.md
+
+
+?? ??:
+9. ???? neutral ????? ?? 1Y CAGR ??? ??? ?? ??(S3/S3 Core2 ? ??)? ??
+- ?? ?? ??: S3
+- ??? ??? ?????? ???? ?? ??? ???? ?? ??
+
+10. ??? ?? ?? ??? ?? FULL? ??? 1Y
+- performance_cards.primary_period ??
+- cagr/mdd/sharpe? 1Y ?? ??? ??
+
+11. period_table ? 3M, 6M ??
+- ?? ?? ??: 3M / 6M / 1Y
+- 5Y / FULL ? ?????? ??
+
+12. reference_metrics ??
+- reference_metrics.five_year
+- reference_metrics.full
+
+13. ????? ?? ?? ??
+- ?? ?? ?? 1? ????? sleeve ??? ?? ??
+- ?? sleeve / ETF sleeve / ??? ??? ?? ??? ?
+- ?? ???? ???? ?? ?? / ETF ??? ?? ??? ?
+
+14. ???? ?? ???? ??
+- 1Y = ?? ??
+- ??? 6M, 3M, 2Y, 3Y, 5Y, FULL ?
+- 5Y, FULL ? ???? ???? ?? ????? ??
+- ?? ?? headline ? performance_cards.primary_period ???? ??
+
+
+추가 정정 (기간 성과 표시):
+- 3M / 6M / 1Y 기간 성과 계산 로직이 수정되었음
+- 부분기간 CAGR은 이제 해당 기간 시작 equity 기준으로 재계산됨
+- 따라서 이전에 보이던 과도한 3M CAGR 값(예: 900%+, 1100%+)은 더 이상 사용하면 안 됨
+- 웹에서는 3M, 6M은 `total_return` 중심으로 보여주는 것을 권장
+- 1Y는 `cagr`를 메인 지표로 사용
+- 2Y 이상은 `cagr` 중심 유지 가능
+
+권장 표시 규칙:
+- 1Y: CAGR, MDD, Sharpe
+- 6M: total_return, MDD, Sharpe
+- 3M: total_return, MDD, Sharpe
+- 2Y/3Y: CAGR, MDD, Sharpe
+- 5Y/FULL: 참고자료
+
+payload 참고:
+- performance_cards.cagr
+- performance_cards.total_return
+- period_table[].total_return
+- period_table[].cagr
+- reference_metrics.five_year
+- reference_metrics.full

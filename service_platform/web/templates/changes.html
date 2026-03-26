@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>Redbot Changes</title></head>
+<body>
+  <h1>?? ??</h1>
+  {% for change in payload.changes %}
+    <section>
+      <h2>{{ change.user_model_name }}</h2>
+      <p>{{ change.summary }}</p>
+      <p>?? ??: {{ change.change_type }}</p>
+    </section>
+  {% endfor %}
+</body>
+</html>

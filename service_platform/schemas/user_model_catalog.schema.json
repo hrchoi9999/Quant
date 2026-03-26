@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["as_of_date", "models"],
+  "properties": {
+    "as_of_date": {"type": "string"},
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["user_model_id", "user_model_name", "service_profile", "summary", "risk_label", "target_user_type", "primary_asset_mix", "is_active"]
+      }
+    }
+  }
+}

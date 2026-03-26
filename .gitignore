@@ -1,26 +1,36 @@
-# 가상환경
+# --- venv ---
 venv/
 venv64/
 .venv/
 
-# 데이터
-*.csv
-*.parquet
-*.db
+# --- archive ---
+_archive/
 
-# 로그
-logs/
-*.log
-
-# 리포트/이미지
-reports/
-*.png
-*.jpg
-
-# 캐시
+# --- python cache ---
 __pycache__/
+*.pyc
+*.pyo
+
+# --- notebook ---
 .ipynb_checkpoints/
 
-# OS / IDE
+# --- IDE/OS ---
 .vscode/
 .DS_Store
+Thumbs.db
+
+# --- data artifacts (권장) ---
+data/**/*.db
+data/**/*.sqlite
+data/**/*.parquet
+data/**/*.csv
+data/**/*.pkl
+
+# 원천/가공 데이터 폴더 자체를 통째로 빼고 싶다면 (선택)
+# data/raw/
+# data/processed/
+
+# --- reports/logs (미래 대비) ---
+reports/
+logs/
+*.log

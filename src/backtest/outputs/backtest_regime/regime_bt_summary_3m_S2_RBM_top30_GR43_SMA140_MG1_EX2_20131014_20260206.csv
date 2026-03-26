@@ -1,0 +1,2 @@
+﻿strategy,start,end,cagr,sharpe,mdd,avg_daily_ret,vol_daily,fee_bps,slippage_bps,rebalance_count,top_n,good_regimes,sma_window,require_above_sma,fundamentals_view,fundamentals_asof,market_gate,market_sma_window,market_sma_mult
+S2,2013-10-14,2026-02-06,0.07604755501151028,0.6951012924693752,-0.25549240435872034,0.0003260409121136439,0.007446021292415081,5.0,5.0,149,30,"4,3",140,True,s2_fund_scores_monthly,False,True,60,1.02

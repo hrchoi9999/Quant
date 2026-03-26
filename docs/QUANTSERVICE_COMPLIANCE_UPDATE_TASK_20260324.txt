@@ -1,0 +1,52 @@
+QuantService compliance update task (2026-03-24)
+
+필수 참고 문서:
+- D:\Quant\docs\QUANTSERVICE_COMPLIANCE_UPDATE_HANDOFF_20260324.md
+
+사용 데이터:
+- D:\Quant\service_platform\web\public_data\current\publish_manifest.json
+- D:\Quant\service_platform\web\public_data\current\user_model_catalog.json
+- D:\Quant\service_platform\web\public_data\current\user_model_snapshot_report.json
+- D:\Quant\service_platform\web\public_data\current\user_performance_summary.json
+- D:\Quant\service_platform\web\public_data\current\user_recent_changes.json
+
+새 canonical API:
+- /api/v1/model-snapshots/today
+- /api/v1/model-snapshots/{service_profile}
+
+반드시 반영할 것:
+1. user_recommendation_report.json 사용 중이면 user_model_snapshot_report.json 으로 교체
+2. recommendation API 경로 사용 중이면 model-snapshots API 경로로 교체
+3. 사용자 노출 문구에서 아래 표현 제거
+- 추천
+- 오늘의 추천
+- 추천 포트폴리오
+- 추천 이유
+- 개인 맞춤
+- 성향별 추천
+- 권유
+- 매수 추천
+- 매도 추천
+
+4. 대체 문구 사용
+- 오늘의 모델 정보
+- 현재 기준 모델
+- 기준일 모델 구성
+- 산출 배경
+- 참고 이용자 유형
+- 모델 프로필
+- 변경 기준
+
+5. 참고 이용자 문구는 target_user_type 대신 reference_usage_context 기준으로 반영
+6. compliance_metadata 필드 읽어서 비개인화/비자문 데이터라는 전제 유지
+7. 투자 행동 유도형 문구 추가 금지
+8. 기존 flat field는 그대로 사용 가능
+- summary_text
+- allocation_items
+- rationale_items
+- change_log
+- performance_summary
+
+주의:
+- 새 snapshot은 법적 리스크를 줄이기 위해 recommendation 중심 명칭이 아니라 model snapshot 중심 명칭으로 바뀌었다.
+- QuantService는 표현과 연결 구조만 수정하고 Quant 계산 로직은 재구현하지 않는다.

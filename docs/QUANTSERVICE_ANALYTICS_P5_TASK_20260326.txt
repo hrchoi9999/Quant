@@ -1,0 +1,21 @@
+Quant service analytics internal preview에 P5 운영 메타/health 데이터가 추가되었습니다.
+이번 작업도 internal preview 전용이며 public 웹에는 연결하지 않습니다.
+
+필수 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P5_HANDOFF_20260326.md
+
+사용 파일:
+- D:\Quanteports\service_analytics_review60325\p5_bundleundle_manifest_20260325.json
+- D:\Quanteports\service_analytics_review60325\p5_bundledmin_ops_status_20260325.json
+- D:\Quanteports\service_analytics_review60325\p5_bundleundle_health_20260325.json
+
+이번 범위:
+1. admin ops status 페이지 또는 admin health panel
+2. bundle health table
+3. 각 admin preview page 상단의 build/freshness meta 활용
+
+핵심 포인트:
+- P1~P4 bundle 에 공통 build meta 추가
+- manifest 에 file_meta / build_status 추가
+- P5 는 운영 상태 확인용
+- production API/current snapshot 으로 합치지 말 것

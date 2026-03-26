@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>Redbot Performance</title></head>
+<body>
+  <h1>?? ??</h1>
+  <ul>
+  {% for model in payload.models %}
+    <li>{{ model.user_model_name }} - CAGR {{ '%.2f'|format(model.performance_cards.cagr * 100) }}%, MDD {{ '%.2f'|format(model.performance_cards.mdd * 100) }}%</li>
+  {% endfor %}
+  </ul>
+</body>
+</html>

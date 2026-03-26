@@ -1,0 +1,32 @@
+Quant 쪽에서 1차 묶음 페이지용 내부 preview payload를 만들었습니다.
+이번 작업은 내부 개발 전용이며, 실서비스 반영은 금지입니다.
+
+필수 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P1_HANDOFF_20260325.md
+
+사용 파일:
+- D:\Quant\reports\service_analytics_review\20260325\p1_bundle\bundle_manifest_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p1_bundle\today_model_info_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p1_bundle\model_changes_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p1_bundle\model_compare_20260325.json
+
+이번 범위:
+1. 오늘의 모델 정보 페이지
+2. 모델 변화 페이지
+3. 모델 비교 페이지
+
+작업 순서:
+1. today_model_info JSON으로 모델 요약 페이지 구현
+2. model_changes JSON으로 최근 8주 변화 페이지 구현
+3. model_compare JSON으로 모델 비교 페이지 구현
+
+중요:
+- 이 payload는 internal_preview_only=true 상태임
+- web_publish_enabled=false 상태임
+- 실서비스 API/current snapshot 교체 금지
+- redbot.co.kr 반영 금지
+- 사용자 컨펌 전까지 배포 금지
+
+표현 주의:
+- S3 / S3_CORE2 자산구성은 fallback 표시가 들어가 있으므로 top holdings 중심으로 보여줄 것
+- 1차에서는 카드/표 위주로 구현하고 과도한 그래프는 뒤로 미룰 것

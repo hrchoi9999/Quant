@@ -1,0 +1,30 @@
+Quant 쪽에서 3차 묶음 페이지용 내부 preview payload를 만들었습니다.
+이번 작업은 내부 개발 전용이며, 실서비스 반영은 금지입니다.
+
+필수 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P3_HANDOFF_20260325.md
+
+사용 파일:
+- D:\Quant\reports\service_analytics_review\20260325\p3_bundle\bundle_manifest_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p3_bundle\model_quality_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p3_bundle\weekly_briefing_20260325.json
+
+이번 범위:
+1. 모델 품질 페이지
+2. 주간 브리핑 페이지
+
+권장 작업 순서:
+1. model_quality JSON으로 품질 페이지 구현
+2. weekly_briefing JSON으로 브리핑 페이지 구현
+
+중요:
+- 이 payload는 internal_preview_only=true 상태임
+- web_publish_enabled=false 상태임
+- 실서비스 API/current snapshot 교체 금지
+- redbot.co.kr 반영 금지
+- 사용자 컨펌 전까지 배포 금지
+
+표현 주의:
+- 모델 품질은 카드 + line chart + table 중심
+- 주간 브리핑은 summary bullet + top holdings + recent changes 중심
+- Quant가 만든 briefing_points를 우선 사용하고 QuantService가 임의 해석 문구를 새로 만들지 말 것

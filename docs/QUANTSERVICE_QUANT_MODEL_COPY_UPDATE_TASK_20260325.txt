@@ -1,0 +1,29 @@
+Quant 쪽 current snapshot에 QuantService 요청 기준의 단순 별칭 필드가 추가되었습니다.
+이번 작업은 기존 구조를 유지하면서 새 필드를 화면에 반영하는 것입니다.
+
+사용 데이터:
+- D:\Quant\service_platform\web\public_data\current\user_model_catalog.json
+- D:\Quant\service_platform\web\public_data\current\user_model_snapshot_report.json
+- D:\Quant\service_platform\web\public_data\current\user_performance_summary.json
+- D:\Quant\service_platform\web\public_data\current\user_recent_changes.json
+
+새 필드:
+1. 공통
+- quant_model_name
+- model_definition_line
+- model_definition_detail
+
+2. 변경내역
+- changes[].quant_model_name
+- changes[].change_badge_label
+
+권장 반영:
+- 카드/상세 제목: quant_model_name
+- 한 줄 정의: model_definition_line
+- 보조 설명: model_definition_detail
+- 변경내역 배지: change_badge_label
+
+중요:
+- 프론트에서 새 문구를 재가공하지 말고 그대로 사용해도 됨
+- 기존 model_metadata, performance_subject_*, change_* 필드는 계속 사용 가능
+- 투자 권유형 표현은 추가하지 말 것

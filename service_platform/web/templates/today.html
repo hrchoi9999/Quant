@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>Redbot Today</title></head>
+<body>
+  <h1>??? ??</h1>
+  <p>?? ?? ??: {{ payload.current_market_regime }}</p>
+  {% for report in payload.reports %}
+    <section>
+      <h2>{{ report.user_model_name }}</h2>
+      <p>{{ report.summary_text }}</p>
+      <p>?? ??: {{ report.market_view }} / ?? ??: {{ report.risk_level }}</p>
+    </section>
+  {% endfor %}
+</body>
+</html>

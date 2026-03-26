@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Public Model Snapshot Report",
+  "type": "object",
+  "required": [
+    "header",
+    "executive_summary",
+    "market_diagnosis",
+    "model_overview",
+    "model_metadata",
+    "model_portfolio",
+    "model_rationale",
+    "risk_guide",
+    "recent_performance",
+    "model_changes",
+    "disclaimer",
+    "compliance_metadata",
+    "internal_metadata"
+  ],
+  "properties": {
+    "header": {
+      "type": "object",
+      "required": ["report_title", "generated_at", "user_model_name", "service_profile", "report_version"]
+    },
+    "executive_summary": {
+      "type": "object",
+      "required": ["current_model_label", "market_view", "summary_basis", "risk_level"]
+    },
+    "market_diagnosis": {
+      "type": "object",
+      "required": ["current_regime", "regime_summary", "reference_response"]
+    },
+    "model_overview": {
+      "type": "object",
+      "required": ["model_name", "model_character", "model_profile_label", "core_role"]
+    },
+    "model_metadata": {
+      "type": "object",
+      "required": ["model_display_name", "model_family_name", "model_public_type", "model_brief_type", "model_portfolio_type", "model_one_line_desc", "model_scope_desc", "model_profile_desc", "model_role_desc", "performance_subject_name", "performance_subject_type", "portfolio_generation_basis", "change_subject_name", "change_basis_desc", "change_reason_desc"]
+    },
+    "model_portfolio": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["security_code", "asset_group", "display_name", "target_weight", "role_summary", "source_type"]
+      }
+    },
+    "model_rationale": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "risk_guide": {
+      "type": "object",
+      "required": ["risk_level", "expected_drawdown_note", "reference_usage_context", "reference_holding_period"]
+    },
+    "recent_performance": {
+      "type": "object",
+      "required": ["headline_metrics", "period_metrics", "performance_subject_name", "performance_subject_type", "portfolio_generation_basis"]
+    },
+    "model_changes": {
+      "type": "object",
+      "required": ["increased_assets", "decreased_assets", "change_subject_name", "change_basis", "change_reason_desc"]
+    },
+    "disclaimer": {
+      "type": "object",
+      "required": ["investment_risk", "past_performance", "informational_purpose", "final_decision"]
+    },
+    "compliance_metadata": {
+      "type": "object",
+      "required": ["content_class", "is_personalized_advice", "is_one_to_one_advisory", "is_actual_trade_instruction", "data_basis"]
+    },
+    "internal_metadata": {
+      "type": "object",
+      "required": ["source_models", "generated_from_files", "user_visible_internal_models"]
+    }
+  }
+}

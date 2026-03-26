@@ -1,0 +1,24 @@
+Quant 쪽에서 analytics admin preview 2차 품질 보강을 반영했습니다.
+
+참고 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P2_IMPROVEMENTS_HANDOFF_20260326.md
+
+핵심 변경:
+1. change log 에 0.1% 미만 노이즈 변화 제거
+2. holding lifecycle 에 re-entry episode 규칙 추가
+3. data quality checks 테이블/CSV 추가
+4. p3 model_quality payload 에 quality_checks[] 추가
+
+QS 에서 할 수 있는 일:
+- model_quality 페이지에 quality_checks badge/table 추가 가능
+- holding_lifecycle 페이지는 current_holdings_lifecycle 를 현재 보유 episode 기준으로 신뢰 가능
+- model_changes 페이지는 기존대로 써도 되지만, 미세 노이즈가 줄어든 상태를 기준으로 보면 됨
+
+참고 파일:
+- D:\Quanteports\service_analytics_review60325\data_quality_checks_20260325.csv
+- D:\Quanteports\service_analytics_review60325\p3_bundle\model_quality_20260325.json
+
+주의:
+- internal preview only 유지
+- public 연결 금지
+- production snapshot/API 수정 금지

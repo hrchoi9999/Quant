@@ -1,0 +1,30 @@
+Quant service analytics internal preview에 P4 데이터가 추가되었습니다.
+이번 작업도 internal preview 전용이며 public 웹에는 연결하지 않습니다.
+
+필수 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P4_HANDOFF_20260326.md
+
+사용 파일:
+- D:\Quanteports\service_analytics_review60325\p4_bundleundle_manifest_20260325.json
+- D:\Quanteports\service_analytics_review60325\p4_bundlesset_exposure_detail_20260325.json
+- D:\Quanteports\service_analytics_review60325\p4_bundle\change_impact_20260325.json
+
+이번 범위:
+1. 자산 노출 상세 페이지
+2. 변화 영향 페이지
+
+핵심 데이터:
+- latest_asset_detail
+- asset_detail_trend_26w
+- latest_change_activity
+- change_activity_trend_26w
+- recent_new_entries_impact_8w
+- recent_exits_impact_8w
+- impact_summary
+
+중요 원칙:
+1. internal preview only
+2. meta.internal_preview_only = true
+3. meta.web_publish_enabled = false
+4. production API/current snapshot으로 합치지 말 것
+5. public 웹 연결 금지

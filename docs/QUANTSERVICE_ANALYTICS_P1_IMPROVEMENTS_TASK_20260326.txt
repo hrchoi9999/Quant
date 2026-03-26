@@ -1,0 +1,22 @@
+Quant 쪽에서 analytics admin preview 데이터 1차 품질 보강을 반영했습니다.
+
+참고 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P1_IMPROVEMENTS_HANDOFF_20260326.md
+
+이번 변경점:
+1. model_changes 의 종목명 null 보정 강화
+2. p1/p2/p3 payload 에 date_context 추가
+3. S3 / S3_CORE2 asset_mix 기반 preview 재생성
+
+QS에서 할 수 있는 일:
+- 기존 화면은 그대로 둬도 됨
+- 필요하면 admin 화면에 date_context 를 표시해서 날짜 의미를 더 분명하게 할 수 있음
+- 예:
+  - signal_date
+  - effective_date
+  - week_end
+
+주의:
+- internal preview only 유지
+- public 연결 금지
+- 기존 production API/current snapshot 수정 금지

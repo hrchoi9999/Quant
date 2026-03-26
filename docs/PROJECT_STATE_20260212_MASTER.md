@@ -1,0 +1,172 @@
+# PROJECT_STATE_20260212_MASTER (퀀트투자 백테스트 리팩토링 종합본)
+
+> 기준일: 2026-02-12 (KST)  
+> 범위: 2026-02-09 ~ 2026-02-12 동안 작성된 PROJECT_STATE 문서 전부를 **누락 없이 통합** + 최신 이슈/결정 반영  
+> 목표: 이 문서 하나만 보고도 **(1) 지금까지 무엇을 했는지, (2) 현재 무엇이 문제인지, (3) 다음에 무엇을 하면 되는지** 즉시 파악 가능
+
+---
+
+## 0) 프로젝트 목적 / 동치 기준
+
+목표는 **레거시 S2 백테스트**와 **리팩토링 S2 백테스트**가 **완전 동치(또는 허용오차 내 거의 동일)** 가 되도록 만드는 것입니다.
+
+동치 기준(필수):
+
+- `summary` (TOTAL / 1Y / 2Y / 3Y / 5Y: CAGR/MDD/Sharpe 등)
+- `equity curve`
+- `snapshot` (보유 종목 30 + CASH)  ← **현재 최대 이슈**
+- `ledger` / `trades_C`
+- `perf_windows` / `summary`
+
+---
+
+## 1) 작업 환경 / 고정 전제
+
+- 프로젝트 루트: `D:\Quant`
+- venv: `D:\Quant\venv64` (Python 3.10.x)
+- DB/Universe는 리팩토링 동안 **고정(업데이트 금지)**  
+  - `data\db\regime.db` / table: `regime_history`
+  - `data\db\price.db` / table: `prices_daily`
+  - `data\db\fundamentals.db` / view: `s2_fund_scores_monthly`
+  - `data\universe\universe_mix_top400_20260129_fundready.csv` / ticker col: `ticker`
+
+---
+
+## 2) 골든(Golden) 정책 / 기준 stamp
+
+- **레거시 실행 결과가 정답(Golden)**
+- 리팩토링 산출물은 Golden과 **동일 결과를 재현**해야 함.
+- 대표 stamp (RBW / 3m / S2 / top30 / good_regimes=4,3 / SMA140 / MG1 / EX2):
+  - `3m_S2_RBW_top30_GR43_SMA140_MG1_EX2_20131014_20260206`
+- Golden Regression: **PASS** 상태를 확보해둔 것이 핵심 자산.
+
+---
+
+## 3) 실행 커맨드(확정본)
+
+### 3.1 레거시(REAL) 실행: Golden 생성/검증 기준선
+- 레거시 러너: `run_backtest_s2_v5.py` (또는 동일 동작의 v4 계열)
+
+### 3.2 리팩토링 실행(목표): 레거시 동치 달성 대상
+- 리팩토링 러너: `run_backtest_v5.py --s2-refactor` 또는 `run_backtest_s2_refactor_v1.py`
+
+> **중요**: 2026-02-12 기준, 리팩토링 러너들은 “import 경로(패키지/스크립트 혼재)” 문제로 인해 실행 방식이 흔들리며 장애가 반복됨.  
+> 이 문제는 “단일 실행 규칙”으로 정리해야 한다(아래 6장 참조).
+
+---
+
+## 4) 산출물 풀세트(8종) 기준
+
+레거시에서 정상 생성이 확인된 CSV 풀세트(8종):
+
+- `equity`
+- `holdings`
+- `snapshot`
+- `ledger`
+- `trades`
+- `trades_c`
+- `perf_windows`
+- `summary`
+
+리팩토링에서도 **파일 개수 자체는 8종 동일하게 생성되는 상태까지는 도달**했으나,
+- 일부는 “최소 스키마(minimal)”로 남아 레거시와 불일치
+- 특히 2026-02-12에는 snapshot 자체가 **CASH 1줄만 남는** 치명 이슈가 핵심
+
+---
+
+## 5) 리팩토링 전체 진행 상황표(통합본: ID 1~10 유지)
+
+> 2026-02-10/11 문서에서 정의한 ID 체계를 유지하고, 2026-02-12 이슈(스냅샷/티커/임포트 혼재)를 반영해 상태를 최신화했습니다.
+
+| ID | 작업 묶음 | 난이도 | 상태(2026-02-12) | 지금까지 실제 한 일(핵심) | 남은 핵심 |
+|---:|---|:---:|---|---|---|
+| 1 | Golden fixture 정리/배치 | ★★☆☆☆ | Done | 레거시 산출물을 Golden으로 고정, 경로/백업 정리 | Golden 생성/백업을 스크립트화(실수 방지) |
+| 2 | Regression 크래시 제거 | ★★★☆☆ | Done | regression 비교 로직 안정화, PASS 확보 | 비교 범위(추가 파일) 확장 시 재점검 |
+| 3 | Snapshot 정보컬럼(name) 정책 | ★★☆☆☆ | Done | 표시용 컬럼 불일치가 회귀를 깨지 않도록 정책 정립 | “표시용 vs 동치용 컬럼” 문서화 고도화 |
+| 4 | 레거시 위임 실행/CSV 풀세트 산출 | ★★★☆☆ | Done | 레거시로 8종 CSV + GSheet 업로드 정상 | 리팩토링 산출물로 전환(레거시 위임 제거) |
+| 5 | fee/slippage parity(5/5) | ★★★☆☆ | Done | fee=5bps / slippage=5bps 동치 고정 | 숨은 기본값(정렬/라운딩/정합) 점검 |
+| 6 | RBW golden 갱신 + PASS | ★★★★☆ | Done | RBW golden 갱신 후 PASS 유지 | (선택) `__trades` 등 추가 fixture 관리 |
+| 7 | refactor 엔진 parity 포팅 | ★★★★★ | In Progress | 리팩토링 러너가 끝까지 실행 + 8종 CSV 생성 수준까지 도달(과거) | **filled bundle 적용/저장 강제 + 스키마/내용 동치** |
+| 8 | RBM fixture 추가 | ★★☆☆☆ | Pending | RBW 집중으로 보류 | RBM stamp 생성 및 golden 추가 |
+| 9 | RBM golden PASS | ★★★★☆ | Pending | - | RBM 회귀 PASS |
+| 10 | 표준 커맨드/문서화 | ★★☆☆☆ | In Progress | 커맨드/고정 파라미터 정리(예: market-sma-mult=1.02 유지) | **단일 실행 규칙 + import 규칙**을 문서/코드로 강제 |
+
+---
+
+## 6) 2026-02-12 핵심 이슈: “snapshot이 CASH 1줄만 나옴” (전략 실패 아님)
+
+### 6.1 관측된 증상(확정)
+- holdings는 정상:
+  - holdings 총 row ≈ 8,982
+  - 마지막 리밸런스(예): 2026-02-04
+  - 해당 리밸런스에서 non-cash 종목 30개 존재
+- snapshot은 비정상:
+  - 결과 row 수가 1 (CASH만 존재)
+
+### 6.2 원인(최유력/사실 기반)
+snapshot은 가격을 조회하기 위해 다음을 수행:
+
+```
+close_wide.loc[snapshot_date, ticker]
+```
+
+여기서 ticker 자료형/포맷 불일치로 전부 KeyError가 발생 → 종목이 모두 drop → CASH-only가 됨.
+
+- holdings ticker: `'065350'` (6자리 문자열)
+- close_wide columns: `65350`(int) 또는 `'65350'` (zfill 미적용)
+
+즉 **ticker ↔ close_wide 컬럼 매칭 실패**가 snapshot만 터지게 만든다.
+
+### 6.3 지금까지의 패치 시도(요약)
+- fill_bundle: snapshot carry-forward 제거 등
+- legacy_reports: ticker resolver 강화(zfill/strip/'A' 제거/numeric equivalence 등)
+- A안(전역 표준화): ticker는 문자열 6자리로 통일하자는 방향
+  - `core/tickers.py` 신규 생성 (ticker 정규화 공통 모듈)
+  - `core/data.py`, `core/engine.py`, `fill_bundle.py`, `legacy_reports.py` 등에서 ticker 정규화 경로 도입
+
+### 6.4 “그런데 왜 더 꼬였나?” (2026-02-12의 2차 문제)
+티커 정규화 자체는 **문제 해결 방향이 맞음**.  
+하지만 동시에 아래가 섞이며 “임포트/실행 방식 혼재”가 발생:
+
+- `python file.py` 실행(스크립트 실행) vs `python -m package.module` 실행(패키지 실행)
+- `from core...` / `from outputs...` / `from src.backtest...` / 상대 import(`from .core...`) 혼재
+- 일부 파일에서 sys.path 조작을 통해 임시로 돌아가게 만든 “dual-mode” 패치가 누적
+
+그 결과:
+- `attempted relative import with no known parent package`
+- `attempted relative import beyond top-level package`
+- `ModuleNotFoundError: No module named 'core'`
+같은 오류가 반복적으로 발생.
+
+---
+
+## 7) 오늘 기준 결론(냉정한 상태)
+
+- **전략 로직 자체가 실패한 것이 아니라**, “output(snapshot) 단계의 ticker 매칭”이 실패 중.
+- 이 이슈를 해결하려면:
+  1) **close_wide.columns를 생성하는 순간부터 ticker를 문자열 6자리로 강제**해야 하고,
+  2) 동시에 프로젝트 전체를 **단일 import/실행 방식으로 정리**해야 함(dual-mode 제거).
+
+---
+
+## 8) 다음에 해야 할 작업(요약)
+
+아래는 TODO 문서(V2)에 상세화되어 있음:
+
+1) 실행 방식 “한 가지”로 고정(패키지 실행) + 모든 import를 `src.backtest...`로 통일  
+2) `close_wide.columns` dtype/샘플 확인 후, `core/data.py`에서 pivot 결과 컬럼을 **항상 zfill(6)** 적용  
+3) snapshot 생성 직전에 디버그 로그 3줄 추가(컬럼 샘플/매칭 실패 건수) → 원인 즉시 확정  
+4) snapshot row=31(30+cash) 복구되면, 그 다음 perf_windows / ledger / trades_c 동치로 진행  
+
+---
+
+## 9) 참고: 2026-02-09~12 문서 출처(통합 원본)
+
+- `PROJECT_STATE_2026-02-09.md`
+- `PROJECT_STATE_2026-02-10.md`
+- `PROJECT_STATE_2026-02-11.md`
+- `PROJECT_STATE_REFACTOR_S2_2026-02-12.md`
+- `Quant_Backtest_Refactor_Project_State_20260212_Last.md`
+- `PROJECT_STATE_20260212_V1.md`
+
+(끝)

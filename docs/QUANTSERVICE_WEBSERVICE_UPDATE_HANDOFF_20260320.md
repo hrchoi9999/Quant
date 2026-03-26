@@ -1,0 +1,347 @@
+﻿# Quant -> QuantService 수정 작업지시서 (2026-03-20)
+
+이 문서는 `D:\Quant` 쪽에서 최근 변경된 snapshot / API / 사용자용 데이터 구조를 기준으로, `QuantService` 쓰레드에서 반영해야 할 수정 작업을 정리한 handoff 문서다.
+
+## 1. 이번 변경의 핵심
+
+이번 변경으로 아래가 달라졌다.
+
+1. 사용자 모델명에서 `Redbot` 접두어를 제거했다.
+2. 포트폴리오 종목 항목에 `security_code`가 추가됐다.
+3. recent changes 데이터가 문자열 배열에서 구조화 객체 배열로 바뀌었다.
+4. `stable / balanced / growth / auto` 사용자 성능 데이터가 분리 생성된다.
+5. 웹서비스용 snapshot 생성이 일일 오케스트레이션에 포함됐다.
+6. 웹서비스용 JSON API 골격이 추가됐다.
+
+즉, QuantService는 기존 snapshot 경로를 계속 사용할 수는 있지만, 일부 필드는 기존 방식 그대로 렌더링하면 안 된다.
+
+## 2. 계속 사용할 데이터 경로
+
+아래 경로는 유지된다.
+
+- `D:\Quant\service_platform\web\public_data\current\publish_manifest.json`
+- `D:\Quant\service_platform\web\public_data\current\user_model_catalog.json`
+- `D:\Quant\service_platform\web\public_data\current\user_recommendation_report.json`
+- `D:\Quant\service_platform\web\public_data\current\user_performance_summary.json`
+- `D:\Quant\service_platform\web\public_data\current\user_recent_changes.json`
+
+추가로, 웹 API 골격도 있다.
+
+- `GET /api/v1/manifest`
+- `GET /api/v1/user-models`
+- `GET /api/v1/recommendation/today`
+- `GET /api/v1/recommendation/{service_profile}`
+- `GET /api/v1/performance/summary`
+- `GET /api/v1/changes/recent`
+
+참고 파일:
+- `D:\Quant\service_platform\web\app.py`
+- `D:\Quant\service_platform\web\data_provider.py`
+
+주의: 현재 로컬 Quant 환경에는 `Flask`가 설치되어 있지 않아 API 런타임 자체는 여기서 실구동 확인하지 못했다. 다만 route/data shape는 반영되어 있다.
+
+## 3. 반드시 반영해야 하는 프론트 수정사항
+
+### 3-1. 사용자 모델명 변경
+
+기존:
+- `Redbot 안정형`
+- `Redbot 균형형`
+- `Redbot 성장형`
+- `Redbot 자동전환형`
+
+현재:
+- `안정형`
+- `균형형`
+- `성장형`
+- `자동전환형`
+
+UI에서 하드코딩된 구명이 있다면 모두 새 이름으로 교체해야 한다.
+
+### 3-2. 포트폴리오 종목 코드 표시
+
+`allocation_items[]` 또는 포트폴리오 상세 항목에 아래 필드가 추가됐다.
+
+- `security_code: string | null`
+
+규칙:
+- 주식 / ETF는 항상 6자리 문자열
+- 예: `005930`, `069500`, `192720`, `459580`
+- 현금성 residual row만 `null` 가능
+- 숫자형으로 변환 금지
+- 앞자리 `0` 유지 필수
+
+렌더링 예시:
+- `삼성전자 (005930)`
+- `KODEX 200 (069500)`
+- `현금/대기자금` (`security_code == null` 이면 코드 숨김)
+
+적용 권장 위치:
+- Today 화면 포트폴리오 리스트
+- 모델 상세 포트폴리오 리스트
+- 변경 종목 리스트
+
+### 3-3. recent changes 구조 변경
+
+이 부분이 가장 중요하다.
+
+기존:
+- `increase_items[]` / `decrease_items[]` 가 문자열 배열
+- 예: `"파워 고배당저변동성 비중 확대 (+1.9%)"`
+
+현재:
+- `increase_items[]` / `decrease_items[]` 가 객체 배열
+
+구조:
+
+```json
+{
+  "display_name": "파워 고배당저변동성",
+  "security_code": "192720",
+  "delta_weight": 0.019145,
+  "direction": "increase"
+}
+```
+
+필드:
+- `display_name: string`
+- `security_code: string | null`
+- `delta_weight: number`
+- `direction: "increase" | "decrease"`
+
+프론트 반영 규칙:
+- 문자열 split/parsing 로직 제거
+- `delta_weight`는 UI에서 `%` 포맷팅
+- `direction`으로 상승/하락 스타일 구분
+- `security_code`가 있으면 종목명 옆에 같이 표시
+
+표시 예:
+- `파워 고배당저변동성 (192720) +1.91%`
+- `KODEX CD금리액티브(합성) (459580) -1.53%`
+
+## 4. 사용자 성능 카드 / 비교 화면 수정사항
+
+이제 `stable / balanced / growth / auto`의 사용자용 성능 수치가 분리 생성된다.
+
+현재 기준 예시:
+- `stable`: CAGR `0.317861`, MDD `-0.12245`, Sharpe `1.918278`
+- `balanced`: CAGR `0.341621`, MDD `-0.13316`, Sharpe `1.882228`
+- `growth`: CAGR `0.365224`, MDD `-0.143817`, Sharpe `1.837617`
+- `auto`: CAGR `0.341621`, MDD `-0.13316`, Sharpe `1.882228`
+
+주의:
+- `auto`와 `balanced`가 현재 같을 수 있다.
+- 이것은 버그가 아니라 현재 국면이 중립이라 `auto`가 `balanced`와 같은 라우팅을 탔기 때문이다.
+- 따라서 프론트에서 "왜 같지?"를 막기 위해, 필요하면 도움말 문구를 둘 수 있다.
+
+권장 문구 예:
+- `현재 시장 국면이 중립 구간이라 자동전환형이 균형형과 유사한 포트폴리오를 사용하고 있습니다.`
+
+## 5. 오케스트레이션 관련 이해사항
+
+이제 일일 배치에서 아래까지 같이 처리된다.
+
+- 주식 / ETF 데이터 업데이트
+- `S2 / S3 / S3 core2 / S4 / S5 / S6` 백테스트
+- `stable / balanced / growth / auto` Router 실행
+- model comparison 생성
+- user report 생성
+- web snapshot 생성
+- web snapshot validate
+- Google Sheets 업로드
+
+즉 QuantService는 별도 수동 export를 기다리기보다, 일일 배치 완료 후 snapshot/API를 읽는 구조로 보면 된다.
+
+## 6. QuantService 구현 권장 순서
+
+1. 모델명 교체
+2. `security_code` 렌더링 추가
+3. recent changes 렌더러를 객체 배열 기준으로 수정
+4. 성능 카드가 profile별 값을 정확히 읽는지 확인
+5. `publish_manifest.json` 기준 stale-data 표시 연결
+6. 가능하면 snapshot 직접 읽기와 API route 사용을 쉽게 바꿀 수 있는 adapter 유지
+
+## 7. QuantService에서 하면 안 되는 것
+
+- `S2/S3/S4/S5/S6/Router` 계산 재실행
+- turnover / CAGR / MDD 재계산
+- 종목코드 재정규화
+- 문자열 파싱으로 recent changes 복원
+- raw DB 직접 조인
+
+QuantService는 Quant가 만든 user-facing payload를 그대로 사용하는 쪽이 맞다.
+
+## 8. 관련 참고 문서
+
+- `D:\Quant\docs\QUANT_TO_QUANTSERVICE_API_SPEC_20260318.md`
+- `D:\Quant\docs\QUANTSERVICE_SCREEN_FIELD_MAPPING_20260318.md`
+- `D:\Quant\docs\QUANTSERVICE_IMPLEMENTATION_BRIEF_20260318.md`
+- `D:\Quant\docs\QUANTSERVICE_TASK_PROMPT_20260318.txt`
+- `D:\Quant\docs\DAILY_QUANT_BATCH_CHECKLIST_20260320.md`
+
+## 9. QuantService 쓰레드에 바로 전달할 요약
+
+- snapshot 파일 경로는 유지
+- 모델명은 `안정형 / 균형형 / 성장형 / 자동전환형`으로 변경
+- 포트폴리오 항목에 `security_code` 추가
+- recent changes는 문자열 배열이 아니라 구조화 객체 배열로 변경
+- 사용자 성능은 profile별로 분리됨
+- 일일 배치가 웹서비스용 snapshot까지 자동 갱신함
+- API 골격(`/api/v1/...`)도 추가되어 추후 snapshot -> API 전환 가능
+
+
+## 10. 2026-03-20 ?? ???? (??? / ???? ??)
+
+### 10-1. ??? ????? ?? ??
+
+???? ?? neutral / risk_on ???? `S2`? ?? ??,
+?? 1?(`1Y`) CAGR? ? ?? ??? ?? ??? ????.
+?? ??? ?? ???.
+
+- `S3`
+- `S3_CORE2`
+
+?? `2026-03-20` ?? ?? 1? CAGR ????? `S3`? ????,
+??? Router? neutral ????? `S3|S5` ??? ????.
+
+?? ???:
+- `S3 1Y CAGR`: ? `5.342769`
+- `S3_CORE2 1Y CAGR`: ? `2.863424`
+
+??? QuantService?? ??? ?????? ???? ?? sleeve ??? ??? ?? ????.
+
+### 10-2. ??? ?? ?? ?? ??
+
+?? ???? ?? ??? `FULL`? ??? `1Y`? ?? ???? ??.
+
+??:
+- `performance_cards.cagr` = FULL CAGR
+- `performance_cards.mdd` = FULL MDD
+- `performance_cards.sharpe` = FULL Sharpe
+
+??:
+- `performance_cards.primary_period` = `1Y`
+- `performance_cards.cagr` = 1Y CAGR
+- `performance_cards.mdd` = 1Y MDD
+- `performance_cards.sharpe` = 1Y Sharpe
+
+? QuantService? ?? ?? ??/??? `?? 1? ??` ?? `1Y ??`??? ??? ???? ?? ??.
+
+### 10-3. period table ??
+
+?? `period_table`?? ?? ??? ????.
+
+- `3M`
+- `6M`
+- `1Y`
+- `2Y`
+- `3Y`
+- `5Y`
+- `FULL`
+
+?? ?? ????:
+- ?? ??: `3M / 6M / 1Y`
+- ?? ??: `2Y / 3Y`
+- ????: `5Y / FULL`
+
+? `5Y`? `FULL`? ???? ??? ???? ??.
+
+### 10-4. reference metrics ??
+
+`user_performance_summary.json` ? ???? ?? ??? ????.
+
+- `reference_metrics.five_year`
+- `reference_metrics.full`
+
+? ?? ??? ?????? ?? ??.
+
+### 10-5. ??? ?? ???
+
+1. ?? ?? ?? ??? `1Y ??`?? ??
+2. ?? ?/??? `3M / 6M / 1Y`? ?? ??
+3. `5Y / FULL`? ?? ?? ?? ???? ???? ??
+4. ??? ?????? ???? ?? ?? ??? ??? ?? ???? ??
+5. ???? ???? ??? ? ? ??? ??? ETF/?? sleeve ??? ?? ???? ?? ??.
+
+
+### 10-6. ????? ?? ?? ?? ??
+
+?? ??? ?????? ?? ?? ?? ????? ???? ETF sleeve? ?? ??? ?? ???,
+??? / ??? / ??? ??? ??? ??? ? ??.
+
+??? QuantService??? ?? ??? ???? ?? ????.
+
+1. sleeve ?? ?? ??
+- ?? sleeve ??
+- ETF sleeve ??
+- ??? ??
+
+2. ? ?? ?? ??? ??
+- ?? ?? ??
+- ETF ?? ??
+- ??? ??
+
+3. ?? ?? ?? ??? ????
+- `?? ?? ?? ??` 1?? ?? ??
+- `?? ?? 3~5?`
+- `ETF ?? 3~5?`
+? ??? ??? ?
+
+??:
+- ???: ?? 50%, ETF 50%
+- ???: ?? 40%, ETF 60%
+- ???: ?? 30%, ETF 70%
+
+??? sleeve ??? ?? ????, ???? ? ?????? ?? ????? ?? ? ????.
+
+### 10-7. ???? ?? ????
+
+????? ?? ????? ??? ?.
+
+1. `1Y` (?? ??)
+2. `6M`
+3. `3M`
+4. `2Y`
+5. `3Y`
+6. `5Y`
+7. `FULL`
+
+??:
+- `1Y`? ?? ?? ??? ?
+- `6M`, `3M`? ?? ?? ??? ?? ?? ??? ??? ?
+- `2Y`, `3Y`? ?? ?? ??
+- `5Y`, `FULL`? ???? ?? ?? ???? ?? ????? ? ?
+
+?? UI ??:
+- ?? ?? headline: `1Y`
+- ?/?? ?? ?? ??: `1Y -> 6M -> 3M -> 2Y -> 3Y -> 5Y -> FULL`
+- `5Y`, `FULL`? ?? ?? ?? `?? ??` ?? ??
+
+?? payload ??:
+- `performance_cards.primary_period` = `1Y`
+- `period_table`?? `3M, 6M, 1Y, 2Y, 3Y, 5Y, FULL` ??
+- `reference_metrics.five_year`, `reference_metrics.full` ??
+
+
+추가 정정 (기간 성과 표시):
+- 3M / 6M / 1Y 기간 성과 계산 로직이 수정되었음
+- 부분기간 CAGR은 이제 해당 기간 시작 equity 기준으로 재계산됨
+- 따라서 이전에 보이던 과도한 3M CAGR 값(예: 900%+, 1100%+)은 더 이상 사용하면 안 됨
+- 웹에서는 3M, 6M은 `total_return` 중심으로 보여주는 것을 권장
+- 1Y는 `cagr`를 메인 지표로 사용
+- 2Y 이상은 `cagr` 중심 유지 가능
+
+권장 표시 규칙:
+- 1Y: CAGR, MDD, Sharpe
+- 6M: total_return, MDD, Sharpe
+- 3M: total_return, MDD, Sharpe
+- 2Y/3Y: CAGR, MDD, Sharpe
+- 5Y/FULL: 참고자료
+
+payload 참고:
+- performance_cards.cagr
+- performance_cards.total_return
+- period_table[].total_return
+- period_table[].cagr
+- reference_metrics.five_year
+- reference_metrics.full

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "as_of_date",
+    "generated_at",
+    "current_market_regime",
+    "reports"
+  ],
+  "properties": {
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "user_model_name",
+          "service_profile",
+          "summary_text",
+          "market_view",
+          "allocation_items",
+          "rationale_items",
+          "risk_level",
+          "performance_summary",
+          "change_log",
+          "disclaimer_text"
+        ],
+        "properties": {
+          "allocation_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "security_code",
+                "asset_group",
+                "display_name",
+                "target_weight",
+                "role_summary",
+                "source_type"
+              ],
+              "properties": {
+                "security_code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9]{6}$"
+                },
+                "asset_group": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "target_weight": {
+                  "type": "number"
+                },
+                "role_summary": {
+                  "type": "string"
+                },
+                "source_type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

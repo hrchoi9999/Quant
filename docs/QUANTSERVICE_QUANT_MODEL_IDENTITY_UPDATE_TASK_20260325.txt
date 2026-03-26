@@ -1,0 +1,66 @@
+Quant 쪽 public payload에 퀀트투자 모델 정체성 메타가 추가되었습니다.
+이번 작업은 QuantService에서 기존 화면 구조를 유지하면서 표현만 보강하는 작업입니다.
+
+필수 참고 문서:
+- D:\Quant\docs\QUANTSERVICE_QUANT_MODEL_IDENTITY_UPDATE_HANDOFF_20260325.md
+
+사용 데이터:
+- D:\Quant\service_platform\web\public_data\current\user_model_catalog.json
+- D:\Quant\service_platform\web\public_data\current\user_model_snapshot_report.json
+- D:\Quant\service_platform\web\public_data\current\user_performance_summary.json
+- D:\Quant\service_platform\web\public_data\current\user_recent_changes.json
+- D:\Quant\service_platform\web\public_data\current\publish_manifest.json
+
+이번에 반영할 것:
+1. model_metadata 사용
+- model_display_name
+- model_family_name
+- model_public_type
+- model_brief_type
+- model_portfolio_type
+- model_one_line_desc
+- model_scope_desc
+
+2. 제목/설명 교체
+- 짧은 탭 이름은 기존 유지 가능
+- 카드/상세 제목은 model_display_name 우선
+- 설명은 model_one_line_desc 우선 사용
+
+3. 성과 화면 반영
+- performance_subject_name
+- performance_subject_type
+- portfolio_generation_basis
+
+4. 변경내역 화면 반영
+- change_subject_name
+- change_basis_desc
+- change_reason_desc
+
+5. 용어 수정
+권장:
+- 모델
+- 모델 포트폴리오
+- 주간 모델 기준안
+- 모델 성과 설명
+- 공개형 모델 정보
+
+지양:
+- 전략
+- 오늘의 추천
+- 추천 전략
+- 추천 대응
+- 대응 가이드
+- 매수 전략
+- 매도 전략
+
+6. 기존 flat field는 계속 사용 가능
+- summary_text
+- allocation_items
+- rationale_items
+- change_log
+- performance_summary
+
+중요:
+- QuantService는 표현만 수정하고 Quant 계산 로직은 재구현하지 말 것
+- raw DB 직접 조인하지 말 것
+- current snapshot 기준으로 연결할 것

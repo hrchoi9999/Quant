@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "as_of_date",
+    "changes"
+  ],
+  "properties": {
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "user_model_name",
+          "change_type",
+          "summary",
+          "increase_items",
+          "decrease_items",
+          "reason_text"
+        ],
+        "properties": {
+          "user_model_name": {
+            "type": "string"
+          },
+          "change_type": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "increase_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "display_name",
+                "security_code",
+                "delta_weight",
+                "direction"
+              ],
+              "properties": {
+                "display_name": {
+                  "type": "string"
+                },
+                "security_code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9]{6}$"
+                },
+                "delta_weight": {
+                  "type": "number"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "increase",
+                    "decrease"
+                  ]
+                }
+              }
+            }
+          },
+          "decrease_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "display_name",
+                "security_code",
+                "delta_weight",
+                "direction"
+              ],
+              "properties": {
+                "display_name": {
+                  "type": "string"
+                },
+                "security_code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[0-9]{6}$"
+                },
+                "delta_weight": {
+                  "type": "number"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "increase",
+                    "decrease"
+                  ]
+                }
+              }
+            }
+          },
+          "reason_text": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

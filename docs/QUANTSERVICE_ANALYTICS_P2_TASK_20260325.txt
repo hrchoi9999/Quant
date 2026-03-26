@@ -1,0 +1,30 @@
+Quant 쪽에서 2차 묶음 페이지용 내부 preview payload를 만들었습니다.
+이번 작업은 내부 개발 전용이며, 실서비스 반영은 금지입니다.
+
+필수 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P2_HANDOFF_20260325.md
+
+사용 파일:
+- D:\Quant\reports\service_analytics_review\20260325\p2_bundle\bundle_manifest_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p2_bundle\portfolio_structure_20260325.json
+- D:\Quant\reports\service_analytics_review\20260325\p2_bundle\holding_lifecycle_20260325.json
+
+이번 범위:
+1. 포트폴리오 구조 페이지
+2. 보유 종목 이력 페이지
+
+권장 작업 순서:
+1. portfolio_structure JSON으로 구조 페이지 구현
+2. holding_lifecycle JSON으로 종목 이력 페이지 구현
+
+중요:
+- 이 payload는 internal_preview_only=true 상태임
+- web_publish_enabled=false 상태임
+- 실서비스 API/current snapshot 교체 금지
+- redbot.co.kr 반영 금지
+- 사용자 컨펌 전까지 배포 금지
+
+표현 주의:
+- 포트폴리오 구조 페이지는 stacked bar / trend chart / breakdown table 중심으로 구현
+- 보유 종목 이력 페이지는 table 중심으로 구현
+- 종목코드는 문자열 그대로 사용

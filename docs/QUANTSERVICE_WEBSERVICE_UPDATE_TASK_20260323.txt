@@ -1,0 +1,100 @@
+QuantService 웹서비스 수정 작업지시 요약 (2026-03-23)
+
+필수 참고 문서:
+- D:\Quant\docs\QUANTSERVICE_WEBSERVICE_UPDATE_HANDOFF_20260323.md
+
+사용 데이터:
+- D:\Quant\service_platform\web\public_data\current\publish_manifest.json
+- D:\Quant\service_platform\web\public_data\current\user_model_catalog.json
+- D:\Quant\service_platform\web\public_data\current\user_model_snapshot_report.json
+- D:\Quant\service_platform\web\public_data\current\user_performance_summary.json
+- D:\Quant\service_platform\web\public_data\current\user_recent_changes.json
+
+이번에 반드시 반영할 것:
+
+1. 사용자 모델명
+- 안정형
+- 균형형
+- 성장형
+- 자동전환형
+
+2. 포트폴리오 종목 코드 표시
+- allocation_items[].security_code 사용
+- 6자리 문자열 그대로 표시
+- number 변환 금지
+- cash-like row는 null 가능
+
+3. recent changes 구조 변경 반영
+기존:
+- 문자열 배열
+현재:
+- 객체 배열
+필드:
+- display_name
+- security_code
+- delta_weight
+- direction
+
+4. 포트폴리오 표시 방식 변경
+- 단일 상위 종목 리스트만 보여주지 말 것
+- sleeve 비중 먼저 표시
+  - 주식 sleeve 비중
+  - ETF sleeve 비중
+  - 현금성 비중
+- 그 다음 종목 리스트 표시
+  - 주식 상위 종목
+  - ETF 상위 종목
+  - 현금성 자산
+
+5. 성장형 해석 변경
+- 성장형은 neutral / risk_on 구간에서 최근 1Y CAGR이 더 높은 성장형 주식 모델(S3 / S3 Core2 중 우위 모델)을 사용
+- 현재 기준으로는 S3가 선택되는 것이 정상
+
+6. 성능지표 표시 우선순위
+반드시 아래 순서로 노출:
+- 1Y
+- 2Y
+- 3Y
+- 6M
+- 3M
+
+7. 5Y / FULL 비노출
+- 사용자 웹 화면에서는 5Y, FULL을 아예 보여주지 말 것
+- 내부 참고자료로만 유지
+
+8. 기간별 성능 표시 규칙
+- 1Y: CAGR, MDD, Sharpe
+- 2Y: CAGR, MDD, Sharpe
+- 3Y: CAGR, MDD, Sharpe
+- 6M: total_return, MDD, Sharpe
+- 3M: total_return, MDD, Sharpe
+- 3M / 6M는 CAGR headline으로 크게 보여주지 말 것
+
+9. MDD 해석 주의
+- 여러 기간에서 MDD가 같은 값으로 보일 수 있음
+- 최근 동일한 급락 이벤트가 3M / 6M / 1Y에 공통 포함되면 자연스럽게 발생 가능
+- 계산 버그로 간주하지 말고, 필요하면 설명 툴팁 추가
+
+10. stale-data 처리
+- publish_manifest.json 기준으로 stale-data 상태 표시 연결
+
+중요 원칙:
+- QuantService는 Quant 계산 로직을 재구현하지 말 것
+- CAGR / MDD / Sharpe 재계산하지 말 것
+- raw DB 직접 조인하지 말 것
+- snapshot/API payload를 그대로 소비하는 방향으로 수정할 것
+
+11. 법적 규제 대응 반영
+- canonical 파일명은 `user_model_snapshot_report.json`
+- recommendation 명칭 대신 model snapshot 명칭 사용
+- 아래 키 이름은 원본 report 기준이며, 웹 snapshot에서는 기존 flat field(`summary_text`, `allocation_items`, `rationale_items`, `change_log`)를 그대로 사용
+  - `model_overview`
+  - `model_portfolio`
+  - `model_rationale`
+  - `model_changes`
+  - `current_model_label`
+  - `summary_basis`
+  - `reference_response`
+- `compliance_metadata.is_personalized_advice` 는 항상 false 로 간주
+- 사용자 화면에서 `추천`, `개인 맞춤`, `매수 추천`, `매도 추천` 표현 금지
+

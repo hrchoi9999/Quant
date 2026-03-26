@@ -1,0 +1,50 @@
+Quant service analytics admin preview에 대해 1차, 2차, 3차 개선이 한 번에 반영되었습니다.
+이번 작업은 internal preview 전용이며 public 웹에는 연결하지 않습니다.
+
+필수 문서:
+- D:\Quant\docs\QUANTSERVICE_ANALYTICS_P1_P2_P3_IMPROVEMENTS_HANDOFF_20260326.md
+
+사용 파일:
+- D:\Quanteports\service_analytics_review60325\p1_bundle	oday_model_info_20260325.json
+- D:\Quanteports\service_analytics_review60325\p1_bundle\model_changes_20260325.json
+- D:\Quanteports\service_analytics_review60325\p1_bundle\model_compare_20260325.json
+- D:\Quanteports\service_analytics_review60325\p2_bundle\portfolio_structure_20260325.json
+- D:\Quanteports\service_analytics_review60325\p2_bundle\holding_lifecycle_20260325.json
+- D:\Quanteports\service_analytics_review60325\p3_bundle\model_quality_20260325.json
+- D:\Quanteports\service_analytics_review60325\p3_bundle\weekly_briefing_20260325.json
+
+중요 원칙:
+1. internal preview only
+2. meta.internal_preview_only = true
+3. meta.web_publish_enabled = false
+4. production API/current snapshot으로 합치지 말 것
+5. redbot.co.kr public 영역에 연결하지 말 것
+
+이번에 반영된 핵심:
+1. change_log 이름 누락 보정 강화
+2. 전 페이지 payload에 date_context 추가
+3. change_log에 materiality threshold 적용
+4. holding lifecycle에 re-entry episode 규칙 반영
+5. model_quality에 quality_checks 추가
+6. model_quality에 benchmark 상대지표 12w/52w 추가
+7. model_quality에 turnover / concentration 지표 추가
+8. weekly_briefing summary와 briefing_points 품질 강화
+
+QS 권장 반영:
+1. admin 화면 상단에 date_context 사용 가능
+2. model_changes는 더 낮은 노이즈 기준으로 해석 가능
+3. holding_lifecycle는 current episode 기준으로 표현 가능
+4. model_quality 페이지에서 아래 지표를 추가 활용
+- relative_strength_vs_benchmark_12w
+- turnover_avg_4w
+- top5_weight
+- holdings_hhi
+- quality_checks[]
+5. weekly_briefing 페이지에서 아래 수치를 보조 정보로 노출 가능
+- relative_strength_vs_benchmark_12w
+- turnover_avg_4w
+- top5_weight
+
+주의:
+- briefing_points는 Quant가 만든 문구를 우선 사용하고 QS가 투자판단 문구를 새로 만들지 말 것
+- quality_checks.detail은 tooltip/admin detail 수준으로만 사용 권장
