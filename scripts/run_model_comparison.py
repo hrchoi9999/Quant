@@ -27,7 +27,10 @@ def _summary_table(models):
     rows = []
     for model, bundle in models.items():
         m = perf_metrics(bundle.equity_df)
-        row = {'model': model, 'start': bundle.equity_df['date'].iloc[0], 'end': bundle.equity_df['date'].iloc[-1], 'days': int(len(bundle.equity_df)), 'cagr': m['cagr'], 'mdd': m['mdd'], 'sharpe': m['sharpe'], 'avg_daily_ret': m['avg_daily_ret'], 'vol_daily': m['vol_daily']}
+        start = pd.to_datetime(bundle.equity_df['date'].iloc[0], errors='coerce')
+        end = pd.to_datetime(bundle.equity_df['date'].iloc[-1], errors='coerce')
+        elapsed_days = int((end - start).days) if pd.notna(start) and pd.notna(end) else int(len(bundle.equity_df))
+        row = {'model': model, 'start': bundle.equity_df['date'].iloc[0], 'end': bundle.equity_df['date'].iloc[-1], 'days': elapsed_days, 'cagr': m['cagr'], 'mdd': m['mdd'], 'sharpe': m['sharpe'], 'avg_daily_ret': m['avg_daily_ret'], 'vol_daily': m['vol_daily']}
         if bundle.summary_df is not None and not bundle.summary_df.empty:
             src = bundle.summary_df.iloc[0].to_dict()
             row['turnover'] = float(src.get('turnover', float('nan')))

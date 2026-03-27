@@ -9,8 +9,14 @@ def build_cost_sensitivity_table(models: dict[str, ModelSeries], summary_df: pd.
     rows = []
     for _, row in summary_df.iterrows():
         model = str(row['model'])
-        days = float(row.get('days', 0.0) or 0.0)
-        years = max(days / 252.0, 1.0 / 252.0)
+        start = pd.to_datetime(row.get('start'), errors='coerce')
+        end = pd.to_datetime(row.get('end'), errors='coerce')
+        if pd.notna(start) and pd.notna(end):
+            elapsed_days = max(int((end - start).days), 1)
+            years = max(elapsed_days / 365.25, 1.0 / 365.25)
+        else:
+            obs = float(row.get('days', 0.0) or 0.0)
+            years = max(obs / 252.0, 1.0 / 252.0)
         turnover = float(row.get('turnover', 0.0) or 0.0)
         base_cagr = float(row.get('cagr', float('nan')))
         current_fee_bps = float(row.get('fee_bps', 0.0) or 0.0) + float(row.get('slippage_bps', 0.0) or 0.0)

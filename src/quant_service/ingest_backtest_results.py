@@ -66,20 +66,36 @@ def _safe_int(v):
     return None if fv is None else int(fv)
 
 
+def _infer_periods_per_year(dates: pd.Series) -> float:
+    dt = pd.to_datetime(dates, errors="coerce").dropna().sort_values()
+    if len(dt) < 2:
+        return 252.0
+    gaps = dt.diff().dropna().dt.days
+    if gaps.empty:
+        return 252.0
+    median_gap = float(gaps.median())
+    if median_gap <= 0:
+        return 252.0
+    return 365.25 / median_gap
+
+
 def _calc_summary_from_nav(nav_df: pd.DataFrame, nav_col: str = "nav") -> dict[str, float | int | None]:
     d = nav_df.copy()
+    d["date"] = pd.to_datetime(d["date"], errors="coerce")
     d[nav_col] = pd.to_numeric(d[nav_col], errors="coerce")
-    d = d.dropna(subset=[nav_col]).copy()
+    d = d.dropna(subset=["date", nav_col]).copy()
     if d.empty:
         return {}
+    d = d.sort_values("date").reset_index(drop=True)
     d["ret"] = d[nav_col].pct_change().fillna(0.0)
     total_return = float(d[nav_col].iloc[-1] / d[nav_col].iloc[0] - 1.0)
-    n = max(len(d) - 1, 1)
-    years = n / 252.0
+    elapsed_days = max((d["date"].iloc[-1] - d["date"].iloc[0]).days, 1)
+    years = elapsed_days / 365.25
     cagr = float((d[nav_col].iloc[-1] / d[nav_col].iloc[0]) ** (1.0 / years) - 1.0) if years > 0 else None
+    periods_per_year = _infer_periods_per_year(d["date"])
     vol_daily = float(d["ret"].std(ddof=0)) if len(d) > 1 else 0.0
     avg_daily_ret = float(d["ret"].mean())
-    sharpe = None if not vol_daily or vol_daily <= 0 else float((avg_daily_ret / vol_daily) * math.sqrt(252.0))
+    sharpe = None if not vol_daily or vol_daily <= 0 else float((avg_daily_ret / vol_daily) * math.sqrt(periods_per_year))
     d["peak"] = d[nav_col].cummax()
     d["dd"] = d[nav_col] / d["peak"] - 1.0
     return {
@@ -151,12 +167,14 @@ def _latest_s3_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[Ru
     end_token = asof_date
     base_nav = REPORTS_S3 / f"s3_nav_hold_top20_2013-10-14_{end_token}.csv"
     if base_nav.exists():
+        base_nav_df = pd.read_csv(base_nav, usecols=["date"])
+        actual_start = str(pd.to_datetime(base_nav_df["date"], errors="coerce").dropna().min().date())
         specs.append(RunSpec(
             model_code="S3",
             run_id=f"RUN__S3__{_as_yyyymmdd(asof_date)}__2013_10_14__{_as_yyyymmdd(asof_date)}__001",
             batch_id=batch_id,
             snapshot_id=snapshot_id,
-            start_date="2013-10-14",
+            start_date=actual_start,
             end_date=asof_date,
             asof_date=asof_date,
             outdir=REPORTS_S3,
@@ -177,12 +195,14 @@ def _latest_s3_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[Ru
         tag = m.group(1)
         if tag == "2013-10-14":
             continue
+        nav_df = pd.read_csv(nav, usecols=["date"])
+        actual_start = str(pd.to_datetime(nav_df["date"], errors="coerce").dropna().min().date())
         specs.append(RunSpec(
             model_code="S3_CORE2",
             run_id=f"RUN__S3_CORE2__{_as_yyyymmdd(asof_date)}__{tag}",
             batch_id=batch_id,
             snapshot_id=snapshot_id,
-            start_date="2013-10-14",
+            start_date=actual_start,
             end_date=asof_date,
             asof_date=asof_date,
             outdir=REPORTS_S3,

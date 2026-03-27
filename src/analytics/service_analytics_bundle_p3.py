@@ -6,10 +6,13 @@ from pathlib import Path
 
 import pandas as pd
 
+
 from src.analytics.service_analytics_bundle_common import build_common_meta, finalize_manifest
 
 ROOT = Path(r'D:\Quant')
 ANALYTICS_DB = ROOT / 'data' / 'db' / 'service_analytics.db'
+DETAIL_DB = ROOT / 'data' / 'db' / 'quant_service_detail.db'
+PRICE_DB = ROOT / 'data' / 'db' / 'price.db'
 OUTPUT_ROOT = ROOT / 'reports' / 'service_analytics_review'
 
 
@@ -68,6 +71,155 @@ def _date_context(asof: str, qrow: pd.DataFrame) -> dict[str, object]:
         'effective_date': asof,
         'week_end': week_end.strftime('%Y-%m-%d') if pd.notna(week_end) else None,
         'quality_week_end': week_end.strftime('%Y-%m-%d') if pd.notna(week_end) else None,
+    }
+
+
+def _load_holdings_for_run(run_id: str, start_date: str) -> pd.DataFrame:
+    conn = sqlite3.connect(DETAIL_DB)
+    try:
+        return pd.read_sql_query(
+            """
+            SELECT run_id, date, ticker, rank_no, weight, current_price
+            FROM run_holdings_history
+            WHERE run_id = ? AND date >= ?
+            ORDER BY date, rank_no, ticker
+            """,
+            conn,
+            params=(run_id, start_date),
+        )
+    finally:
+        conn.close()
+
+
+def _load_instrument_names(tickers: list[str]) -> dict[str, str]:
+    if not tickers:
+        return {}
+    conn = sqlite3.connect(PRICE_DB)
+    try:
+        placeholders = ",".join(["?"] * len(tickers))
+        query = f"SELECT ticker, name FROM instrument_master WHERE ticker IN ({placeholders})"
+        df = pd.read_sql_query(query, conn, params=tuple(tickers))
+    finally:
+        conn.close()
+    if df.empty:
+        return {}
+    df['ticker'] = df['ticker'].astype(str).str.zfill(6)
+    return dict(zip(df['ticker'], df['name']))
+
+
+def _load_price_panel(tickers: list[str], start_date: str, end_date: str) -> pd.DataFrame:
+    if not tickers:
+        return pd.DataFrame()
+    conn = sqlite3.connect(PRICE_DB)
+    try:
+        placeholders = ",".join(["?"] * len(tickers))
+        query = f"SELECT date, ticker, close FROM prices_daily WHERE ticker IN ({placeholders}) AND date >= ? AND date <= ? ORDER BY date"
+        df = pd.read_sql_query(query, conn, params=tuple(tickers + [start_date, end_date]))
+    finally:
+        conn.close()
+    if df.empty:
+        return df
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    df['ticker'] = df['ticker'].astype(str).str.zfill(6)
+    return df
+
+
+def _estimate_top_contributors(run_id: str, qtrend: pd.DataFrame) -> list[dict[str, object]]:
+    if qtrend is None or qtrend.empty or len(qtrend) < 2:
+        return []
+    recent = qtrend.sort_values('week_end').tail(13).copy()
+    if len(recent) < 2:
+        return []
+    start_date = pd.to_datetime(recent['week_end'].iloc[0], errors='coerce').strftime('%Y-%m-%d')
+    end_date = pd.to_datetime(recent['week_end'].iloc[-1], errors='coerce').strftime('%Y-%m-%d')
+    holdings = _load_holdings_for_run(run_id, start_date)
+    if holdings.empty:
+        return []
+    holdings['date'] = pd.to_datetime(holdings['date'], errors='coerce')
+    holdings['ticker'] = holdings['ticker'].astype(str).str.zfill(6)
+    tickers = sorted(holdings['ticker'].dropna().astype(str).unique().tolist())
+    prices = _load_price_panel(tickers, start_date, end_date)
+    if prices.empty:
+        return []
+    wide = prices.pivot_table(index='date', columns='ticker', values='close', aggfunc='last').sort_index().ffill()
+
+    contrib: dict[str, float] = {}
+    names = _load_instrument_names(tickers)
+    week_ends = list(pd.to_datetime(recent['week_end']).tolist())
+    for idx in range(len(week_ends) - 1):
+        start = pd.Timestamp(week_ends[idx])
+        end = pd.Timestamp(week_ends[idx + 1])
+        sub = holdings.loc[holdings['date'] == start].copy()
+        if sub.empty:
+            continue
+        sub = sub[sub['ticker'].astype(str).str.upper() != 'CASH'].copy()
+        if sub.empty:
+            continue
+        if sub['weight'].notna().any():
+            weights = pd.to_numeric(sub['weight'], errors='coerce').fillna(0.0)
+            total = float(weights.sum())
+            weights = weights / total if total > 0 else pd.Series([1.0 / len(sub)] * len(sub), index=sub.index)
+        else:
+            weights = pd.Series([1.0 / len(sub)] * len(sub), index=sub.index)
+        held = sub['ticker'].astype(str).str.zfill(6).tolist()
+        try:
+            start_px = wide.loc[:start, held].iloc[-1]
+            end_px = wide.loc[:end, held].iloc[-1]
+        except Exception:
+            continue
+        rets = (end_px / start_px - 1.0).fillna(0.0)
+        for (_, row), weight in zip(sub.iterrows(), weights.tolist()):
+            ticker = str(row['ticker']).zfill(6)
+            names[ticker] = names.get(ticker) or str(row.get('name') or '')
+            contrib[ticker] = contrib.get(ticker, 0.0) + float(weight) * float(rets.get(ticker, 0.0))
+    top = sorted(contrib.items(), key=lambda x: x[1], reverse=True)[:5]
+    return [
+        {
+            'ticker': ticker,
+            'name': names.get(ticker) or ticker,
+            'estimated_contribution_12w': float(value),
+        }
+        for ticker, value in top
+    ]
+
+
+def _build_performance_interpretation(run_id: str, qtrend: pd.DataFrame) -> dict[str, object]:
+    if qtrend is None or qtrend.empty:
+        return {
+            'window_weeks': 12,
+            'window_start_week_end': None,
+            'window_end_week_end': None,
+            'cumulative_return_12w': None,
+            'best_weekly_return_12w': None,
+            'best_weekly_return_week_end': None,
+            'worst_weekly_return_12w': None,
+            'worst_weekly_return_week_end': None,
+            'positive_weeks_12w': 0,
+            'negative_weeks_12w': 0,
+            'flat_weeks_12w': 0,
+            'annualized_volatility_12w': None,
+            'top_contributors_12w': [],
+        }
+    recent = qtrend.sort_values('week_end').tail(13).copy()
+    recent['week_end'] = pd.to_datetime(recent['week_end'], errors='coerce')
+    trailing = recent.tail(12).copy()
+    r1w = pd.to_numeric(trailing['return_1w'], errors='coerce').fillna(0.0)
+    best_idx = r1w.idxmax() if not trailing.empty else None
+    worst_idx = r1w.idxmin() if not trailing.empty else None
+    return {
+        'window_weeks': 12,
+        'window_start_week_end': recent['week_end'].iloc[0].strftime('%Y-%m-%d') if len(recent) >= 1 and pd.notna(recent['week_end'].iloc[0]) else None,
+        'window_end_week_end': recent['week_end'].iloc[-1].strftime('%Y-%m-%d') if len(recent) >= 1 and pd.notna(recent['week_end'].iloc[-1]) else None,
+        'cumulative_return_12w': _safe_float(trailing['return_12w'].iloc[-1]) if 'return_12w' in trailing.columns and not trailing.empty else None,
+        'best_weekly_return_12w': _safe_float(r1w.max()) if len(r1w) else None,
+        'best_weekly_return_week_end': pd.to_datetime(trailing.loc[best_idx, 'week_end']).strftime('%Y-%m-%d') if best_idx is not None and pd.notna(trailing.loc[best_idx, 'week_end']) else None,
+        'worst_weekly_return_12w': _safe_float(r1w.min()) if len(r1w) else None,
+        'worst_weekly_return_week_end': pd.to_datetime(trailing.loc[worst_idx, 'week_end']).strftime('%Y-%m-%d') if worst_idx is not None and pd.notna(trailing.loc[worst_idx, 'week_end']) else None,
+        'positive_weeks_12w': int((r1w > 0).sum()),
+        'negative_weeks_12w': int((r1w < 0).sum()),
+        'flat_weeks_12w': int((r1w == 0).sum()),
+        'annualized_volatility_12w': _safe_float(r1w.std(ddof=0) * (52.0 ** 0.5)) if len(r1w) > 1 else None,
+        'top_contributors_12w': _estimate_top_contributors(run_id, recent),
     }
 
 
@@ -163,6 +315,7 @@ def build_bundle(asof: str) -> dict[str, object]:
         display_name = row['display_name']
         qrow = latest_quality.loc[latest_quality['model_code'] == model_code]
         qtrend = quality_trend.loc[quality_trend['model_code'] == model_code].tail(26)
+        performance_interpretation = _build_performance_interpretation(str(row['run_id']), qtrend)
         p1_row = p1.get(model_code, {})
         recent_summary = p1_row.get('recent_change_summary', {})
         one_week_model_changes = one_week_changes.loc[one_week_changes['model_code'] == model_code].sort_values(['week_end', 'change_type', 'delta_weight'], ascending=[False, True, False])
@@ -251,6 +404,7 @@ def build_bundle(asof: str) -> dict[str, object]:
                 }
                 for _, r in model_quality_checks.iterrows()
             ],
+            'performance_interpretation': performance_interpretation,
         })
 
         briefing_models.append({
@@ -268,6 +422,7 @@ def build_bundle(asof: str) -> dict[str, object]:
                 'turnover_avg_4w': turnover_avg_4w,
                 'top5_weight': top5_weight,
             },
+            'performance_interpretation': performance_interpretation,
             'briefing_points': _build_briefing_points(display_name, return_4w, return_12w, current_drawdown, new_8w, exit_8w, cash_weight, rel_vs_bm_12w, turnover_avg_4w, top5_weight, holdings_hhi),
             'top_holdings': p1_row.get('top_holdings', [])[:5],
             'one_week_changes': [

@@ -32,6 +32,8 @@ def perf_metrics(equity_df: pd.DataFrame) -> dict[str, float]:
     if equity_df is None or equity_df.empty:
         return {'cagr': float('nan'), 'mdd': float('nan'), 'sharpe': float('nan'), 'avg_daily_ret': float('nan'), 'vol_daily': float('nan'), 'total_return': float('nan')}
     work = equity_df.copy()
+    work['date'] = pd.to_datetime(work['date'], errors='coerce')
+    work = work.dropna(subset=['date']).sort_values('date').reset_index(drop=True)
     rets = pd.to_numeric(work['port_ret'], errors='coerce').fillna(0.0)
     eq = pd.to_numeric(work['equity'], errors='coerce').dropna()
     n = int(len(eq))
@@ -39,13 +41,17 @@ def perf_metrics(equity_df: pd.DataFrame) -> dict[str, float]:
         return {'cagr': float('nan'), 'mdd': float('nan'), 'sharpe': float('nan'), 'avg_daily_ret': float('nan'), 'vol_daily': float('nan'), 'total_return': float('nan')}
     start_eq = float(eq.iloc[0])
     end_eq = float(eq.iloc[-1])
-    years = max(n / 252.0, 1.0 / 252.0)
+    elapsed_days = max(int((work['date'].iloc[-1] - work['date'].iloc[0]).days), 1)
+    years = max(elapsed_days / 365.25, 1.0 / 365.25)
     total_return = float(end_eq / start_eq - 1.0) if start_eq > 0 else float('nan')
     cagr = float((end_eq / start_eq) ** (1.0 / years) - 1.0) if start_eq > 0 and end_eq > 0 else float('nan')
     dd = eq / eq.cummax() - 1.0
     mdd = float(dd.min()) if len(dd) else float('nan')
     vol = float(rets.std(ddof=0))
-    sharpe = float((rets.mean() / vol) * np.sqrt(252.0)) if vol > 0 else float('nan')
+    gaps = work['date'].diff().dropna().dt.days
+    median_gap = float(gaps.median()) if not gaps.empty else 1.0
+    periods_per_year = 252.0 if median_gap <= 0 else (365.25 / median_gap)
+    sharpe = float((rets.mean() / vol) * np.sqrt(periods_per_year)) if vol > 0 else float('nan')
     return {'cagr': cagr, 'mdd': mdd, 'sharpe': sharpe, 'avg_daily_ret': float(rets.mean()), 'vol_daily': vol, 'total_return': total_return}
 
 

@@ -39,12 +39,16 @@ def main() -> None:
         raise SystemExit('model_quality payload missing quality_trend_26w')
     if not all('quality_checks' in row for row in quality['models']):
         raise SystemExit('model_quality payload missing quality_checks')
+    if not all('performance_interpretation' in row for row in quality['models']):
+        raise SystemExit('model_quality payload missing performance_interpretation')
     if not all('turnover_avg_4w' in row.get('latest_quality', {}) for row in quality['models']):
         raise SystemExit('model_quality payload missing turnover_avg_4w')
     if not all('top5_weight' in row.get('latest_quality', {}) for row in quality['models']):
         raise SystemExit('model_quality payload missing top5_weight')
     if not all('briefing_points' in row for row in briefing['models']):
         raise SystemExit('weekly_briefing payload missing briefing_points')
+    if not all('performance_interpretation' in row for row in briefing['models']):
+        raise SystemExit('weekly_briefing payload missing performance_interpretation')
     if not all('relative_strength_vs_benchmark_12w' in row.get('summary', {}) for row in briefing['models']):
         raise SystemExit('weekly_briefing payload missing relative_strength_vs_benchmark_12w')
 
