@@ -1,0 +1,116 @@
+{
+  "asof_date": "2026-03-30",
+  "comparison_horizons": [
+    "3M",
+    "6M",
+    "1Y"
+  ],
+  "experiments": [
+    {
+      "experiment_id": "S2_MOMENTUM_CONFIRMATION_V1",
+      "model_code": "S2",
+      "priority": 1,
+      "status": "tested",
+      "objective": "Improve 3M/6M/1Y selected-vs-not-selected return while preserving mild drawdown advantage.",
+      "hypothesis": "A medium-horizon relative-strength confirmation after fundamentals ranking will remove weak follow-through names.",
+      "knobs": [
+        "mom_4w_pct_min",
+        "mom_12w_pct_min",
+        "top_n"
+      ],
+      "success_rules": [
+        "Positive return delta on 6M and 1Y",
+        "No material MDD deterioration versus baseline"
+      ],
+      "latest_result": {
+        "asof_date": "2026-03-30",
+        "best_variant": {
+          "mom_4w_pct_min": 0.55,
+          "mom_12w_pct_min": 0.5,
+          "top_n": 25
+        },
+        "summary": {
+          "3M_return_delta": 0.045561182233024175,
+          "6M_return_delta": 0.032312236954462004,
+          "1Y_return_delta": -0.00400777085972609,
+          "3M_mdd_delta": -0.04137679849866918,
+          "6M_mdd_delta": -0.04937359863186308,
+          "1Y_mdd_delta": -0.05490044633133995
+        },
+        "decision": "not_ready_to_redefine_S2",
+        "note": "3M and 6M improved versus baseline, but 1Y return delta remains slightly negative and MDD deteriorates across all horizons."
+      }
+    },
+    {
+      "experiment_id": "S2_OVERHEAT_PENALTY_V1",
+      "model_code": "S2",
+      "priority": 2,
+      "status": "planned",
+      "objective": "Reduce selection of already overextended names and improve medium-horizon follow-through.",
+      "hypothesis": "Penalizing names too far above long trend or too far above recent range will improve 3M/6M returns.",
+      "knobs": [
+        "distance_from_sma140_cap",
+        "breakout_extension_cap",
+        "regime_filter_variant"
+      ],
+      "success_rules": [
+        "Positive return delta on 3M and 6M",
+        "MDD no worse than baseline by more than 1.5%p"
+      ]
+    },
+    {
+      "experiment_id": "S3_VOLATILITY_PENALTY_V1",
+      "model_code": "S3",
+      "priority": 3,
+      "status": "planned",
+      "objective": "Retain S3 return edge while reducing MDD cost.",
+      "hypothesis": "Adding a volatility/risk penalty to the ranking should preserve alpha but remove the worst path-risk names.",
+      "knobs": [
+        "vol_penalty_weight",
+        "max_single_name_weight",
+        "breakout_quality_filter"
+      ],
+      "success_rules": [
+        "Return delta remains positive on 3M/6M/1Y",
+        "MDD delta improves on at least 2 horizons"
+      ]
+    },
+    {
+      "experiment_id": "S3_CORE2_SCORE_REBUILD_V1",
+      "model_code": "S3_CORE2",
+      "priority": 1,
+      "status": "planned",
+      "objective": "Recover selection alpha on 3M/6M/1Y where current Core2 underperforms non-selected names.",
+      "hypothesis": "Core2 needs a broader score than mom20 + volume ratio, with quality confirmation and better gate interaction.",
+      "knobs": [
+        "core_mom_weight",
+        "core_vol_weight",
+        "quality_confirm_weight",
+        "gate_open_th",
+        "gate_close_th"
+      ],
+      "success_rules": [
+        "Positive return delta on 3M and 6M",
+        "1Y return gap materially improved versus baseline"
+      ]
+    },
+    {
+      "experiment_id": "S3_CORE2_GATE_EXIT_REDESIGN_V1",
+      "model_code": "S3_CORE2",
+      "priority": 2,
+      "status": "planned",
+      "objective": "Reduce weak carry and improve post-selection path quality.",
+      "hypothesis": "Gate and exit redesign can remove names that score well on entry but do not persist over 6M/1Y.",
+      "knobs": [
+        "breadth_open_th",
+        "breadth_close_th",
+        "exit_close_below_ma60_weeks",
+        "exit_ma60_slope_nonpos_weeks"
+      ],
+      "success_rules": [
+        "MDD delta improves on 6M and 1Y",
+        "Return delta does not worsen on 3M"
+      ]
+    }
+  ]
+}

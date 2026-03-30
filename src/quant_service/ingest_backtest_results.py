@@ -16,6 +16,7 @@ REPORTS_S3 = PROJECT_ROOT / r"reports\backtest_s3_dev"
 REPORTS_ETF = PROJECT_ROOT / r"reports\backtest_etf_allocation"
 CORE_DB = PROJECT_ROOT / r"data\db\quant_service.db"
 DETAIL_DB = PROJECT_ROOT / r"data\db\quant_service_detail.db"
+FUNDAMENTALS_DB = PROJECT_ROOT / r"data\db\fundamentals.db"
 
 MODEL_VERSION_MAP = {
     "S2": "S2__2026_03_12_001",
@@ -64,6 +65,29 @@ def _safe_float(v):
 def _safe_int(v):
     fv = _safe_float(v)
     return None if fv is None else int(fv)
+
+
+def _load_s2_fund_lookup() -> tuple[dict[tuple[str, str], tuple[float | None, int | None]], list[pd.Timestamp]]:
+    con = sqlite3.connect(str(FUNDAMENTALS_DB))
+    try:
+        rows = con.execute(
+            """
+            SELECT date, ticker, growth_score, score_rank
+            FROM s2_fund_scores_monthly
+            """
+        ).fetchall()
+    finally:
+        con.close()
+    lookup: dict[tuple[str, str], tuple[float | None, int | None]] = {}
+    fund_dates: set[pd.Timestamp] = set()
+    for fund_date, ticker, growth_score, score_rank in rows:
+        key_date = str(fund_date)
+        lookup[(key_date, str(ticker).zfill(6))] = (_safe_float(growth_score), _safe_int(score_rank))
+        try:
+            fund_dates.add(pd.Timestamp(key_date))
+        except Exception:
+            pass
+    return lookup, sorted(fund_dates)
 
 
 def _infer_periods_per_year(dates: pd.Series) -> float:
@@ -528,6 +552,7 @@ def _ingest_s2(core_con: sqlite3.Connection, detail_con: sqlite3.Connection, spe
 
     h = holdings_df.copy()
     h["ticker"] = h["ticker"].astype(str)
+    s2_fund_lookup, s2_fund_dates = _load_s2_fund_lookup()
     hold_rows = []
     signal_rows = []
     for row in h.itertuples(index=False):
@@ -535,8 +560,25 @@ def _ingest_s2(core_con: sqlite3.Connection, detail_con: sqlite3.Connection, spe
         if ticker == "CASH":
             continue
         date = str(getattr(row, "trade_date", getattr(row, "rebalance_date", "")))
-        hold_rows.append((spec.run_id, date, ticker, _safe_int(getattr(row, "score_rank", None)), _safe_float(getattr(row, "weight", None)), _safe_float(getattr(row, "growth_score", None)), None, None, _safe_float(getattr(row, "price", None)), None, f"regime={getattr(row, 'regime', '')}; market_ok={getattr(row, 'market_ok', '')}"))
-        signal_rows.append((spec.run_id, date, ticker, _safe_float(getattr(row, "regime_score", None)), None if pd.isna(getattr(row, "regime", None)) else str(getattr(row, "regime", None)), _safe_float(getattr(row, "growth_score", None)), None, None, _safe_int(getattr(row, "market_ok", None)), _safe_int(getattr(row, "score_rank", None))))
+        rebalance_date = str(getattr(row, "rebalance_date", date))
+        fund_asof_date = str(getattr(row, "fund_asof_date", "") or "")
+        if not fund_asof_date:
+            try:
+                rb_ts = pd.Timestamp(rebalance_date)
+                eligible = [d for d in s2_fund_dates if d <= rb_ts]
+                if eligible:
+                    fund_asof_date = str(eligible[-1].date())
+            except Exception:
+                fund_asof_date = ""
+        fallback_growth, fallback_rank = s2_fund_lookup.get((fund_asof_date, ticker.zfill(6)), (None, None))
+        growth_score = _safe_float(getattr(row, "growth_score", None))
+        score_rank = _safe_int(getattr(row, "score_rank", None))
+        if growth_score is None:
+            growth_score = fallback_growth
+        if score_rank is None:
+            score_rank = fallback_rank
+        hold_rows.append((spec.run_id, date, ticker, score_rank, _safe_float(getattr(row, "weight", None)), growth_score, None, None, _safe_float(getattr(row, "price", None)), None, f"regime={getattr(row, 'regime', '')}; market_ok={getattr(row, 'market_ok', '')}; fund_asof={fund_asof_date}"))
+        signal_rows.append((spec.run_id, date, ticker, _safe_float(getattr(row, "regime_score", None)), None if pd.isna(getattr(row, "regime", None)) else str(getattr(row, "regime", None)), growth_score, None, None, _safe_int(getattr(row, "market_ok", None)), score_rank))
     if hold_rows:
         detail_con.executemany("INSERT INTO run_holdings_history (run_id, date, ticker, rank_no, weight, score, entry_date, entry_price, current_price, cum_return_since_entry, reason_summary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", hold_rows)
         detail_con.executemany("INSERT INTO run_signal_details_s2 (run_id, date, ticker, regime_value, regime_label, growth_score, sma140, above_sma_flag, market_gate_flag, selection_rank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", signal_rows)
