@@ -45,7 +45,7 @@
       "experiment_id": "S2_OVERHEAT_PENALTY_V1",
       "model_code": "S2",
       "priority": 2,
-      "status": "planned",
+      "status": "tested",
       "objective": "Reduce selection of already overextended names and improve medium-horizon follow-through.",
       "hypothesis": "Penalizing names too far above long trend or too far above recent range will improve 3M/6M returns.",
       "knobs": [
@@ -56,7 +56,105 @@
       "success_rules": [
         "Positive return delta on 3M and 6M",
         "MDD no worse than baseline by more than 1.5%p"
-      ]
+      ],
+      "latest_result": {
+        "asof_date": "2026-03-30",
+        "best_variant": {
+          "distance_from_sma140_cap": 0.35,
+          "extension_from_ma20_cap": 0.18,
+          "top_n": 30
+        },
+        "summary": {
+          "3M_return_delta": 0.004573873423909594,
+          "6M_return_delta": -0.11817944486287654,
+          "1Y_return_delta": -0.7678243696846832,
+          "3M_mdd_delta": -0.02095101151882785,
+          "6M_mdd_delta": -0.04142973231807594,
+          "1Y_mdd_delta": -0.026941541821064972
+        },
+        "decision": "reject_overheat_penalty_as_standalone",
+        "note": "Standalone overheat caps did not improve 6M or 1Y and worsened MDD. If reused later, it should be combined with stronger momentum or quality confirmation."
+      }
+    },
+    {
+      "experiment_id": "S2_T3_ENTRY_REDESIGN_V1",
+      "model_code": "S2",
+      "priority": 3,
+      "status": "tested",
+      "objective": "Rebuild S2 around Top3 entry signals: fundamentals acceleration plus long-trend alignment.",
+      "hypothesis": "Top3 entry starts are more aligned with acceleration and trend quality than with plain growth score rank.",
+      "knobs": [
+        "base_fund_weight",
+        "fund_accel_weight",
+        "trend_align_weight",
+        "overheat_penalty_weight",
+        "top_n"
+      ],
+      "success_rules": [
+        "Positive return delta on 3M/6M/1Y",
+        "No material MDD deterioration"
+      ],
+      "latest_result": {
+        "asof_date": "2026-03-30",
+        "best_variant": {
+          "base_fund_weight": 0.3,
+          "fund_accel_weight": 0.35,
+          "trend_align_weight": 0.3,
+          "overheat_penalty_weight": 0.05,
+          "top_n": 25
+        },
+        "summary": {
+          "3M_return_delta": -0.017418323868185037,
+          "6M_return_delta": -0.03554625754500815,
+          "1Y_return_delta": -0.030094107901104228,
+          "3M_mdd_delta": -0.004885461012883563,
+          "6M_mdd_delta": -0.006670656417654464,
+          "1Y_mdd_delta": 0.017044808713412407
+        },
+        "decision": "not_ready_to_redefine_S2",
+        "note": "Top3 entry signals alone were not sufficient to beat the S2-style universe on 3M/6M/1Y. This suggests entry-start common traits are useful research hints but not a full ranking replacement."
+      }
+    },
+    {
+      "experiment_id": "S2_T3_HYBRID_REDESIGN_V2",
+      "model_code": "S2",
+      "priority": 4,
+      "status": "tested",
+      "objective": "Combine medium-horizon momentum confirmation with Top3-entry acceleration/trend ranking.",
+      "hypothesis": "Momentum confirmation filters the weak names, and Top3 entry signals improve ranking quality among the survivors.",
+      "knobs": [
+        "mom_4w_pct_min",
+        "mom_12w_pct_min",
+        "base_fund_weight",
+        "fund_accel_weight",
+        "trend_align_weight",
+        "top_n"
+      ],
+      "success_rules": [
+        "Positive return delta on 6M and 1Y",
+        "No material MDD deterioration"
+      ],
+      "latest_result": {
+        "asof_date": "2026-03-30",
+        "best_variant": {
+          "mom_4w_pct_min": 0.45,
+          "mom_12w_pct_min": 0.45,
+          "base_fund_weight": 0.25,
+          "fund_accel_weight": 0.4,
+          "trend_align_weight": 0.2,
+          "top_n": 25
+        },
+        "summary": {
+          "3M_return_delta": -0.011343613262245738,
+          "6M_return_delta": -0.019871565219209984,
+          "1Y_return_delta": -0.012654979294894083,
+          "3M_mdd_delta": -0.01227270288034603,
+          "6M_mdd_delta": -0.004685121301087208,
+          "1Y_mdd_delta": 0.013987663777975787
+        },
+        "decision": "not_ready_to_redefine_S2",
+        "note": "Hybridizing momentum confirmation with Top3-entry ranking improved over the pure Top3 redesign, but still failed to deliver positive 3M/6M/1Y return deltas versus the investable universe."
+      }
     },
     {
       "experiment_id": "S3_VOLATILITY_PENALTY_V1",
