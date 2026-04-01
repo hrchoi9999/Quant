@@ -34,6 +34,9 @@ class SnapshotProvider:
     def load_changes_payload(self) -> dict[str, Any]:
         return _load_json("user_recent_changes.json", {"changes": []})
 
+    def load_tseries_discovery_payload(self) -> dict[str, Any]:
+        return _load_json("quantservice_tseries_discovery.json", {"models": []})
+
     def load_home_payload(self) -> dict[str, Any]:
         return {
             "catalog": self.load_catalog(),

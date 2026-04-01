@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -13,12 +13,14 @@ if str(ROOT) not in sys.path:
 
 from src.reporting.public_model_terms import build_public_model_metadata
 from src.reporting.render_redbot_user_report import load_mapping
+from src.quant_service.read_tseries_operational import build_snapshot as build_tseries_snapshot, connect as connect_tseries
 
 CURRENT_DIR = ROOT / "service_platform" / "web" / "public_data" / "current"
 REPORT_DIR = ROOT / "reports" / "redbot_user_reports"
 ROUTER_DIR = ROOT / "reports" / "backtest_router"
 LEGACY_REPORT = CURRENT_DIR / "user_recommendation_report.json"
 CANONICAL_REPORT = CURRENT_DIR / "user_model_snapshot_report.json"
+T_SERIES_DISCOVERY = CURRENT_DIR / "quantservice_tseries_discovery.json"
 
 
 def load_report(service_profile: str, asof: str) -> dict[str, Any]:
@@ -175,11 +177,124 @@ def build_changes(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
     return {"as_of_date": asof, "changes": rows}
 
 
+def _normalize_tseries_model(snapshot: dict[str, Any]) -> dict[str, Any]:
+    profile = snapshot.get("profile") or {}
+    meta = snapshot.get("meta") or {}
+    shadow_rows = snapshot.get("shadow_summary") or []
+    shadow_summary: dict[str, dict[str, Any]] = {"confirmed": {}, "near": {}, "observe": {}}
+    if isinstance(shadow_rows, list):
+        for row in shadow_rows:
+            if not isinstance(row, dict):
+                continue
+            bucket = row.get("candidate_bucket")
+            horizon = row.get("horizon")
+            if not bucket or horizon not in (None, "", "overall"):
+                continue
+            target_bucket = str(bucket)
+            if target_bucket == "historical_stage2":
+                target_bucket = "confirmed"
+            elif target_bucket == "historical_stage1":
+                target_bucket = "near"
+            elif target_bucket not in ("confirmed", "near", "observe"):
+                continue
+            shadow_summary[target_bucket] = {
+                "obs_n": row.get("obs_n"),
+                "t10_hit_rate": row.get("t10_hit_rate"),
+                "t3_hit_rate": row.get("t3_hit_rate"),
+                "avg_stage1_prob": row.get("avg_stage1_prob"),
+                "avg_stage2_prob": row.get("avg_stage2_prob"),
+            }
+    top_by_bucket = snapshot.get("top_by_bucket") or {}
+    bucket_counts = snapshot.get("bucket_counts") or {}
+    performance_summary = snapshot.get("performance_summary") or {}
+    for bucket in ("confirmed", "near", "observe"):
+        top_by_bucket.setdefault(bucket, [])
+        bucket_counts.setdefault(bucket, 0)
+    threshold_summary = "threshold values not published"
+    stage1 = profile.get("stage1_threshold")
+    confirmed = profile.get("stage2_confirmed_th")
+    near = profile.get("stage2_near_th")
+    parts = []
+    if stage1 is not None:
+        parts.append(f"stage1 {float(stage1):.3f}")
+    if confirmed is not None:
+        parts.append(f"confirmed {float(confirmed):.3f}")
+    if near is not None:
+        parts.append(f"near {float(near):.3f}")
+    if parts:
+        threshold_summary = " / ".join(parts)
+    asset_scope = str(meta.get("asset_scope") or "").strip().lower()
+    asset_scope_label = "Stock" if asset_scope == "stock" else "ETF"
+    display_name = str(meta.get("display_name") or "").strip() or f"전이형 발굴 모델 · {asset_scope_label}"
+    return {
+        "model_code": snapshot.get("model_code"),
+        "asof_date": snapshot.get("asof_date"),
+        "meta": {
+            "display_name": display_name,
+            "display_name_en": "transition-based discovery model",
+            "display_name_ko": "전이형 발굴 모델",
+            "service_model_code": "T_STOCK_DISCOVERY" if asset_scope == "stock" else "T_ETF_DISCOVERY",
+            "service_family": "discovery",
+            "service_role": "watchlist",
+            "asset_scope": asset_scope,
+            "version": meta.get("version_label") or meta.get("version") or "V01",
+            "version_label": meta.get("version_label") or meta.get("version") or "V01",
+            "stage_structure": meta.get("stage_structure") or "two_stage",
+            "status": meta.get("status") or "active",
+            "notes": meta.get("notes") or "",
+            "display_order": 1 if asset_scope == "stock" else 2,
+        },
+        "profile": {
+            "profile_code": profile.get("profile_code"),
+            "threshold_summary": threshold_summary,
+            "risk_filter_version": profile.get("risk_filter_version"),
+            "threshold_values": {
+                "stage1_threshold": stage1,
+                "stage2_confirmed_threshold": confirmed,
+                "stage2_near_threshold": near,
+            },
+            "notes": profile.get("notes"),
+        },
+        "run": {
+            "refresh_kind": (snapshot.get("run") or {}).get("refresh_kind"),
+            "status": (snapshot.get("run") or {}).get("status"),
+            "started_at": (snapshot.get("run") or {}).get("started_at"),
+            "finished_at": (snapshot.get("run") or {}).get("finished_at"),
+            "notes": (snapshot.get("run") or {}).get("notes"),
+        },
+        "bucket_counts": bucket_counts,
+        "top_by_bucket": top_by_bucket,
+        "shadow_summary": shadow_summary,
+        "performance_summary": performance_summary,
+    }
+
+
+def build_tseries_discovery(asof: str) -> dict[str, Any]:
+    con = connect_tseries()
+    try:
+        models = [
+            _normalize_tseries_model(build_tseries_snapshot(con, "T-STOCK-V01")),
+            _normalize_tseries_model(build_tseries_snapshot(con, "T-ETF-V01")),
+        ]
+    finally:
+        con.close()
+    return {
+        "source_name": "handoff:tseries_discovery_current",
+        "warnings": [],
+        "errors": [],
+        "as_of_date": asof,
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "channel": "tseries-discovery",
+        "schema_version": "v1",
+        "models": models,
+    }
+
+
 def build_manifest(asof: str) -> dict[str, Any]:
     return {
         "as_of_date": asof,
         "generated_at": datetime.now().isoformat(timespec="seconds"),
-        "files": ["user_model_catalog.json", "user_model_snapshot_report.json", "user_performance_summary.json", "user_recent_changes.json"],
+        "files": ["user_model_catalog.json", "user_model_snapshot_report.json", "user_performance_summary.json", "user_recent_changes.json", "quantservice_tseries_discovery.json"],
         "channel": "user-facing",
         "version": "v2",
         "compliance_note": "public_model_snapshot_only"
@@ -200,6 +315,7 @@ def main() -> None:
     write_json(CANONICAL_REPORT, build_reports(mapping, args.asof))
     write_json(CURRENT_DIR / "user_performance_summary.json", build_performance(mapping, args.asof))
     write_json(CURRENT_DIR / "user_recent_changes.json", build_changes(mapping, args.asof))
+    write_json(T_SERIES_DISCOVERY, build_tseries_discovery(args.asof))
     write_json(CURRENT_DIR / "publish_manifest.json", build_manifest(args.asof))
     if LEGACY_REPORT.exists():
         LEGACY_REPORT.unlink()
@@ -208,3 +324,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

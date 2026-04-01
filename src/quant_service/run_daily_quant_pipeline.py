@@ -30,7 +30,8 @@ def build_commands(
     include_etf: bool,
     etf_start: str,
     include_service_analytics: bool,
-) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[str], list[str] | None, list[str] | None, list[list[str]], list[list[str]], list[list[str]]]:
+    include_tseries_shadow: bool,
+) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str] | None, list[str] | None, list[list[str]], list[list[str]], list[list[str]]]:
     prep_cmds: list[list[str]] = [[
         python_exe,
         str(PROJECT_ROOT / r"src\pipelines\rebuild_mix_universe_and_refresh_dbs.py"),
@@ -77,6 +78,12 @@ def build_commands(
         [python_exe, str(PROJECT_ROOT / r"src\backtest\run_backtest_s6_defensive_allocation.py"), "--asof", asof, "--start", "2023-06-08", "--end", asof, "--rebalance", "M"],
     ]
 
+    tseries_shadow_cmds: list[list[str]] = []
+    if include_tseries_shadow:
+        tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_stock_v01_operational_refresh.py")])
+        if include_etf:
+            tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_etf_v01_operational_refresh.py")])
+
     router_and_reports_cmds = []
     for profile in ["stable", "balanced", "growth", "auto"]:
         router_and_reports_cmds.append([python_exe, str(PROJECT_ROOT / r"src\backtest\run_backtest_multiasset_router.py"), "--asof", asof, "--start", "2023-06-08", "--end", asof, "--rebalance", "M", "--service-profile", profile])
@@ -120,6 +127,7 @@ def build_commands(
         s2_cmd,
         model_cmds,
         router_and_reports_cmds,
+        tseries_shadow_cmds,
         ingest_cmd,
         publish_cmd,
         model_gsheet_cmd,
@@ -141,11 +149,21 @@ def main() -> None:
     ap.add_argument("--include-etf", action="store_true")
     ap.add_argument("--etf-start", default="2013-10-14")
     ap.add_argument("--skip-publish", action="store_true")
-    ap.add_argument("--skip-service-analytics", action="store_true", help="Skip internal service analytics DB/review/bundle generation")
+    ap.add_argument(
+        "--include-service-analytics",
+        action="store_true",
+        help="Opt in to internal service analytics DB/review/admin preview bundle generation",
+    )
+    ap.add_argument(
+        "--skip-service-analytics",
+        action="store_true",
+        help="Deprecated compatibility flag. Internal service analytics are now skipped by default.",
+    )
+    ap.add_argument("--skip-tseries-shadow", action="store_true", help="Skip T-STOCK-V01 / T-ETF-V01 shadow refresh outputs")
     args = ap.parse_args()
 
     core2_tag = args.core2_tag or f"daily_{args.asof.replace('-', '')}"
-    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, ingest_cmd, publish_cmd, model_gsheet_cmd, etf_model_gsheet_cmd, web_snapshot_cmds, service_analytics_cmds = build_commands(
+    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, model_gsheet_cmd, etf_model_gsheet_cmd, web_snapshot_cmds, service_analytics_cmds = build_commands(
         asof=args.asof,
         python_exe=str(args.python),
         core_db=str(args.core_db),
@@ -155,7 +173,8 @@ def main() -> None:
         model_gsheet=bool(args.model_gsheet),
         include_etf=bool(args.include_etf),
         etf_start=str(args.etf_start),
-        include_service_analytics=not bool(args.skip_service_analytics),
+        include_service_analytics=bool(args.include_service_analytics) and not bool(args.skip_service_analytics),
+        include_tseries_shadow=not bool(args.skip_tseries_shadow),
     )
 
     print("[PIPELINE]")
@@ -163,7 +182,11 @@ def main() -> None:
     print(f"  include_etf={bool(args.include_etf)}")
     print(f"  etf_start={args.etf_start}")
     print(f"  model_gsheet={bool(args.model_gsheet)}")
-    print(f"  service_analytics={not bool(args.skip_service_analytics)}")
+    print(
+        "  service_analytics="
+        f"{bool(args.include_service_analytics) and not bool(args.skip_service_analytics)}"
+    )
+    print(f"  tseries_shadow={not bool(args.skip_tseries_shadow)}")
 
     for cmd in prep_cmds:
         _run(cmd, PROJECT_ROOT)
@@ -176,6 +199,9 @@ def main() -> None:
         raise SystemExit(f"Model jobs failed: {exit_codes}")
 
     for cmd in router_and_reports_cmds:
+        _run(cmd, PROJECT_ROOT)
+
+    for cmd in tseries_shadow_cmds:
         _run(cmd, PROJECT_ROOT)
 
     _run(ingest_cmd, PROJECT_ROOT)
@@ -197,3 +223,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

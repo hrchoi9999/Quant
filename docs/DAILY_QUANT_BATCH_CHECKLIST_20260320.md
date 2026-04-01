@@ -4,8 +4,7 @@
 
 ```powershell
 cd D:\Quant
-.env64\Scripts\python.exe .\src\quant_service
-un_daily_quant_pipeline.py --include-etf --model-gsheet
+.\venv64\Scripts\python.exe .\src\quant_service\run_daily_quant_pipeline.py --include-etf --model-gsheet
 ```
 
 ## Must Check
@@ -46,26 +45,23 @@ un_daily_quant_pipeline.py --include-etf --model-gsheet
 
 ## Quick Sanity Rules
 
-- `stable / balanced / growth` ???? ??? ???? ?? ??? ??.
-- `auto`? ?? ??? ???? `balanced`? ?? ? ??.
-- ETF core? ??? S4/S5/S6? ???? ???.
-- KRX universe? cache source? ??? ?? ???, ?? DB ????? ?? ???? ???? ??.
-- ? snapshot validate? ??? ???? ??.
+- `stable / balanced / growth` profiles should all publish without missing holdings.
+- `auto` should resolve to one of the supported service profiles.
+- ETF core aliases should be present before S4/S5/S6 publish.
+- KRX universe and cache sources should be aligned before publish.
+- Web snapshot validation must pass before handoff.
 
 ## Recovery Order
 
-1. ETF core ??: [build_universe_etf_core.py](D:/Quant/src/collectors/universe/build_universe_etf_core.py)
-2. ETF/stock data mismatch: [run_daily_quant_pipeline.py](D:/Quant/src/quant_service/run_daily_quant_pipeline.py) ???
-3. DB ?? ??: [ingest_backtest_results.py](D:/Quant/src/quant_service/ingest_backtest_results.py) -> [publish_backtest_results.py](D:/Quant/src/quant_service/publish_backtest_results.py)
-4. Web payload ??: [build_user_facing_snapshots.py](D:/Quant/service_platform/publishers/build_user_facing_snapshots.py) -> [validate_redbot_web_snapshots.py](D:/Quant/scripts/validate_redbot_web_snapshots.py)
-5. Sheets ??: [sync_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_model_holdings_gsheet.py), [sync_etf_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_etf_model_holdings_gsheet.py)
-6. Internal analytics ??: [build_service_analytics.py](D:/Quant/scripts/build_service_analytics.py) -> [validate_service_analytics.py](D:/Quant/scripts/validate_service_analytics.py) -> P1/P2/P3 bundle rebuild
+1. ETF core issue: [build_universe_etf_core.py](D:/Quant/src/collectors/universe/build_universe_etf_core.py)
+2. ETF/stock data mismatch: rerun [run_daily_quant_pipeline.py](D:/Quant/src/quant_service/run_daily_quant_pipeline.py)
+3. DB publish issue: [ingest_backtest_results.py](D:/Quant/src/quant_service/ingest_backtest_results.py) -> [publish_backtest_results.py](D:/Quant/src/quant_service/publish_backtest_results.py)
+4. Web payload issue: [build_user_facing_snapshots.py](D:/Quant/service_platform/publishers/build_user_facing_snapshots.py) -> [validate_redbot_web_snapshots.py](D:/Quant/scripts/validate_redbot_web_snapshots.py)
+5. Sheets issue: [sync_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_model_holdings_gsheet.py), [sync_etf_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_etf_model_holdings_gsheet.py)
+6. Internal analytics preview assets are disabled by default; rebuild them only when explicitly requested with `--include-service-analytics`
 
+## Internal Admin Preview Bundles
 
-6. Internal admin analytics preview
-- [service_analytics.db](D:/Quant/data/db/service_analytics.db) latest build
-- [p1_bundle](D:/Quant/reports/service_analytics_review/20260325/p1_bundle) refreshed
-- [p2_bundle](D:/Quant/reports/service_analytics_review/20260325/p2_bundle) refreshed
-- [p3_bundle](D:/Quant/reports/service_analytics_review/20260325/p3_bundle) refreshed
-- internal preview only: do not publish to public web until approved
-
+- `service_analytics_review` preview bundles (`p1_bundle` ~ `p5_bundle`) are no longer part of the default daily pipeline.
+- Public current snapshots, market briefing current, and T-series Discovery current remain part of the default pipeline.
+- Only use `--include-service-analytics` when a separate internal admin preview rebuild is explicitly requested.

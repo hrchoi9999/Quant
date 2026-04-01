@@ -501,7 +501,20 @@ def main() -> None:
             else:
                 print("[INFO] tail backfill skipped: no tail-missing tickers.")
 
-        remaining = _price_missing_tickers(Path(args.price_db), args.price_table, tickers, price_target_end)
+        price_db_max_after_price_step = _get_price_db_max_date(Path(args.price_db), args.price_table)
+        effective_price_end_for_universe = _safe_min_date_str(price_target_end, price_db_max_after_price_step) or price_target_end
+        if effective_price_end_for_universe != price_target_end:
+            print(
+                f"[INFO] priceready check end snapped: requested={price_target_end} "
+                f"-> effective={effective_price_end_for_universe}"
+            )
+
+        remaining = _price_missing_tickers(
+            Path(args.price_db),
+            args.price_table,
+            tickers,
+            effective_price_end_for_universe,
+        )
         if remaining:
             before, after = _write_universe_excluding(paths.mix_universe, paths.mix_universe_priceready, args.ticker_col, remaining)
             print(f"[WARN] priceready universe generated: before={before} after={after} (dropped missing_end={len(remaining)})")

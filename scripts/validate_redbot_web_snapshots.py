@@ -17,6 +17,7 @@ REQUIRED = [
     "user_model_snapshot_report.json",
     "user_performance_summary.json",
     "user_recent_changes.json",
+    "quantservice_tseries_discovery.json",
     "publish_manifest.json",
 ]
 
@@ -37,11 +38,34 @@ def main() -> None:
     reports = json.loads((CURRENT_DIR / "user_model_snapshot_report.json").read_text(encoding="utf-8"))
     performance = json.loads((CURRENT_DIR / "user_performance_summary.json").read_text(encoding="utf-8"))
     changes = json.loads((CURRENT_DIR / "user_recent_changes.json").read_text(encoding="utf-8"))
+    tseries = json.loads((CURRENT_DIR / "quantservice_tseries_discovery.json").read_text(encoding="utf-8"))
 
     assert len(catalog.get("models", [])) == 4
     assert len(reports.get("reports", [])) == 4
     assert len(performance.get("models", [])) == 4
     assert len(changes.get("changes", [])) == 4
+
+    tseries_models = tseries.get("models", [])
+    assert len(tseries_models) == 2
+    expected_tseries_codes = {"T-STOCK-V01", "T-ETF-V01"}
+    actual_tseries_codes = {row.get("model_code") for row in tseries_models}
+    if actual_tseries_codes != expected_tseries_codes:
+        raise SystemExit(f"Unexpected T-series model set: {sorted(actual_tseries_codes)}")
+    required_tseries_keys = {"model_code", "asof_date", "meta", "profile", "run", "bucket_counts", "top_by_bucket", "shadow_summary", "performance_summary"}
+    for row in tseries_models:
+        missing = sorted(required_tseries_keys - set(row.keys()))
+        if missing:
+            raise SystemExit(f"Missing T-series keys for {row.get('model_code')}: {missing}")
+        if not isinstance(row.get("top_by_bucket"), dict):
+            raise SystemExit(f"Invalid top_by_bucket for {row.get('model_code')}")
+        if not isinstance(row.get("shadow_summary"), dict):
+            raise SystemExit(f"Invalid shadow_summary for {row.get('model_code')}")
+        if not isinstance(row.get("bucket_counts"), dict):
+            raise SystemExit(f"Invalid bucket_counts for {row.get('model_code')}")
+        profile = row.get("profile") or {}
+        threshold_values = profile.get("threshold_values") or {}
+        if not isinstance(threshold_values, dict):
+            raise SystemExit(f"Invalid threshold_values for {row.get('model_code')}")
 
     banned_terms = ["추천", "권유", "매수 추천", "매도 추천", "개인 맞춤", "성향별 추천", "오늘의 추천", "추천 전략", "매수 전략", "매도 전략"]
     report_text = json.dumps(reports, ensure_ascii=False)
@@ -107,6 +131,7 @@ def main() -> None:
     print("validated_reports=4")
     print("validated_performance_models=4")
     print("validated_changes=4")
+    print("validated_tseries_models=2")
     print("validated_korean_text=clean")
     print("validated_security_code=ok")
     print("validated_compliance_language=ok")

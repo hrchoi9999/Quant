@@ -1,5 +1,5 @@
 {
-  "as_of_date": "2026-03-25",
+  "as_of_date": "2026-04-01",
   "changes": [
     {
       "user_model_name": "안정형",
@@ -104,15 +104,15 @@
         "backtest_result": true,
         "disclaimer_required": true,
         "data_basis": "rule_based_public_model_output",
-        "model_version": "public-model-2026.03.25",
+        "model_version": "public-model-2026.04.01",
         "calculation_version": "calc-2026-03-24-compliance-v1",
-        "asof_date": "2026-03-25",
+        "asof_date": "2026-04-01",
         "rebalance_frequency": "monthly",
         "fee_bps": 0.0,
         "slippage_bps": 0.0,
         "benchmark_name": "KOSPI200",
         "backtest_start_date": "2023-06-08",
-        "backtest_end_date": "2026-03-25",
+        "backtest_end_date": "2026-03-31",
         "universe_definition": "KR stocks + KR ETFs used by public rule-based models",
         "data_source_summary": "KRX daily prices, KR ETF daily prices, internal fundamentals views, rule-based monthly rebalance outputs"
       }
@@ -220,15 +220,15 @@
         "backtest_result": true,
         "disclaimer_required": true,
         "data_basis": "rule_based_public_model_output",
-        "model_version": "public-model-2026.03.25",
+        "model_version": "public-model-2026.04.01",
         "calculation_version": "calc-2026-03-24-compliance-v1",
-        "asof_date": "2026-03-25",
+        "asof_date": "2026-04-01",
         "rebalance_frequency": "monthly",
         "fee_bps": 0.0,
         "slippage_bps": 0.0,
         "benchmark_name": "KOSPI200",
         "backtest_start_date": "2023-06-08",
-        "backtest_end_date": "2026-03-25",
+        "backtest_end_date": "2026-03-31",
         "universe_definition": "KR stocks + KR ETFs used by public rule-based models",
         "data_source_summary": "KRX daily prices, KR ETF daily prices, internal fundamentals views, rule-based monthly rebalance outputs"
       }
@@ -336,15 +336,15 @@
         "backtest_result": true,
         "disclaimer_required": true,
         "data_basis": "rule_based_public_model_output",
-        "model_version": "public-model-2026.03.25",
+        "model_version": "public-model-2026.04.01",
         "calculation_version": "calc-2026-03-24-compliance-v1",
-        "asof_date": "2026-03-25",
+        "asof_date": "2026-04-01",
         "rebalance_frequency": "monthly",
         "fee_bps": 0.0,
         "slippage_bps": 0.0,
         "benchmark_name": "KOSPI200",
         "backtest_start_date": "2023-06-08",
-        "backtest_end_date": "2026-03-25",
+        "backtest_end_date": "2026-03-31",
         "universe_definition": "KR stocks + KR ETFs used by public rule-based models",
         "data_source_summary": "KRX daily prices, KR ETF daily prices, internal fundamentals views, rule-based monthly rebalance outputs"
       }
@@ -452,15 +452,15 @@
         "backtest_result": true,
         "disclaimer_required": true,
         "data_basis": "rule_based_public_model_output",
-        "model_version": "public-model-2026.03.25",
+        "model_version": "public-model-2026.04.01",
         "calculation_version": "calc-2026-03-24-compliance-v1",
-        "asof_date": "2026-03-25",
+        "asof_date": "2026-04-01",
         "rebalance_frequency": "monthly",
         "fee_bps": 0.0,
         "slippage_bps": 0.0,
         "benchmark_name": "KOSPI200",
         "backtest_start_date": "2023-06-08",
-        "backtest_end_date": "2026-03-25",
+        "backtest_end_date": "2026-03-31",
         "universe_definition": "KR stocks + KR ETFs used by public rule-based models",
         "data_source_summary": "KRX daily prices, KR ETF daily prices, internal fundamentals views, rule-based monthly rebalance outputs"
       }

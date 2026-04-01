@@ -1,4 +1,4 @@
-﻿## One-Run Update + Backtest Command
+## One-Run Update + Backtest Command
 
 ### Recommended one-command orchestration
 
@@ -16,14 +16,18 @@ cd D:\Quant
 
 ### Notes
 
-- Default flow: data refresh -> S2 backtest -> S3/S3 core2/S4/S5/S6 backtests (ETF models from 2023-06-08) -> Router/profile reports (from 2023-06-08) -> ingest -> publish -> web snapshots -> internal service analytics/review bundles
+- Default flow: data refresh -> S2 backtest -> S3/S3 core2/S4/S5/S6 backtests (ETF models from 2023-06-08) -> Router/profile reports (from 2023-06-08) -> T-STOCK-V01 / T-ETF-V01 shadow refresh -> ingest -> publish -> web snapshots
 - `--include-etf`: build ETF universe latest alias, upsert `instrument_master`, and incrementally load ETF prices into `price.db`
 - `--etf-start`: first-load fallback start date for ETFs. Default is `2013-10-14`
 - `--asof` omitted: local today date is used automatically
+- Non-trading-day rule: if `--asof` is not a trading day, upstream price/universe checks and ingest fall back to the latest available trading-day artifacts on or before the requested date
+- This means `S2`/`S3` stock outputs can be published for the requested `asof`, while some source run files may still carry the last trading-day end token in their filenames
 - Default storage: `quant_service.db` + `quant_service_detail.db`
 - Default mode rebuilds service web snapshots, but does not upload to Google Sheets
-- Default mode also rebuilds internal service analytics DB, review CSV/Markdown, and P1/P2/P3 admin preview bundles
-- Add `--skip-service-analytics` if you want to skip internal analytics generation during a run
+- Internal service analytics DB, review CSV/Markdown, and admin preview bundles are disabled by default
+- Add `--include-service-analytics` only if you intentionally want to rebuild internal admin preview analytics assets
+- Default mode also runs `T-STOCK-V01` shadow refresh, and if `--include-etf` is set it also runs `T-ETF-V01` shadow refresh using existing local research outputs
+- Add `--skip-tseries-shadow` if you want to skip T-series shadow refresh during a run
 - Add `--model-gsheet` to upload S2/S3/S3 core2 published holdings and S4/S5/S6 ETF model snapshots to Google Sheets
 - Add `--s2-gsheet` if you also want the original S2 backtest bundle uploaded during the S2 run
 
@@ -34,7 +38,7 @@ cd D:\Quant
 - `ETF prices` failure: rerun [fetch_etf_prices_daily.py](D:/Quant/src/collectors/prices/fetch_etf_prices_daily.py) and check ETF rows in [price.db](D:/Quant/data/db/price.db) `prices_daily`
 - `S2` backtest failure: check latest files under [backtest_regime_refactor](D:/Quant/reports/backtest_regime_refactor) and confirm [universe_mix_top400_latest_fundready.csv](D:/Quant/data/universe/universe_mix_top400_latest_fundready.csv) exists
 - `S3/S3 core2` failure: check [features_s3.db](D:/Quant/data/db_s3/features_s3.db) max dates and latest files under [backtest_s3_dev](D:/Quant/reports/backtest_s3_dev)
-- `ingest` failure: rerun [ingest_backtest_results.py](D:/Quant/src/quant_service/ingest_backtest_results.py) with the same `--asof`
+- `ingest` failure: rerun [ingest_backtest_results.py](D:/Quant/src/quant_service/ingest_backtest_results.py) with the same `--asof`; on non-trading days it should now resolve the latest compatible artifacts on or before the requested date
 - `publish` failure: rerun [publish_backtest_results.py](D:/Quant/src/quant_service/publish_backtest_results.py) with the same `--asof`
 - DB validation: check [quant_service.db](D:/Quant/data/db/quant_service.db) `run_runs`, `run_summary`, `pub_model_current` and [quant_service_detail.db](D:/Quant/data/db/quant_service_detail.db) `run_nav_daily`, `run_holdings_history`
 
@@ -123,5 +127,6 @@ python .\src\experiments\run_s3_trend_hold_top20_CORE2_TIEBREAK_GATE_SWEEP.py `
   --gate-use-slope 1 `
   --gate-use-ma-stack 1
 ```
+
 
 

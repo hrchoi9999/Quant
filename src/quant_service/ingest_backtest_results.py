@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import math
@@ -46,6 +46,29 @@ def _to_date_str(s: str) -> str:
     if re.fullmatch(r"\d{8}", s):
         return f"{s[:4]}-{s[4:6]}-{s[6:8]}"
     return s
+
+
+def _extract_last_yyyymmdd(text: str) -> str | None:
+    matches = re.findall(r"(\d{8})", str(text))
+    return matches[-1] if matches else None
+
+
+def _latest_path_lte(directory: Path, pattern: str, requested_token: str) -> Path | None:
+    requested = str(requested_token)
+    candidates: list[tuple[str, float, Path]] = []
+    for path in directory.glob(pattern):
+        token = _extract_last_yyyymmdd(path.stem)
+        if token is None or token > requested:
+            continue
+        try:
+            mtime = path.stat().st_mtime
+        except OSError:
+            mtime = 0.0
+        candidates.append((token, mtime, path))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return candidates[0][2]
 
 
 def _safe_float(v):
@@ -153,7 +176,9 @@ class RunSpec:
 
 def _latest_s2_spec(asof_date: str, batch_id: str, snapshot_id: str) -> RunSpec:
     end_token = _as_yyyymmdd(asof_date)
-    summary = sorted(REPORTS_S2.glob(f"regime_bt_summary_*_{end_token}.csv"), key=lambda p: p.stat().st_mtime, reverse=True)[0]
+    summary = _latest_path_lte(REPORTS_S2, "regime_bt_summary_*.csv", end_token)
+    if summary is None:
+        raise FileNotFoundError(f"No S2 summary found on or before {end_token} in {REPORTS_S2}")
     stem_suffix = summary.stem.replace("regime_bt_summary_", "")
     run_id = f"RUN__S2__{end_token}__{stem_suffix}"
 
@@ -166,7 +191,7 @@ def _latest_s2_spec(asof_date: str, batch_id: str, snapshot_id: str) -> RunSpec:
         batch_id=batch_id,
         snapshot_id=snapshot_id,
         start_date=_to_date_str(stem_suffix.split("_")[-2]),
-        end_date=asof_date,
+        end_date=_to_date_str(_extract_last_yyyymmdd(stem_suffix) or end_token),
         asof_date=asof_date,
         outdir=REPORTS_S2,
         summary_path=summary,
@@ -188,32 +213,38 @@ def _latest_s2_spec(asof_date: str, batch_id: str, snapshot_id: str) -> RunSpec:
 
 def _latest_s3_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[RunSpec]:
     specs: list[RunSpec] = []
-    end_token = asof_date
-    base_nav = REPORTS_S3 / f"s3_nav_hold_top20_2013-10-14_{end_token}.csv"
-    if base_nav.exists():
+    requested_token = _as_yyyymmdd(asof_date)
+    base_nav = _latest_path_lte(REPORTS_S3, "s3_nav_hold_top20_2013-10-14_*.csv", requested_token)
+    if base_nav is not None and base_nav.exists():
+        actual_end_token = str(base_nav.stem).split("_")[-1]
+        actual_end_date = _to_date_str(actual_end_token)
         base_nav_df = pd.read_csv(base_nav, usecols=["date"])
         actual_start = str(pd.to_datetime(base_nav_df["date"], errors="coerce").dropna().min().date())
         specs.append(RunSpec(
             model_code="S3",
-            run_id=f"RUN__S3__{_as_yyyymmdd(asof_date)}__2013_10_14__{_as_yyyymmdd(asof_date)}__001",
+            run_id=f"RUN__S3__{_as_yyyymmdd(asof_date)}__2013_10_14__{actual_end_token}__001",
             batch_id=batch_id,
             snapshot_id=snapshot_id,
             start_date=actual_start,
-            end_date=asof_date,
+            end_date=actual_end_date,
             asof_date=asof_date,
             outdir=REPORTS_S3,
             summary_path=None,
             nav_path=base_nav,
-            holdings_path=REPORTS_S3 / f"s3_holdings_history_top20_2013-10-14_{end_token}.csv",
+            holdings_path=REPORTS_S3 / f"s3_holdings_history_top20_2013-10-14_{actual_end_date}.csv",
             trade_path=None,
             artifacts=[
                 base_nav,
-                REPORTS_S3 / f"s3_holdings_history_top20_2013-10-14_{end_token}.csv",
-                REPORTS_S3 / f"s3_holdings_last_top20_{end_token}.csv",
+                REPORTS_S3 / f"s3_holdings_history_top20_2013-10-14_{actual_end_date}.csv",
+                REPORTS_S3 / f"s3_holdings_last_top20_{actual_end_date}.csv",
             ],
         ))
-    for nav in sorted(REPORTS_S3.glob(f"s3_nav_hold_top20_*_2013-10-14_{end_token}.csv")):
-        m = re.match(r"s3_nav_hold_top20_(.+)_2013-10-14_" + re.escape(end_token) + r"\.csv$", nav.name)
+    effective_end_token = None if base_nav is None else str(base_nav.stem).split("_")[-1]
+    if effective_end_token is None:
+        return specs
+    effective_end_date = _to_date_str(effective_end_token)
+    for nav in sorted(REPORTS_S3.glob(f"s3_nav_hold_top20_*_2013-10-14_{effective_end_token}.csv")):
+        m = re.match(r"s3_nav_hold_top20_(.+)_2013-10-14_" + re.escape(effective_end_token) + r"\.csv$", nav.name)
         if not m:
             continue
         tag = m.group(1)
@@ -227,17 +258,17 @@ def _latest_s3_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[Ru
             batch_id=batch_id,
             snapshot_id=snapshot_id,
             start_date=actual_start,
-            end_date=asof_date,
+            end_date=effective_end_date,
             asof_date=asof_date,
             outdir=REPORTS_S3,
             summary_path=None,
             nav_path=nav,
-            holdings_path=REPORTS_S3 / f"s3_holdings_history_top20_{tag}_2013-10-14_{end_token}.csv",
+            holdings_path=REPORTS_S3 / f"s3_holdings_history_top20_{tag}_2013-10-14_{effective_end_date}.csv",
             trade_path=None,
             artifacts=[
                 nav,
-                REPORTS_S3 / f"s3_holdings_history_top20_{tag}_2013-10-14_{end_token}.csv",
-                REPORTS_S3 / f"s3_holdings_last_top20_{tag}_{end_token}.csv",
+                REPORTS_S3 / f"s3_holdings_history_top20_{tag}_2013-10-14_{effective_end_date}.csv",
+                REPORTS_S3 / f"s3_holdings_last_top20_{tag}_{effective_end_date}.csv",
             ],
             variant_tag=tag,
         ))
@@ -253,10 +284,9 @@ def _latest_etf_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[R
         'S6': ('s6_alloc_summary', 's6_alloc_equity', 's6_alloc_weights', 's6_alloc_trades'),
     }
     for model_code, (sum_prefix, eq_prefix, wt_prefix, tr_prefix) in patterns.items():
-        matches = sorted(REPORTS_ETF.glob(f"{sum_prefix}_{asof_token}_*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
-        if not matches:
+        summary = _latest_path_lte(REPORTS_ETF, f"{sum_prefix}_*.csv", asof_token)
+        if summary is None:
             continue
-        summary = matches[0]
         suffix = summary.stem.replace(f"{sum_prefix}_", "")
         parts = suffix.split('_')
         start_date = _to_date_str(parts[2]) if len(parts) >= 4 else '2024-01-02'
@@ -710,3 +740,4 @@ def _parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = _parse_args()
     ingest(asof_date=args.asof, core_db_path=Path(args.core_db), detail_db_path=Path(args.detail_db))
+
