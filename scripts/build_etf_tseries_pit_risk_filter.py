@@ -48,16 +48,28 @@ def classify_theme(row: pd.Series) -> str:
     return 'other'
 
 
-def excluded_by_structural_rule(row: pd.Series) -> bool:
+def _is_truthy(value: object) -> bool:
+    if pd.isna(value):
+        return False
+    return str(value).strip().lower() in {'1', 'true', 't', 'yes', 'y'}
+
+
+def excluded_by_structural_rule(row: pd.Series) -> str | None:
+    name = str(row.get('name', '') or '')
     if float(row.get('liquidity_20d_value', 0) or 0) < LIQUIDITY_FLOOR:
-        return True
-    return False
+        return 'liquidity_floor'
+    if _is_truthy(row.get('is_inverse')) or _is_truthy(row.get('is_leveraged')):
+        return 'inverse_or_leverage'
+    if any(token in name for token in ['레버리지', '인버스', '2X']):
+        return 'inverse_or_leverage'
+    return None
 
 
 def main() -> None:
     df = pd.read_csv(IN_DIR / f'etf_tseries_pit_operational_candidates_{ASOF_DATE}.csv', dtype={'ticker': str})
     df['theme_bucket'] = df.apply(classify_theme, axis=1)
-    df['is_excluded'] = df.apply(excluded_by_structural_rule, axis=1)
+    df['structural_reason'] = df.apply(excluded_by_structural_rule, axis=1)
+    df['is_excluded'] = df['structural_reason'].notna()
     df['grade_order'] = df['candidate_grade'].map(GRADE_ORDER)
     df = df.sort_values(['grade_order','stage2_prob','stage1_prob','liquidity_20d_value'], ascending=[True,False,False,False], na_position='last')
 
@@ -67,7 +79,7 @@ def main() -> None:
     for _, row in df.iterrows():
         row_dict=row.to_dict()
         if row_dict['is_excluded']:
-            row_dict['filter_reason']='structural_exclusion'
+            row_dict['filter_reason']=f"structural_exclusion:{row_dict['structural_reason']}"
             excluded_rows.append(row_dict)
             continue
         theme=row_dict['theme_bucket']
@@ -99,7 +111,9 @@ def main() -> None:
         {'bucket':'kept_near','count':int((kept['candidate_grade']=='near').sum())},
         {'bucket':'kept_observe','count':int((kept['candidate_grade']=='observe').sum())},
         {'bucket':'excluded_total','count':len(excluded)},
-        {'bucket':'excluded_structural','count':int((excluded['filter_reason']=='structural_exclusion').sum()) if not excluded.empty else 0},
+        {'bucket':'excluded_structural','count':int(excluded['filter_reason'].fillna('').str.startswith('structural_exclusion').sum()) if not excluded.empty else 0},
+        {'bucket':'excluded_inverse_or_leverage','count':int((excluded['filter_reason']=='structural_exclusion:inverse_or_leverage').sum()) if not excluded.empty else 0},
+        {'bucket':'excluded_liquidity_floor','count':int((excluded['filter_reason']=='structural_exclusion:liquidity_floor').sum()) if not excluded.empty else 0},
     ])
     summary.to_csv(IN_DIR / f'etf_tseries_pit_risk_filter_summary_{RUN_DATE}.csv', index=False, encoding='utf-8-sig')
 
@@ -111,6 +125,8 @@ def main() -> None:
 - kept near: {int((kept['candidate_grade'] == 'near').sum())}
 - kept observe: {int((kept['candidate_grade'] == 'observe').sum())}
 - excluded total: {len(excluded)}
+- excluded inverse/leverage: {int((excluded['filter_reason'] == 'structural_exclusion:inverse_or_leverage').sum()) if not excluded.empty else 0}
+- excluded liquidity floor: {int((excluded['filter_reason'] == 'structural_exclusion:liquidity_floor').sum()) if not excluded.empty else 0}
 """
     (IN_DIR / f'etf_tseries_pit_risk_filter_{RUN_DATE}.md').write_text(md, encoding='utf-8')
 

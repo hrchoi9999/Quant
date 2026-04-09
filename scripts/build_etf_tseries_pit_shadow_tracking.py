@@ -10,8 +10,14 @@ OUT_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_T_SE
 WF_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_T_SERIES_PIT_STRICT_WALKFORWARD'
 
 
+def is_inverse_or_leverage_name(name: object) -> bool:
+    text = str(name or '')
+    return any(token in text for token in ['레버리지', '인버스', '2X'])
+
+
 def build_historical_shadow() -> pd.DataFrame:
     df = pd.read_csv(WF_DIR / 'etf_tseries_pit_strict_walkforward_top_picks.csv', dtype={'ticker': str})
+    df = df.loc[~df['name'].map(is_inverse_or_leverage_name)].copy()
     df = df.groupby(['stage','signal_date','ticker','name'], as_index=False).agg(pred_prob=('pred_prob','max'), target_hit=('label','max'))
     df['candidate_grade'] = df['stage'].map({'stage1_lower_to_et10':'historical_stage1','stage2_et10_to_et3':'historical_stage2'})
     df['tracking_status'] = 'resolved'

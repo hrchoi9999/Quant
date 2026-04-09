@@ -165,6 +165,8 @@ def _filter_universe_by_fs_annual(
     start_year: int,
     end_year: int,
     out_file: Path,
+    fundready_total: int | None = None,
+    balance_markets: bool = False,
 ) -> Tuple[Path, List[str], int, int]:
     df = pd.read_csv(universe_file)
     if ticker_col not in df.columns:
@@ -187,7 +189,27 @@ def _filter_universe_by_fs_annual(
     have = set(fs["stock_code"].tolist())
 
     missing = sorted(set(df[ticker_col]) - have)
-    df2 = df[df[ticker_col].isin(have)].copy()
+    eligible = df[df[ticker_col].isin(have)].copy()
+
+    df2 = eligible
+    if fundready_total and len(eligible) > fundready_total:
+        if balance_markets and "market" in eligible.columns:
+            market_upper = eligible["market"].astype(str).str.upper()
+            kospi_quota = fundready_total // 2
+            kosdaq_quota = fundready_total - kospi_quota
+
+            selected_parts = [
+                eligible[market_upper == "KOSPI"].head(kospi_quota),
+                eligible[market_upper == "KOSDAQ"].head(kosdaq_quota),
+            ]
+            df2 = pd.concat(selected_parts, ignore_index=True)
+
+            if len(df2) < fundready_total:
+                picked = set(df2[ticker_col].astype(str).str.zfill(6))
+                fill = eligible[~eligible[ticker_col].astype(str).str.zfill(6).isin(picked)].head(fundready_total - len(df2))
+                df2 = pd.concat([df2, fill], ignore_index=True)
+        else:
+            df2 = eligible.head(fundready_total).copy()
 
     out_file.parent.mkdir(parents=True, exist_ok=True)
     df2.to_csv(out_file, index=False, encoding="utf-8-sig")
@@ -303,7 +325,9 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("--dart-db", default=r"D:\Quant\data\db\dart_main.db")
     p.add_argument("--dart-start-year", type=int, default=2015)
-    p.add_argument("--dart-end-year", type=int, default=2024)
+    p.add_argument("--dart-end-year", type=int, default=None)
+    p.add_argument("--fundready-total", type=int, default=200)
+    p.add_argument("--fundready-balance-markets", action="store_true", default=True)
 
     p.add_argument("--no-fund", action="store_true")
     p.add_argument("--fund-script", default=r"D:\Quant\src\fundamentals\build_fundamentals_monthly.py")
@@ -325,6 +349,7 @@ def main() -> None:
 
     asof = args.asof.strip() or datetime.now().strftime("%Y-%m-%d")
     asof_yyyymmdd = asof.replace("-", "")
+    dart_end_year = int(args.dart_end_year) if args.dart_end_year is not None else (_to_date(asof).year - 1)
 
     universe_dir = Path(args.universe_dir)
     universe_dir.mkdir(parents=True, exist_ok=True)
@@ -572,8 +597,10 @@ def main() -> None:
             universe_file=final_universe_for_price_regime,
             ticker_col=args.ticker_col,
             start_year=int(args.dart_start_year),
-            end_year=int(args.dart_end_year),
+            end_year=dart_end_year,
             out_file=paths.mix_universe_fundready,
+            fundready_total=int(args.fundready_total) if args.fundready_total else None,
+            balance_markets=bool(args.fundready_balance_markets),
         )
         if miss_fs:
             preview = ", ".join(miss_fs[:30])

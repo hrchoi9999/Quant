@@ -466,11 +466,16 @@ def main() -> None:
 
     # save master (2) 요청 asof 파일도 함께 생성(다운스트림 파이프라인 호환)
     # - 예: rebuild_mix_universe_and_refresh_dbs.py가 universe_top200_kospi_<requested>.csv 를 기대함
-    # - pykrx 실패로 cache를 사용해 used_asof가 과거로 밀린 경우에도, 요청 asof 이름으로 '동일 내용'을 저장
+    # - pykrx 원천 조회 실패나 소스 지연으로 cache를 사용해 used_asof가 과거로 밀린 경우에도,
+    #   요청 asof 이름으로 '동일 내용'을 저장해 다운스트림 파이프라인 호환성을 유지한다.
     if used_asof != asof_req:
         out_master_req = out_dir / f"universe_krx_{market.lower()}_{asof_req}.csv"
         master.to_csv(out_master_req, index=False, encoding="utf-8-sig")
-        print(f"[WARN] requested_asof alias saved: {out_master_req} (alias of used_asof={used_asof}, source={used_source})")
+        print(
+            f"[WARN] requested_asof alias saved: {out_master_req} "
+            f"(requested={asof_req}, used_asof={used_asof}, source={used_source}; "
+            "this is a source fallback, not necessarily a market holiday)"
+        )
 
     # optional active filter
     master_for_topn = master

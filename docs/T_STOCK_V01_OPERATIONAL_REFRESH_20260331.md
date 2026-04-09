@@ -20,7 +20,8 @@
 - internal theme labels: `internal_rule_v2`
 
 ## Runner
-- `D:\Quant\scriptsun_t_stock_v01_operational_refresh.py`
+- `D:\Quant\scripts
+un_t_stock_v01_operational_refresh.py`
 
 ## Outputs
 - latest watchlist
@@ -33,3 +34,6 @@
 - This refresh is safe to run repeatedly on the same local snapshot.
 - It does not fetch new data.
 - Upstream data collection and DB refresh will be attached later, together with ETF side integration.
+
+- Refresh now also builds a rolling watchlist using the latest weekly snapshots.
+  - Output: `t_stock_v01_rolling_watchlist_YYYY-MM-DD.csv`

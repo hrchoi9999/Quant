@@ -3,11 +3,25 @@ from __future__ import annotations
 import argparse
 import sqlite3
 from pathlib import Path
+import re
 import pandas as pd
 
 PROJECT_ROOT = Path(r"D:\Quant")
 DB_PATH = PROJECT_ROOT / r"data\db\tseries_operational.db"
 RUN_DATE = "20260331"
+
+
+def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
+    candidates: list[str] = []
+    regex = re.compile(pattern)
+    for p in src_dir.iterdir():
+        m = regex.match(p.name)
+        if m:
+            candidates.append(m.group(1))
+    if not candidates:
+        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
+    return max(candidates)
+
 
 
 def _to_int_bool(s: pd.Series) -> pd.Series:
@@ -21,6 +35,37 @@ def _write_df(con: sqlite3.Connection, table: str, df: pd.DataFrame, delete_sql:
     if not df.empty:
         df.to_sql(table, con, if_exists="append", index=False)
     con.commit()
+
+
+def _sync_rolling_watchlist(con: sqlite3.Connection, model_code: str, asof_date: str, run_id: str, latest_path: Path, summary_path: Path) -> None:
+    if latest_path.exists():
+        latest = pd.read_csv(latest_path, dtype={'ticker': str})
+        if not latest.empty:
+            latest['model_code'] = model_code
+            latest['asof_date'] = asof_date
+            for col in ['market','asset_class','group_key','theme_bucket','theme_name_kr','is_s2_overlap','stage1_prob','stage2_prob','mcap','liquidity_20d_value']:
+                if col not in latest.columns:
+                    latest[col] = None
+            latest['is_current'] = latest['is_current'].map(lambda x: None if pd.isna(x) else int(bool(x)))
+            latest['is_s2_overlap'] = latest['is_s2_overlap'].map(lambda x: None if pd.isna(x) else int(bool(x)))
+            latest = latest[[
+                'model_code','asof_date','watch_status','watch_tier','is_current','current_bucket','best_bucket_recent',
+                'appearances_recent','consecutive_current','last_seen_asof','prev_seen_asof','ticker','name','market',
+                'asset_class','group_key','theme_bucket','theme_name_kr','is_s2_overlap','stage1_prob','stage2_prob','mcap','liquidity_20d_value'
+            ]]
+        else:
+            latest = pd.DataFrame(columns=['model_code','asof_date','watch_status','watch_tier','is_current','current_bucket','best_bucket_recent','appearances_recent','consecutive_current','last_seen_asof','prev_seen_asof','ticker','name','market','asset_class','group_key','theme_bucket','theme_name_kr','is_s2_overlap','stage1_prob','stage2_prob','mcap','liquidity_20d_value'])
+        _write_df(con, 'ts_rolling_watchlist_latest', latest, 'DELETE FROM ts_rolling_watchlist_latest WHERE model_code=? AND asof_date=?', (model_code, asof_date))
+
+    if summary_path.exists():
+        summary = pd.read_csv(summary_path)
+        if not summary.empty:
+            summary['model_code'] = model_code
+            summary['asof_date'] = asof_date
+            summary = summary[['model_code','asof_date','bucket','count']]
+        else:
+            summary = pd.DataFrame(columns=['model_code','asof_date','bucket','count'])
+        _write_df(con, 'ts_rolling_watchlist_summary', summary, 'DELETE FROM ts_rolling_watchlist_summary WHERE model_code=? AND asof_date=?', (model_code, asof_date))
 
 
 def upsert_meta_models(con: sqlite3.Connection) -> None:
@@ -41,8 +86,8 @@ def upsert_meta_models(con: sqlite3.Connection) -> None:
 
 def sync_stock(con: sqlite3.Connection) -> None:
     model_code = "T-STOCK-V01"
-    asof_date = "2026-03-26"
     op_dir = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\T_STOCK_V01_OPERATIONALIZATION"
+    asof_date = latest_asof_from_dir(op_dir, r"t_stock_v01_latest_watchlist_(\d{4}-\d{2}-\d{2})\.csv")
     labels_path = PROJECT_ROOT / r"data\labels\t_stock_v01_theme_labels_20260331.csv"
     run_id = f"{model_code}:{asof_date}:shadow_refresh"
     profile_id = f"{model_code}:operating_v2:{asof_date}"
@@ -119,6 +164,15 @@ def sync_stock(con: sqlite3.Connection) -> None:
     summary = pd.concat([overall, by_h], ignore_index=True)
     _write_df(con, "ts_shadow_tracking_summary", summary, "DELETE FROM ts_shadow_tracking_summary WHERE model_code=? AND asof_date=?", (model_code, asof_date))
 
+    _sync_rolling_watchlist(
+        con,
+        model_code,
+        asof_date,
+        run_id,
+        op_dir / f"t_stock_v01_rolling_watchlist_{asof_date}.csv",
+        op_dir / f"t_stock_v01_rolling_watchlist_summary_{RUN_DATE}.csv",
+    )
+
     artifacts = pd.DataFrame([
         {"ts_run_id": run_id, "artifact_type": "latest_watchlist", "artifact_path": str(op_dir / f"t_stock_v01_latest_watchlist_{asof_date}.csv")},
         {"ts_run_id": run_id, "artifact_type": "latest_watchlist_summary", "artifact_path": str(op_dir / f"t_stock_v01_latest_watchlist_summary_{RUN_DATE}.csv")},
@@ -144,7 +198,7 @@ def sync_etf(con: sqlite3.Connection) -> None:
           risk_filter_version, is_current, notes, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         """,
-        (profile_id, model_code, "operational_pit_v1", asof_date, None, 0.65, 0.60, "etf_pit_risk_filter_v2", 1, "ETF PIT operational profile: stage1 momentum_trend top_ratio 0.08, stage2 vol_trend_compact with confirmed 0.65 and near 0.60. Inverse/leverage allowed, liquidity floor 20d avg trading value >= 20 billion KRW."),
+        (profile_id, model_code, "operational_pit_v1", asof_date, None, 0.65, 0.60, "etf_pit_risk_filter_v3", 1, "ETF PIT operational profile: stage1 momentum_trend top_ratio 0.08, stage2 vol_trend_compact with confirmed 0.65 and near 0.60. Inverse/leverage excluded, liquidity floor 20d avg trading value >= 20 billion KRW."),
     )
     con.execute(
         """
@@ -152,7 +206,7 @@ def sync_etf(con: sqlite3.Connection) -> None:
           ts_run_id, model_code, profile_id, asof_date, refresh_kind, status, source_snapshot_ref, started_at, finished_at, outdir, notes, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?, ?, datetime('now'))
         """,
-        (run_id, model_code, profile_id, asof_date, "shadow_refresh", "success", "research_outputs:20260401", str(op_dir), "Synced ETF PIT operational watchlist and shadow tracking from local outputs."),
+        (run_id, model_code, profile_id, asof_date, "shadow_refresh", "success", "research_outputs:20260401", str(op_dir), "Synced ETF PIT operational watchlist and shadow tracking from local outputs with inverse/leverage excluded."),
     )
     con.commit()
 
@@ -210,6 +264,24 @@ def sync_etf(con: sqlite3.Connection) -> None:
     summary["t3_hit_rate"] = summary.apply(lambda r: r["hit_rate"] * 100.0 if r["stage"] == "stage2_et10_to_et3" else None, axis=1)
     summary = summary[["model_code", "asof_date", "candidate_grade", "horizon", "obs_n", "t10_hit_rate", "t3_hit_rate", "avg_stage1_prob", "avg_stage2_prob"]].rename(columns={"candidate_grade": "candidate_bucket"})
     _write_df(con, "ts_shadow_tracking_summary", summary, "DELETE FROM ts_shadow_tracking_summary WHERE model_code=? AND asof_date=?", (model_code, asof_date))
+
+    _sync_rolling_watchlist(
+        con,
+        model_code,
+        asof_date,
+        run_id,
+        op_dir / f"t_stock_v01_rolling_watchlist_{asof_date}.csv",
+        op_dir / f"t_stock_v01_rolling_watchlist_summary_{RUN_DATE}.csv",
+    )
+
+    _sync_rolling_watchlist(
+        con,
+        model_code,
+        asof_date,
+        run_id,
+        op_dir / f"etf_tseries_pit_rolling_watchlist_{asof_date}.csv",
+        op_dir / "etf_tseries_pit_rolling_watchlist_summary_20260401.csv",
+    )
 
     artifacts = pd.DataFrame([
         {"ts_run_id": run_id, "artifact_type": "latest_watchlist", "artifact_path": str(op_dir / f"etf_tseries_pit_latest_watchlist_{asof_date}.csv")},

@@ -53,25 +53,15 @@ CANONICAL_USER_MODELS = {
         "primary_internal_models": ["S3", "S4"],
         "secondary_internal_models": ["Router(growth)"],
     },
-    "auto": {
-        "user_model_name": "자동전환형",
-        "description": "시장 상태에 따라 자산 비중 구조를 조정하는 주간 브리핑용 퀀트투자 모델",
-        "risk_label": "adaptive",
-        "target_user_type": "시장 상태 변화에 따라 조정되는 공개형 모델 기준안을 참고하려는 이용자",
-        "key_assets": ["multi_asset", "regime_switching", "dynamic_allocation"],
-        "primary_internal_models": ["Router(auto)"],
-        "secondary_internal_models": ["S2", "S3", "S4", "S5", "S6"],
-    },
 }
 
-RISK_LABEL_KR = {"low": "낮음", "medium": "보통", "high": "높음", "adaptive": "자동조정"}
+RISK_LABEL_KR = {"low": "낮음", "medium": "보통", "high": "높음"}
 REGIME_KR = {"risk_on": "상승 우위", "neutral": "중립", "risk_off": "하락 방어", "unknown": "미확인"}
-PROFILE_LABELS = {"stable": "방어 중심 모델", "balanced": "균형 배분 모델", "growth": "성장 추세 모델", "auto": "국면 대응 모델"}
+PROFILE_LABELS = {"stable": "방어 중심 모델", "balanced": "균형 배분 모델", "growth": "성장 추세 모델"}
 SERVICE_MODEL_SOURCE = {
     "stable": {"summary_model": "Router", "weights_kind": "router_stable", "compare_profile": "stable"},
     "balanced": {"summary_model": "Router", "weights_kind": "router_balanced", "compare_profile": "balanced"},
     "growth": {"summary_model": "Router", "weights_kind": "router_growth", "compare_profile": "growth"},
-    "auto": {"summary_model": "Router", "weights_kind": "router_auto", "compare_profile": "auto"},
 }
 ROLE_SUMMARY_BY_GROUP = {"cash": "현금성 대기 자산", "etf": "ETF 분산 투자", "stock": "주식 직접 투자", "other": "기타 자산"}
 GARBLED_TOKENS = ["??", "\ufffd", "챙", "챗", "쨌", "혮", "湲", "誘", "멸", "뎅", "좊", "몃", "쾭", "꾧", "梨", "곕", "툕"]
@@ -124,8 +114,6 @@ def load_router_decisions(profile: str) -> pd.DataFrame:
 
 
 def load_weights_frame(kind: str) -> pd.DataFrame:
-    if kind == "router_auto":
-        return pd.read_csv(latest_file(ROUTER_DIR, "router_weights_*_auto.csv"))
     if kind == "router_balanced":
         return pd.read_csv(latest_file(ROUTER_DIR, "router_weights_*_balanced.csv"))
     if kind == "router_growth":
@@ -283,7 +271,6 @@ def build_public_compliance_metadata(*, asof_date: str, start_date: str, end_dat
         "stable": "KOSPI200",
         "balanced": "KOSPI200",
         "growth": "KOSPI200",
-        "auto": "KOSPI200",
     }.get(service_profile, "KOSPI200")
     return {
         "content_class": "service_public_backtest",
@@ -358,7 +345,7 @@ def performance_payload(summary_df: pd.DataFrame, periods_df: pd.DataFrame, summ
 
 
 def determine_market_diagnosis() -> tuple[str, str, str]:
-    latest = load_router_decisions("auto").iloc[-1]
+    latest = load_router_decisions("balanced").iloc[-1]
     regime = str(latest["detected_regime"])
     regime_summary = {
         "risk_on": "위험자산 선호가 강한 국면으로 해석되는 구간입니다.",
@@ -535,7 +522,7 @@ def render_markdown(report: dict[str, Any]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Render user-facing public model snapshot report payload")
     parser.add_argument("--user-model-name", default=None)
-    parser.add_argument("--service-profile", default=None, choices=["stable", "balanced", "growth", "auto"])
+    parser.add_argument("--service-profile", default=None, choices=["stable", "balanced", "growth"])
     parser.add_argument("--asof", default=None)
     args = parser.parse_args()
     report, json_path, md_path = build_report(args.user_model_name, args.service_profile, args.asof)

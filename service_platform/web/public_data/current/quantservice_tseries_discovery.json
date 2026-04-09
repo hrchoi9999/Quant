@@ -2,14 +2,14 @@
   "source_name": "handoff:tseries_discovery_current",
   "warnings": [],
   "errors": [],
-  "as_of_date": "2026-04-01",
-  "generated_at": "2026-04-01T18:43:49",
+  "as_of_date": "2026-04-06",
+  "generated_at": "2026-04-06T18:34:31",
   "channel": "tseries-discovery",
   "schema_version": "v1",
   "models": [
     {
       "model_code": "T-STOCK-V01",
-      "asof_date": "2026-03-26",
+      "asof_date": "2026-04-01",
       "meta": {
         "display_name": "T-STOCK-V01",
         "display_name_en": "transition-based discovery model",
@@ -39,122 +39,30 @@
       "run": {
         "refresh_kind": "shadow_refresh",
         "status": "success",
-        "started_at": "2026-03-31 16:44:37",
-        "finished_at": "2026-03-31 16:44:37",
+        "started_at": "2026-04-06 09:34:12",
+        "finished_at": "2026-04-06 09:34:12",
         "notes": "Synced stock operational watchlist, labels, and shadow tracking from local outputs."
       },
       "bucket_counts": {
-        "confirmed": 6,
-        "near": 3,
-        "observe": 1
+        "observe": 1,
+        "confirmed": 0,
+        "near": 0
       },
       "top_by_bucket": {
-        "confirmed": [
-          {
-            "ticker": "047040",
-            "name": "대우건설",
-            "market": "KOSPI",
-            "theme_bucket": "construction_materials",
-            "theme_name_kr": "건설/소재",
-            "stage1_prob": 0.5225413887008845,
-            "stage2_prob": 0.543302648987533,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "420770",
-            "name": "기가비스",
-            "market": "KOSDAQ",
-            "theme_bucket": "semiconductor_tech",
-            "theme_name_kr": "반도체/전자부품",
-            "stage1_prob": 0.5225186291094959,
-            "stage2_prob": 0.5403429362388631,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "043260",
-            "name": "성호전자",
-            "market": "KOSDAQ",
-            "theme_bucket": "semiconductor_tech",
-            "theme_name_kr": "반도체/전자부품",
-            "stage1_prob": 0.520734113188271,
-            "stage2_prob": 0.5338330151500879,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "038500",
-            "name": "삼표시멘트",
-            "market": "KOSDAQ",
-            "theme_bucket": "construction_materials",
-            "theme_name_kr": "건설/소재",
-            "stage1_prob": 0.525321732292861,
-            "stage2_prob": 0.5331064009653733,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "187660",
-            "name": "현대ADM",
-            "market": "KOSDAQ",
-            "theme_bucket": "biotech_healthcare",
-            "theme_name_kr": "바이오/헬스케어",
-            "stage1_prob": 0.5246369036421171,
-            "stage2_prob": 0.532313932914681,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "048410",
-            "name": "현대바이오",
-            "market": "KOSDAQ",
-            "theme_bucket": "biotech_healthcare",
-            "theme_name_kr": "바이오/헬스케어",
-            "stage1_prob": 0.5326958797889336,
-            "stage2_prob": 0.5274395802261937,
-            "is_s2_overlap": 0
-          }
-        ],
-        "near": [
-          {
-            "ticker": "006910",
-            "name": "보성파워텍",
-            "market": "KOSDAQ",
-            "theme_bucket": "energy_utility_infra",
-            "theme_name_kr": "에너지/전력/인프라",
-            "stage1_prob": 0.5223432959729295,
-            "stage2_prob": 0.5241883246635636,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "171090",
-            "name": "선익시스템",
-            "market": "KOSDAQ",
-            "theme_bucket": "semiconductor_tech",
-            "theme_name_kr": "반도체/전자부품",
-            "stage1_prob": 0.5214615907698738,
-            "stage2_prob": 0.5220502540497237,
-            "is_s2_overlap": 0
-          },
-          {
-            "ticker": "009830",
-            "name": "한화솔루션",
-            "market": "KOSPI",
-            "theme_bucket": "energy_utility_infra",
-            "theme_name_kr": "에너지/전력/인프라",
-            "stage1_prob": 0.5273594240626948,
-            "stage2_prob": 0.5217292572414803,
-            "is_s2_overlap": 0
-          }
-        ],
         "observe": [
           {
-            "ticker": "458870",
-            "name": "씨어스테크놀로지",
-            "market": "KOSDAQ",
-            "theme_bucket": "medtech_platform",
-            "theme_name_kr": "의료기기/플랫폼",
-            "stage1_prob": 0.5418617579311396,
-            "stage2_prob": NaN,
+            "ticker": "011200",
+            "name": "HMM",
+            "market": "KOSPI",
+            "theme_bucket": "other",
+            "theme_name_kr": "기타",
+            "stage1_prob": 0.5249424746432623,
+            "stage2_prob": null,
             "is_s2_overlap": 0
           }
-        ]
+        ],
+        "confirmed": [],
+        "near": []
       },
       "shadow_summary": {
         "confirmed": {
@@ -179,18 +87,329 @@
           "avg_stage2_prob": null
         }
       },
+      "rolling_watchlist": {
+        "summary": [
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "bucket": "active",
+            "count": 0
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "bucket": "cooling",
+            "count": 10
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "bucket": "new",
+            "count": 1
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "bucket": "tier_core",
+            "count": 9
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "bucket": "tier_monitor",
+            "count": 2
+          }
+        ],
+        "items": [
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "confirmed",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "047040",
+            "name": "대우건설",
+            "market": "KOSPI",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "construction_materials",
+            "theme_name_kr": "건설/소재",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5225413887008845,
+            "stage2_prob": 0.543302648987533,
+            "mcap": 3117169785000.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "confirmed",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "420770",
+            "name": "기가비스",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "semiconductor_tech",
+            "theme_name_kr": "반도체/전자부품",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5225186291094959,
+            "stage2_prob": 0.5403429362388631,
+            "mcap": 798572754000.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "confirmed",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "043260",
+            "name": "성호전자",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "semiconductor_tech",
+            "theme_name_kr": "반도체/전자부품",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.520734113188271,
+            "stage2_prob": 0.5338330151500879,
+            "mcap": 1744701445800.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "confirmed",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "038500",
+            "name": "삼표시멘트",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "construction_materials",
+            "theme_name_kr": "건설/소재",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.525321732292861,
+            "stage2_prob": 0.5331064009653733,
+            "mcap": 1699681819500.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "confirmed",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "187660",
+            "name": "현대ADM",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "biotech_healthcare",
+            "theme_name_kr": "바이오/헬스케어",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5246369036421171,
+            "stage2_prob": 0.532313932914681,
+            "mcap": 668923011180.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "confirmed",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "048410",
+            "name": "현대바이오",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "biotech_healthcare",
+            "theme_name_kr": "바이오/헬스케어",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5326958797889336,
+            "stage2_prob": 0.5274395802261937,
+            "mcap": 1706647859200.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "near",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "006910",
+            "name": "보성파워텍",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "energy_utility_infra",
+            "theme_name_kr": "에너지/전력/인프라",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5223432959729295,
+            "stage2_prob": 0.5241883246635636,
+            "mcap": 605279431680.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "near",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "171090",
+            "name": "선익시스템",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "semiconductor_tech",
+            "theme_name_kr": "반도체/전자부품",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5214615907698738,
+            "stage2_prob": 0.5220502540497237,
+            "mcap": 1145632531500.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "core",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "near",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "009830",
+            "name": "한화솔루션",
+            "market": "KOSPI",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "energy_utility_infra",
+            "theme_name_kr": "에너지/전력/인프라",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5273594240626948,
+            "stage2_prob": 0.5217292572414803,
+            "mcap": 8800897843200.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "new",
+            "watch_tier": "monitor",
+            "is_current": 1,
+            "current_bucket": "observe",
+            "best_bucket_recent": "observe",
+            "appearances_recent": 1,
+            "consecutive_current": 1,
+            "last_seen_asof": "2026-04-01",
+            "prev_seen_asof": null,
+            "ticker": "011200",
+            "name": "HMM",
+            "market": "KOSPI",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "other",
+            "theme_name_kr": "기타",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5249424746432623,
+            "stage2_prob": NaN,
+            "mcap": 21647311411500.0,
+            "liquidity_20d_value": null
+          },
+          {
+            "model_code": "T-STOCK-V01",
+            "asof_date": "2026-04-01",
+            "watch_status": "cooling",
+            "watch_tier": "monitor",
+            "is_current": 0,
+            "current_bucket": null,
+            "best_bucket_recent": "observe",
+            "appearances_recent": 1,
+            "consecutive_current": 0,
+            "last_seen_asof": "2026-03-26",
+            "prev_seen_asof": null,
+            "ticker": "458870",
+            "name": "씨어스테크놀로지",
+            "market": "KOSDAQ",
+            "asset_class": null,
+            "group_key": null,
+            "theme_bucket": "medtech_platform",
+            "theme_name_kr": "의료기기/플랫폼",
+            "is_s2_overlap": 0,
+            "stage1_prob": 0.5418617579311396,
+            "stage2_prob": NaN,
+            "mcap": 1937879640000.0,
+            "liquidity_20d_value": null
+          }
+        ]
+      },
       "performance_summary": {
         "headline_metrics": {
           "primary_period": "1Y",
           "display_metric": "cagr",
-          "cagr": 2.868001,
+          "cagr": 2.784299,
           "total_return": 2.864421,
           "mdd": -0.051462,
           "sharpe": 3.58781,
           "trailing_3m": {
             "period": "3M",
             "start_date": "2025-11-26",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 0.0,
             "cagr": 0.0,
             "mdd": 0.0,
@@ -199,46 +418,46 @@
           "trailing_6m": {
             "period": "6M",
             "start_date": "2025-09-03",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 1.022238,
-            "cagr": 2.528374,
+            "cagr": 2.40353,
             "mdd": 0.0,
             "sharpe": 7.211103
           },
           "trailing_1y": {
             "period": "1Y",
             "start_date": "2025-03-26",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 2.864421,
-            "cagr": 2.868001,
+            "cagr": 2.784299,
             "mdd": -0.051462,
             "sharpe": 3.58781
           },
           "reference_5y": {
             "period": "5Y",
-            "start_date": "2021-03-24",
-            "end_date": "2026-03-26",
-            "total_return": 41.179297,
-            "cagr": 1.112072,
+            "start_date": "2021-03-31",
+            "end_date": "2026-04-01",
+            "total_return": 37.183765,
+            "cagr": 1.071314,
             "mdd": -0.142105,
-            "sharpe": 1.773783
+            "sharpe": 1.738847
           },
           "reference_full": {
             "period": "FULL",
             "start_date": "2017-10-18",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 303.390787,
-            "cagr": 0.969739,
+            "cagr": 0.967146,
             "mdd": -0.353589,
             "sharpe": 1.795153
           },
-          "last_realized_date": "2026-03-26"
+          "last_realized_date": "2026-04-01"
         },
         "period_metrics": [
           {
             "period": "3M",
             "start_date": "2025-11-26",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 0.0,
             "cagr": 0.0,
             "mdd": 0.0,
@@ -247,54 +466,54 @@
           {
             "period": "6M",
             "start_date": "2025-09-03",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 1.022238,
-            "cagr": 2.528374,
+            "cagr": 2.40353,
             "mdd": 0.0,
             "sharpe": 7.211103
           },
           {
             "period": "1Y",
             "start_date": "2025-03-26",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 2.864421,
-            "cagr": 2.868001,
+            "cagr": 2.784299,
             "mdd": -0.051462,
             "sharpe": 3.58781
           },
           {
             "period": "2Y",
-            "start_date": "2024-03-20",
-            "end_date": "2026-03-26",
-            "total_return": 5.288819,
-            "cagr": 1.490582,
+            "start_date": "2024-03-27",
+            "end_date": "2026-04-01",
+            "total_return": 5.025701,
+            "cagr": 1.441271,
             "mdd": -0.138955,
-            "sharpe": 1.932844
+            "sharpe": 1.911002
           },
           {
             "period": "3Y",
-            "start_date": "2023-03-22",
-            "end_date": "2026-03-26",
-            "total_return": 10.421503,
-            "cagr": 1.244979,
+            "start_date": "2023-03-29",
+            "end_date": "2026-04-01",
+            "total_return": 10.236811,
+            "cagr": 1.234491,
             "mdd": -0.138955,
-            "sharpe": 1.74882
+            "sharpe": 1.746671
           },
           {
             "period": "5Y",
-            "start_date": "2021-03-24",
-            "end_date": "2026-03-26",
-            "total_return": 41.179297,
-            "cagr": 1.112072,
+            "start_date": "2021-03-31",
+            "end_date": "2026-04-01",
+            "total_return": 37.183765,
+            "cagr": 1.071314,
             "mdd": -0.142105,
-            "sharpe": 1.773783
+            "sharpe": 1.738847
           },
           {
             "period": "FULL",
             "start_date": "2017-10-18",
-            "end_date": "2026-03-26",
+            "end_date": "2026-04-01",
             "total_return": 303.390787,
-            "cagr": 0.969739,
+            "cagr": 0.967146,
             "mdd": -0.353589,
             "sharpe": 1.795153
           }
@@ -325,39 +544,27 @@
       "profile": {
         "profile_code": "operational_pit_v1",
         "threshold_summary": "confirmed 0.650 / near 0.600",
-        "risk_filter_version": "etf_pit_risk_filter_v2",
+        "risk_filter_version": "etf_pit_risk_filter_v3",
         "threshold_values": {
           "stage1_threshold": null,
           "stage2_confirmed_threshold": 0.65,
           "stage2_near_threshold": 0.6
         },
-        "notes": "ETF PIT operational profile: stage1 momentum_trend top_ratio 0.08, stage2 vol_trend_compact with confirmed 0.65 and near 0.60. Inverse/leverage allowed, liquidity floor 20d avg trading value >= 20 billion KRW."
+        "notes": "ETF PIT operational profile: stage1 momentum_trend top_ratio 0.08, stage2 vol_trend_compact with confirmed 0.65 and near 0.60. Inverse/leverage excluded, liquidity floor 20d avg trading value >= 20 billion KRW."
       },
       "run": {
         "refresh_kind": "shadow_refresh",
         "status": "success",
-        "started_at": "2026-03-31 16:44:42",
-        "finished_at": "2026-03-31 16:44:42",
-        "notes": "Synced ETF PIT operational watchlist and shadow tracking from local outputs."
+        "started_at": "2026-04-06 09:34:18",
+        "finished_at": "2026-04-06 09:34:18",
+        "notes": "Synced ETF PIT operational watchlist and shadow tracking from local outputs with inverse/leverage excluded."
       },
       "bucket_counts": {
-        "confirmed": 1,
         "near": 2,
+        "confirmed": 0,
         "observe": 0
       },
       "top_by_bucket": {
-        "confirmed": [
-          {
-            "ticker": "114800",
-            "name": "KODEX 인버스",
-            "market": null,
-            "theme_bucket": "other",
-            "theme_name_kr": null,
-            "stage1_prob": 0.6248340260156026,
-            "stage2_prob": 0.7724305272869904,
-            "is_s2_overlap": null
-          }
-        ],
         "near": [
           {
             "ticker": "462010",
@@ -380,39 +587,126 @@
             "is_s2_overlap": null
           }
         ],
+        "confirmed": [],
         "observe": []
       },
       "shadow_summary": {
         "confirmed": {
-          "obs_n": 69,
+          "obs_n": 46,
           "t10_hit_rate": NaN,
-          "t3_hit_rate": 17.391304347826082,
-          "avg_stage1_prob": 0.6263709327692489,
+          "t3_hit_rate": 15.217391304347819,
+          "avg_stage1_prob": 0.6025777250658279,
           "avg_stage2_prob": null
         },
         "near": {
-          "obs_n": 698,
-          "t10_hit_rate": 7.02005730659025,
+          "obs_n": 499,
+          "t10_hit_rate": 6.01202404809619,
           "t3_hit_rate": NaN,
-          "avg_stage1_prob": 0.6269014836735692,
+          "avg_stage1_prob": 0.6088406571864259,
           "avg_stage2_prob": null
         },
         "observe": {}
+      },
+      "rolling_watchlist": {
+        "summary": [
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "bucket": "active",
+            "count": 0
+          },
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "bucket": "cooling",
+            "count": 0
+          },
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "bucket": "new",
+            "count": 2
+          },
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "bucket": "tier_core",
+            "count": 2
+          },
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "bucket": "tier_monitor",
+            "count": 0
+          }
+        ],
+        "items": [
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "watch_status": "new",
+            "watch_tier": "core",
+            "is_current": 1,
+            "current_bucket": "near",
+            "best_bucket_recent": "near",
+            "appearances_recent": 1,
+            "consecutive_current": 1,
+            "last_seen_asof": "2026-03-31",
+            "prev_seen_asof": null,
+            "ticker": "462010",
+            "name": "TIGER 2차전지소재Fn",
+            "market": null,
+            "asset_class": "equity",
+            "group_key": "equity_kr_growth",
+            "theme_bucket": "energy_materials",
+            "theme_name_kr": null,
+            "is_s2_overlap": null,
+            "stage1_prob": 0.5715288674439678,
+            "stage2_prob": 0.6276418701732265,
+            "mcap": null,
+            "liquidity_20d_value": 48019175167.0
+          },
+          {
+            "model_code": "T-ETF-V01",
+            "asof_date": "2026-03-31",
+            "watch_status": "new",
+            "watch_tier": "core",
+            "is_current": 1,
+            "current_bucket": "near",
+            "best_bucket_recent": "near",
+            "appearances_recent": 1,
+            "consecutive_current": 1,
+            "last_seen_asof": "2026-03-31",
+            "prev_seen_asof": null,
+            "ticker": "305540",
+            "name": "TIGER 2차전지테마",
+            "market": null,
+            "asset_class": "equity",
+            "group_key": "equity_kr_growth",
+            "theme_bucket": "energy_materials",
+            "theme_name_kr": null,
+            "is_s2_overlap": null,
+            "stage1_prob": 0.5829969273147662,
+            "stage2_prob": 0.6020834512991283,
+            "mcap": null,
+            "liquidity_20d_value": 31451572283.5
+          }
+        ]
       },
       "performance_summary": {
         "headline_metrics": {
           "primary_period": "1Y",
           "display_metric": "cagr",
-          "cagr": 0.320972,
-          "total_return": 0.32072,
-          "mdd": -0.044049,
-          "sharpe": 2.253569,
+          "cagr": 0.511778,
+          "total_return": 0.51135,
+          "mdd": -0.025251,
+          "sharpe": 2.509664,
           "trailing_3m": {
             "period": "3M",
             "start_date": "2025-11-28",
             "end_date": "2026-03-31",
-            "total_return": 0.125588,
-            "cagr": 0.420927,
+            "total_return": 0.176744,
+            "cagr": 0.621403,
             "mdd": 0.0,
             "sharpe": null
           },
@@ -420,37 +714,37 @@
             "period": "6M",
             "start_date": "2025-09-30",
             "end_date": "2026-03-31",
-            "total_return": 0.207772,
-            "cagr": 0.460605,
-            "mdd": -0.010713,
-            "sharpe": 4.034373
+            "total_return": 0.289467,
+            "cagr": 0.665631,
+            "mdd": -0.025251,
+            "sharpe": 3.720145
           },
           "trailing_1y": {
             "period": "1Y",
             "start_date": "2025-03-31",
             "end_date": "2026-03-31",
-            "total_return": 0.32072,
-            "cagr": 0.320972,
-            "mdd": -0.044049,
-            "sharpe": 2.253569
+            "total_return": 0.51135,
+            "cagr": 0.511778,
+            "mdd": -0.025251,
+            "sharpe": 2.509664
           },
           "reference_5y": {
             "period": "5Y",
             "start_date": "2021-03-31",
             "end_date": "2026-03-31",
-            "total_return": 0.426195,
-            "cagr": 0.073594,
-            "mdd": -0.256673,
-            "sharpe": 0.484269
+            "total_return": 0.582076,
+            "cagr": 0.096102,
+            "mdd": -0.285219,
+            "sharpe": 0.536389
           },
           "reference_full": {
             "period": "FULL",
             "start_date": "2019-01-31",
             "end_date": "2026-03-31",
-            "total_return": 0.15836,
-            "cagr": 0.020737,
-            "mdd": -0.256673,
-            "sharpe": 0.204947
+            "total_return": 2.552362,
+            "cagr": 0.193614,
+            "mdd": -0.285219,
+            "sharpe": 0.738089
           },
           "last_realized_date": "2026-03-31"
         },
@@ -459,8 +753,8 @@
             "period": "3M",
             "start_date": "2025-11-28",
             "end_date": "2026-03-31",
-            "total_return": 0.125588,
-            "cagr": 0.420927,
+            "total_return": 0.176744,
+            "cagr": 0.621403,
             "mdd": 0.0,
             "sharpe": null
           },
@@ -468,55 +762,55 @@
             "period": "6M",
             "start_date": "2025-09-30",
             "end_date": "2026-03-31",
-            "total_return": 0.207772,
-            "cagr": 0.460605,
-            "mdd": -0.010713,
-            "sharpe": 4.034373
+            "total_return": 0.289467,
+            "cagr": 0.665631,
+            "mdd": -0.025251,
+            "sharpe": 3.720145
           },
           {
             "period": "1Y",
             "start_date": "2025-03-31",
             "end_date": "2026-03-31",
-            "total_return": 0.32072,
-            "cagr": 0.320972,
-            "mdd": -0.044049,
-            "sharpe": 2.253569
+            "total_return": 0.51135,
+            "cagr": 0.511778,
+            "mdd": -0.025251,
+            "sharpe": 2.509664
           },
           {
             "period": "2Y",
             "start_date": "2024-03-29",
             "end_date": "2026-03-31",
-            "total_return": 0.026964,
-            "cagr": 0.013365,
-            "mdd": -0.256673,
-            "sharpe": 0.173313
+            "total_return": 0.104559,
+            "cagr": 0.050873,
+            "mdd": -0.285219,
+            "sharpe": 0.355853
           },
           {
             "period": "3Y",
             "start_date": "2023-03-31",
             "end_date": "2026-03-31",
-            "total_return": 0.216067,
-            "cagr": 0.067364,
-            "mdd": -0.256673,
-            "sharpe": 0.448428
+            "total_return": 0.285486,
+            "cagr": 0.087295,
+            "mdd": -0.285219,
+            "sharpe": 0.486383
           },
           {
             "period": "5Y",
             "start_date": "2021-03-31",
             "end_date": "2026-03-31",
-            "total_return": 0.426195,
-            "cagr": 0.073594,
-            "mdd": -0.256673,
-            "sharpe": 0.484269
+            "total_return": 0.582076,
+            "cagr": 0.096102,
+            "mdd": -0.285219,
+            "sharpe": 0.536389
           },
           {
             "period": "FULL",
             "start_date": "2019-01-31",
             "end_date": "2026-03-31",
-            "total_return": 0.15836,
-            "cagr": 0.020737,
-            "mdd": -0.256673,
-            "sharpe": 0.204947
+            "total_return": 2.552362,
+            "cagr": 0.193614,
+            "mdd": -0.285219,
+            "sharpe": 0.738089
           }
         ],
         "performance_subject_name": "T-series ETF discovery basket",

@@ -21,6 +21,7 @@ ROUTER_DIR = ROOT / "reports" / "backtest_router"
 LEGACY_REPORT = CURRENT_DIR / "user_recommendation_report.json"
 CANONICAL_REPORT = CURRENT_DIR / "user_model_snapshot_report.json"
 T_SERIES_DISCOVERY = CURRENT_DIR / "quantservice_tseries_discovery.json"
+LEGACY_MANIFEST = CURRENT_DIR / "publish_manifest_user.json"
 
 
 def load_report(service_profile: str, asof: str) -> dict[str, Any]:
@@ -31,7 +32,7 @@ def load_report(service_profile: str, asof: str) -> dict[str, Any]:
 
 
 def current_market_regime() -> str:
-    files = sorted(ROUTER_DIR.glob("router_decisions_*_auto.csv"), key=lambda p: (p.stat().st_mtime, p.name))
+    files = sorted(ROUTER_DIR.glob("router_decisions_*_balanced.csv"), key=lambda p: (p.stat().st_mtime, p.name))
     if not files:
         return "unknown"
     import pandas as pd
@@ -92,7 +93,7 @@ def build_catalog(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
     return {"as_of_date": asof, "models": models}
 
 
-def build_reports(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
+def build_reports(mapping: dict[str, Any], asof: str, generated_at: str) -> dict[str, Any]:
     reports = []
     for row in mapping["user_models"]:
         report = load_report(row["service_profile"], asof)
@@ -114,7 +115,7 @@ def build_reports(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
             "compliance_metadata": report["compliance_metadata"]
         })
     performance_meta = reports[0]["compliance_metadata"] if reports else {}
-    return {"as_of_date": asof, "generated_at": datetime.now().isoformat(timespec="seconds"), "current_market_regime": current_market_regime(), "performance_meta": performance_meta, "reports": reports}
+    return {"as_of_date": asof, "generated_at": generated_at, "current_market_regime": current_market_regime(), "performance_meta": performance_meta, "reports": reports}
 
 
 def build_performance(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
@@ -207,6 +208,13 @@ def _normalize_tseries_model(snapshot: dict[str, Any]) -> dict[str, Any]:
     top_by_bucket = snapshot.get("top_by_bucket") or {}
     bucket_counts = snapshot.get("bucket_counts") or {}
     performance_summary = snapshot.get("performance_summary") or {}
+    rolling = snapshot.get("rolling_watchlist") or {}
+    rolling_summary = rolling.get("summary") if isinstance(rolling, dict) else []
+    rolling_items = rolling.get("items") if isinstance(rolling, dict) else []
+    if not isinstance(rolling_summary, list):
+        rolling_summary = []
+    if not isinstance(rolling_items, list):
+        rolling_items = []
     for bucket in ("confirmed", "near", "observe"):
         top_by_bucket.setdefault(bucket, [])
         bucket_counts.setdefault(bucket, 0)
@@ -265,11 +273,15 @@ def _normalize_tseries_model(snapshot: dict[str, Any]) -> dict[str, Any]:
         "bucket_counts": bucket_counts,
         "top_by_bucket": top_by_bucket,
         "shadow_summary": shadow_summary,
+        "rolling_watchlist": {
+            "summary": rolling_summary,
+            "items": rolling_items[:20],
+        },
         "performance_summary": performance_summary,
     }
 
 
-def build_tseries_discovery(asof: str) -> dict[str, Any]:
+def build_tseries_discovery(asof: str, generated_at: str) -> dict[str, Any]:
     con = connect_tseries()
     try:
         models = [
@@ -283,17 +295,17 @@ def build_tseries_discovery(asof: str) -> dict[str, Any]:
         "warnings": [],
         "errors": [],
         "as_of_date": asof,
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "generated_at": generated_at,
         "channel": "tseries-discovery",
         "schema_version": "v1",
         "models": models,
     }
 
 
-def build_manifest(asof: str) -> dict[str, Any]:
+def build_manifest(asof: str, generated_at: str) -> dict[str, Any]:
     return {
         "as_of_date": asof,
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "generated_at": generated_at,
         "files": ["user_model_catalog.json", "user_model_snapshot_report.json", "user_performance_summary.json", "user_recent_changes.json", "quantservice_tseries_discovery.json"],
         "channel": "user-facing",
         "version": "v2",
@@ -311,12 +323,15 @@ def main() -> None:
     parser.add_argument("--asof", default=datetime.now().strftime("%Y-%m-%d"))
     args = parser.parse_args()
     mapping = load_mapping()
+    generated_at = datetime.now().isoformat(timespec="seconds")
     write_json(CURRENT_DIR / "user_model_catalog.json", build_catalog(mapping, args.asof))
-    write_json(CANONICAL_REPORT, build_reports(mapping, args.asof))
+    write_json(CANONICAL_REPORT, build_reports(mapping, args.asof, generated_at))
     write_json(CURRENT_DIR / "user_performance_summary.json", build_performance(mapping, args.asof))
     write_json(CURRENT_DIR / "user_recent_changes.json", build_changes(mapping, args.asof))
-    write_json(T_SERIES_DISCOVERY, build_tseries_discovery(args.asof))
-    write_json(CURRENT_DIR / "publish_manifest.json", build_manifest(args.asof))
+    write_json(T_SERIES_DISCOVERY, build_tseries_discovery(args.asof, generated_at))
+    manifest = build_manifest(args.asof, generated_at)
+    write_json(CURRENT_DIR / "publish_manifest.json", manifest)
+    write_json(LEGACY_MANIFEST, manifest)
     if LEGACY_REPORT.exists():
         LEGACY_REPORT.unlink()
     print(f"[OK] built user-facing snapshots for asof={args.asof} -> {CURRENT_DIR}")

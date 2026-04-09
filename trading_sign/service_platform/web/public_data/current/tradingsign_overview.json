@@ -1,0 +1,90 @@
+{
+  "asof": "2026-04-06",
+  "generated_at": "2026-04-06T18:34:42",
+  "schema_version": "v1",
+  "summary": {
+    "model_count": 5,
+    "signal_count": 98,
+    "state_counts": {
+      "매수": 0,
+      "보유": 69,
+      "주의": 29,
+      "매도": 0,
+      "매수 대기": 0
+    },
+    "state_order": [
+      "매수",
+      "보유",
+      "주의",
+      "매도",
+      "매수 대기"
+    ]
+  },
+  "models": [
+    {
+      "model_code": "BALANCED",
+      "model_name": "균형형",
+      "signal_date": "2026-04-06",
+      "record_count": 35,
+      "state_counts": {
+        "매수": 0,
+        "보유": 27,
+        "주의": 8,
+        "매도": 0,
+        "매수 대기": 0
+      }
+    },
+    {
+      "model_code": "GROWTH",
+      "model_name": "성장형",
+      "signal_date": "2026-04-06",
+      "record_count": 25,
+      "state_counts": {
+        "매수": 0,
+        "보유": 15,
+        "주의": 10,
+        "매도": 0,
+        "매수 대기": 0
+      }
+    },
+    {
+      "model_code": "STABLE",
+      "model_name": "안정형",
+      "signal_date": "2026-04-06",
+      "record_count": 35,
+      "state_counts": {
+        "매수": 0,
+        "보유": 27,
+        "주의": 8,
+        "매도": 0,
+        "매수 대기": 0
+      }
+    },
+    {
+      "model_code": "T_ETF_DISCOVERY",
+      "model_name": "T ETF 발굴형",
+      "signal_date": "2026-04-06",
+      "record_count": 2,
+      "state_counts": {
+        "매수": 0,
+        "보유": 0,
+        "주의": 2,
+        "매도": 0,
+        "매수 대기": 0
+      }
+    },
+    {
+      "model_code": "T_STOCK_DISCOVERY",
+      "model_name": "T 주식 발굴형",
+      "signal_date": "2026-04-06",
+      "record_count": 1,
+      "state_counts": {
+        "매수": 0,
+        "보유": 0,
+        "주의": 1,
+        "매도": 0,
+        "매수 대기": 0
+      }
+    }
+  ]
+}

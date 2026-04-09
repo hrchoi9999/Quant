@@ -146,3 +146,46 @@ CREATE TABLE IF NOT EXISTS ts_artifacts (
   PRIMARY KEY (ts_run_id, artifact_type, artifact_path),
   FOREIGN KEY (ts_run_id) REFERENCES ts_runs(ts_run_id)
 );
+
+
+CREATE TABLE IF NOT EXISTS ts_rolling_watchlist_latest (
+  model_code             TEXT NOT NULL,
+  asof_date              TEXT NOT NULL,
+  watch_status           TEXT NOT NULL,
+  watch_tier             TEXT NOT NULL,
+  is_current             INTEGER,
+  current_bucket         TEXT,
+  best_bucket_recent     TEXT,
+  appearances_recent     INTEGER,
+  consecutive_current    INTEGER,
+  last_seen_asof         TEXT,
+  prev_seen_asof         TEXT,
+  ticker                 TEXT NOT NULL,
+  name                   TEXT,
+  market                 TEXT,
+  asset_class            TEXT,
+  group_key              TEXT,
+  theme_bucket           TEXT,
+  theme_name_kr          TEXT,
+  is_s2_overlap          INTEGER,
+  stage1_prob            REAL,
+  stage2_prob            REAL,
+  mcap                   REAL,
+  liquidity_20d_value    REAL,
+  created_at             TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (model_code, asof_date, ticker),
+  FOREIGN KEY (model_code) REFERENCES ts_meta_models(model_code)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ts_rolling_watchlist_latest_model_status
+ON ts_rolling_watchlist_latest (model_code, asof_date, watch_status, watch_tier);
+
+CREATE TABLE IF NOT EXISTS ts_rolling_watchlist_summary (
+  model_code             TEXT NOT NULL,
+  asof_date              TEXT NOT NULL,
+  bucket                 TEXT NOT NULL,
+  count                  INTEGER,
+  created_at             TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (model_code, asof_date, bucket),
+  FOREIGN KEY (model_code) REFERENCES ts_meta_models(model_code)
+);

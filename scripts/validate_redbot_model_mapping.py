@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 
 PROJECT_ROOT = Path(r'D:\Quant')
-EXPECTED_USER_MODELS = {'ì\x95\x88ì\xa0\x95í\x98\x95', 'ê·\xa0í\x98\x95í\x98\x95', 'ì\x84±ì\x9e¥í\x98\x95', 'ì\x9e\x90ë\x8f\x99ì\xa0\x84í\x99\x98í\x98\x95'}
+EXPECTED_USER_MODELS = {'안정형', '균형형', '성장형'}
 
 
 def main() -> None:
@@ -20,7 +20,7 @@ def main() -> None:
     internal_models = data.get('internal_models', []) or []
     service_profiles = data.get('service_profiles', []) or []
 
-    expected_profiles = {'stable', 'balanced', 'growth', 'auto'}
+    expected_profiles = {'stable', 'balanced', 'growth'}
     internal_names = {str(x.get('internal_model_name')) for x in internal_models}
     user_names = {str(x.get('user_model_name')) for x in user_models}
     profile_names = {str(x.get('service_profile')) for x in service_profiles}

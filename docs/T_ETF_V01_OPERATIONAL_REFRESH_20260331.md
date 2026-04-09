@@ -38,3 +38,9 @@
 - 입력은 기존 ETF T-series 연구 결과와 현재 저장된 로컬 데이터에 한정된다.
 - 유동성 하한은 `20일 평균 거래대금 200억`으로 유지한다.
 - 레버리지/인버스 ETF는 현재 운영형에서 허용한다.
+
+
+- Current operational rule: inverse/leverage excluded, liquidity floor 20d avg trading value >= 20 billion KRW.
+
+- Refresh now also builds a rolling watchlist using the latest monthly snapshots.
+  - Output: `etf_tseries_pit_rolling_watchlist_YYYY-MM-DD.csv`

@@ -1,15 +1,29 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 import pandas as pd
 
 BASE_DIR = Path(r"D:\Quant")
 RUN_DATE = "20260331"
-ASOF_DATE = "2026-03-26"
 IN_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "T_STOCK_V01_OPERATIONALIZATION"
 OUT_DIR = BASE_DIR / "data" / "labels"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 REPORT_DIR = IN_DIR
+
+
+def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
+    candidates: list[str] = []
+    regex = re.compile(pattern)
+    for p in src_dir.iterdir():
+        m = regex.match(p.name)
+        if m:
+            candidates.append(m.group(1))
+    if not candidates:
+        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
+    return max(candidates)
+
+ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv")
 
 THEME_NAME_KR = {
     "defense_aero": "방산/항공우주",

@@ -31,7 +31,9 @@ def build_commands(
     etf_start: str,
     include_service_analytics: bool,
     include_tseries_shadow: bool,
-) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str] | None, list[str] | None, list[list[str]], list[list[str]], list[list[str]]]:
+    include_remote_current_publish: bool,
+    include_generated_cleanup: bool,
+) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str] | None, list[str] | None, list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
     prep_cmds: list[list[str]] = [[
         python_exe,
         str(PROJECT_ROOT / r"src\pipelines\rebuild_mix_universe_and_refresh_dbs.py"),
@@ -85,7 +87,7 @@ def build_commands(
             tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_etf_v01_operational_refresh.py")])
 
     router_and_reports_cmds = []
-    for profile in ["stable", "balanced", "growth", "auto"]:
+    for profile in ["stable", "balanced", "growth"]:
         router_and_reports_cmds.append([python_exe, str(PROJECT_ROOT / r"src\backtest\run_backtest_multiasset_router.py"), "--asof", asof, "--start", "2023-06-08", "--end", asof, "--rebalance", "M", "--service-profile", profile])
         router_and_reports_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_model_comparison.py"), "--asof", asof, "--start", "2023-06-08", "--end", asof, "--rebalance", "M", "--service-profile", profile])
         router_and_reports_cmds.append([python_exe, str(PROJECT_ROOT / r"src\reporting\render_redbot_user_report.py"), "--service-profile", profile, "--asof", asof])
@@ -103,6 +105,26 @@ def build_commands(
         [python_exe, str(PROJECT_ROOT / r"service_platform\publishers\build_user_facing_snapshots.py"), "--asof", asof],
         [python_exe, str(PROJECT_ROOT / r"scripts\validate_redbot_web_snapshots.py"), "--asof", asof],
     ]
+
+    trading_sign_cmds: list[list[str]] = [
+        [
+            python_exe,
+            str(PROJECT_ROOT / r"scripts\run_trading_sign_from_quant_pipeline.py"),
+            "--signal-date",
+            asof,
+            "--data-asof-date",
+            asof,
+            "--python",
+            python_exe,
+        ],
+        [python_exe, str(PROJECT_ROOT / r"scripts\validate_trading_sign_snapshots.py"), "--asof", asof],
+    ]
+
+    remote_publish_cmds: list[list[str]] = []
+    if include_remote_current_publish:
+        remote_publish_cmds = [
+            [python_exe, str(PROJECT_ROOT / r"scripts\publish_public_current_to_gcs.py")],
+        ]
 
     service_analytics_cmds: list[list[str]] = []
     if include_service_analytics:
@@ -122,6 +144,12 @@ def build_commands(
             [python_exe, str(PROJECT_ROOT / r"scripts\validate_service_analytics_bundle_p5.py")],
         ]
 
+    generated_cleanup_cmds: list[list[str]] = []
+    if include_generated_cleanup:
+        generated_cleanup_cmds = [
+            [python_exe, str(PROJECT_ROOT / r"scripts\cleanup_generated_files.py"), "--asof", asof, "--execute", "--write-manifest"],
+        ]
+
     return (
         prep_cmds,
         s2_cmd,
@@ -133,7 +161,10 @@ def build_commands(
         model_gsheet_cmd,
         etf_model_gsheet_cmd,
         web_snapshot_cmds,
+        trading_sign_cmds,
+        remote_publish_cmds,
         service_analytics_cmds,
+        generated_cleanup_cmds,
     )
 
 
@@ -160,10 +191,13 @@ def main() -> None:
         help="Deprecated compatibility flag. Internal service analytics are now skipped by default.",
     )
     ap.add_argument("--skip-tseries-shadow", action="store_true", help="Skip T-STOCK-V01 / T-ETF-V01 shadow refresh outputs")
+    ap.add_argument("--skip-trading-sign", action="store_true", help="Skip trading_sign current snapshot generation and validation")
+    ap.add_argument("--skip-remote-current-publish", action="store_true", help="Skip canonical GCS republish of current public snapshot files")
+    ap.add_argument("--skip-generated-file-cleanup", action="store_true", help="Skip conservative archive cleanup of dated generated files")
     args = ap.parse_args()
 
     core2_tag = args.core2_tag or f"daily_{args.asof.replace('-', '')}"
-    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, model_gsheet_cmd, etf_model_gsheet_cmd, web_snapshot_cmds, service_analytics_cmds = build_commands(
+    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, model_gsheet_cmd, etf_model_gsheet_cmd, web_snapshot_cmds, trading_sign_cmds, remote_publish_cmds, service_analytics_cmds, generated_cleanup_cmds = build_commands(
         asof=args.asof,
         python_exe=str(args.python),
         core_db=str(args.core_db),
@@ -175,6 +209,8 @@ def main() -> None:
         etf_start=str(args.etf_start),
         include_service_analytics=bool(args.include_service_analytics) and not bool(args.skip_service_analytics),
         include_tseries_shadow=not bool(args.skip_tseries_shadow),
+        include_remote_current_publish=not bool(args.skip_remote_current_publish),
+        include_generated_cleanup=not bool(args.skip_generated_file_cleanup),
     )
 
     print("[PIPELINE]")
@@ -187,6 +223,9 @@ def main() -> None:
         f"{bool(args.include_service_analytics) and not bool(args.skip_service_analytics)}"
     )
     print(f"  tseries_shadow={not bool(args.skip_tseries_shadow)}")
+    print(f"  trading_sign={not bool(args.skip_trading_sign)}")
+    print(f"  remote_current_publish={not bool(args.skip_remote_current_publish)}")
+    print(f"  generated_file_cleanup={not bool(args.skip_generated_file_cleanup)}")
 
     for cmd in prep_cmds:
         _run(cmd, PROJECT_ROOT)
@@ -215,7 +254,20 @@ def main() -> None:
     for cmd in web_snapshot_cmds:
         _run(cmd, PROJECT_ROOT)
 
+    if not args.skip_trading_sign:
+        for cmd in trading_sign_cmds:
+            _run(cmd, PROJECT_ROOT)
+
+    for cmd in remote_publish_cmds:
+        effective_cmd = list(cmd)
+        if args.skip_trading_sign:
+            effective_cmd.append("--skip-trading-sign-current")
+        _run(effective_cmd, PROJECT_ROOT)
+
     for cmd in service_analytics_cmds:
+        _run(cmd, PROJECT_ROOT)
+
+    for cmd in generated_cleanup_cmds:
         _run(cmd, PROJECT_ROOT)
 
     print("[OK] daily quant pipeline completed")

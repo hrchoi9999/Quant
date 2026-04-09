@@ -140,3 +140,6 @@
   - 그룹별 cap 재튜닝
   - monthly automation
   - 실제 ET10/ET3 후행 성과 누적 검증
+
+
+- Current operational rule: inverse/leverage excluded, liquidity floor 20d avg trading value >= 20 billion KRW.

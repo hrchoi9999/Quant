@@ -40,10 +40,10 @@ def main() -> None:
     changes = json.loads((CURRENT_DIR / "user_recent_changes.json").read_text(encoding="utf-8"))
     tseries = json.loads((CURRENT_DIR / "quantservice_tseries_discovery.json").read_text(encoding="utf-8"))
 
-    assert len(catalog.get("models", [])) == 4
-    assert len(reports.get("reports", [])) == 4
-    assert len(performance.get("models", [])) == 4
-    assert len(changes.get("changes", [])) == 4
+    assert len(catalog.get("models", [])) == 3
+    assert len(reports.get("reports", [])) == 3
+    assert len(performance.get("models", [])) == 3
+    assert len(changes.get("changes", [])) == 3
 
     tseries_models = tseries.get("models", [])
     assert len(tseries_models) == 2
@@ -51,7 +51,7 @@ def main() -> None:
     actual_tseries_codes = {row.get("model_code") for row in tseries_models}
     if actual_tseries_codes != expected_tseries_codes:
         raise SystemExit(f"Unexpected T-series model set: {sorted(actual_tseries_codes)}")
-    required_tseries_keys = {"model_code", "asof_date", "meta", "profile", "run", "bucket_counts", "top_by_bucket", "shadow_summary", "performance_summary"}
+    required_tseries_keys = {"model_code", "asof_date", "meta", "profile", "run", "bucket_counts", "top_by_bucket", "shadow_summary", "rolling_watchlist", "performance_summary"}
     for row in tseries_models:
         missing = sorted(required_tseries_keys - set(row.keys()))
         if missing:
@@ -62,6 +62,9 @@ def main() -> None:
             raise SystemExit(f"Invalid shadow_summary for {row.get('model_code')}")
         if not isinstance(row.get("bucket_counts"), dict):
             raise SystemExit(f"Invalid bucket_counts for {row.get('model_code')}")
+        rolling_watchlist = row.get("rolling_watchlist")
+        if not isinstance(rolling_watchlist, dict):
+            raise SystemExit(f"Invalid rolling_watchlist for {row.get('model_code')}")
         profile = row.get("profile") or {}
         threshold_values = profile.get("threshold_values") or {}
         if not isinstance(threshold_values, dict):
@@ -127,10 +130,10 @@ def main() -> None:
                 if item.get("direction") != expected_direction:
                     raise SystemExit(f"direction mismatch in change item: {item}")
 
-    print("validated_user_models=4")
-    print("validated_reports=4")
-    print("validated_performance_models=4")
-    print("validated_changes=4")
+    print("validated_user_models=3")
+    print("validated_reports=3")
+    print("validated_performance_models=3")
+    print("validated_changes=3")
     print("validated_tseries_models=2")
     print("validated_korean_text=clean")
     print("validated_security_code=ok")

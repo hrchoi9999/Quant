@@ -1,10 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
+import re
 import pandas as pd
 
 PROJECT_ROOT = Path(r"D:\Quant")
 MODEL_DIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_MODELING\logistic_regression"
-S3_CURRENT = PROJECT_ROOT / r"reports\backtest_s3_dev\s3_holdings_last_top20_2026-03-25.csv"
 OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_THRESHOLD_CANDIDATES"
 
 CONFIGS = [
@@ -14,17 +14,38 @@ CONFIGS = [
 ]
 
 
+def latest_s3_current_path() -> Path:
+    pattern = re.compile(r"s3_holdings_last_top20_(\d{4}-\d{2}-\d{2})\.csv$")
+    matches: list[tuple[str, Path]] = []
+    for p in (PROJECT_ROOT / r"reports\backtest_s3_dev").glob("s3_holdings_last_top20_*.csv"):
+        m = pattern.match(p.name)
+        if m:
+            matches.append((m.group(1), p))
+    if not matches:
+        raise FileNotFoundError("No official S3 current holdings file found")
+    return max(matches, key=lambda item: item[0])[1]
+
+
+def latest_stage_asof(stage1: pd.DataFrame) -> str:
+    if "asof_date" in stage1.columns and not stage1["asof_date"].dropna().empty:
+        return str(pd.to_datetime(stage1["asof_date"].dropna().max()).date())
+    return pd.Timestamp.today().strftime("%Y-%m-%d")
+
+
 def read_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path, dtype={"ticker": str})
 
 
-def load_frames() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def load_frames() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
     s1 = read_csv(MODEL_DIR / "latest_stage1_rank.csv")
     s2 = read_csv(MODEL_DIR / "latest_stage2_rank.csv")
-    s3 = read_csv(S3_CURRENT)
+    s3_path = latest_s3_current_path()
+    s3 = read_csv(s3_path)
     for df in (s1, s2, s3):
         df["ticker"] = df["ticker"].astype(str).str.zfill(6)
-    return s1, s2, s3
+    stage_asof = latest_stage_asof(s1)
+    current_report_asof = s3_path.stem.replace("s3_holdings_last_top20_", "")
+    return s1, s2, s3, stage_asof, current_report_asof
 
 
 def threshold_view(
@@ -141,14 +162,14 @@ def summary_row(
     }
 
 
-def render_md(summary: pd.DataFrame) -> str:
+def render_md(summary: pd.DataFrame, stage_asof: str, current_report_asof: str) -> str:
     lines = [
         "# S3 Two-Stage Threshold Candidates",
         "",
         "- source model: `logistic_regression` two-stage discovery",
-        "- latest stage1 rank: `2026-03-26`",
-        "- latest stage2 rank: `2026-03-26`",
-        "- official S3 current holdings: `2026-03-25`",
+        "- latest stage1 rank: `{stage_asof}`",
+        f"- latest stage2 rank: `{stage_asof}`",
+        f"- official S3 current holdings report: `{current_report_asof}`",
         "",
         "## Summary",
         "",
@@ -184,25 +205,25 @@ def render_md(summary: pd.DataFrame) -> str:
 
 def main() -> None:
     OUTDIR.mkdir(parents=True, exist_ok=True)
-    stage1, stage2, s3_current = load_frames()
+    stage1, stage2, s3_current, stage_asof, current_report_asof = load_frames()
     summary_rows = []
     for label, stage1_th, stage2_confirmed_th, stage2_near_th in CONFIGS:
         s1, s2_all, s2_confirmed, s2_near = threshold_view(stage1, stage2, stage1_th, stage2_confirmed_th, stage2_near_th)
-        merge_official(s1, s2_all, s3_current, label).to_csv(OUTDIR / f"{label}_official_s3_overlap_2026-03-26.csv", index=False, encoding="utf-8-sig")
-        fusion_watchlist(s1, s2_all, s3_current, label).to_csv(OUTDIR / f"{label}_fusion_watchlist_2026-03-26.csv", index=False, encoding="utf-8-sig")
-        s1.to_csv(OUTDIR / f"{label}_stage1_candidates_2026-03-26.csv", index=False, encoding="utf-8-sig")
-        s2_all.to_csv(OUTDIR / f"{label}_stage2_candidates_2026-03-26.csv", index=False, encoding="utf-8-sig")
-        s2_confirmed.to_csv(OUTDIR / f"{label}_stage2_confirmed_candidates_2026-03-26.csv", index=False, encoding="utf-8-sig")
-        s2_near.to_csv(OUTDIR / f"{label}_stage2_near_candidates_2026-03-26.csv", index=False, encoding="utf-8-sig")
+        merge_official(s1, s2_all, s3_current, label).to_csv(OUTDIR / f"{label}_official_s3_overlap_{stage_asof}.csv", index=False, encoding="utf-8-sig")
+        fusion_watchlist(s1, s2_all, s3_current, label).to_csv(OUTDIR / f"{label}_fusion_watchlist_{stage_asof}.csv", index=False, encoding="utf-8-sig")
+        s1.to_csv(OUTDIR / f"{label}_stage1_candidates_{stage_asof}.csv", index=False, encoding="utf-8-sig")
+        s2_all.to_csv(OUTDIR / f"{label}_stage2_candidates_{stage_asof}.csv", index=False, encoding="utf-8-sig")
+        s2_confirmed.to_csv(OUTDIR / f"{label}_stage2_confirmed_candidates_{stage_asof}.csv", index=False, encoding="utf-8-sig")
+        s2_near.to_csv(OUTDIR / f"{label}_stage2_near_candidates_{stage_asof}.csv", index=False, encoding="utf-8-sig")
         pd.DataFrame([
             {"grade": "confirmed", "count": len(s2_confirmed)},
             {"grade": "near", "count": len(s2_near)},
             {"grade": "total_stage2", "count": len(s2_all)},
-        ]).to_csv(OUTDIR / f"{label}_stage2_candidate_buckets_summary_2026-03-26.csv", index=False, encoding="utf-8-sig")
+        ]).to_csv(OUTDIR / f"{label}_stage2_candidate_buckets_summary_{stage_asof}.csv", index=False, encoding="utf-8-sig")
         summary_rows.append(summary_row(label, s1, s2_all, s2_confirmed, s2_near, s3_current, stage1_th, stage2_confirmed_th, stage2_near_th))
     summary = pd.DataFrame(summary_rows)
     summary.to_csv(OUTDIR / "s3_two_stage_threshold_candidate_summary.csv", index=False, encoding="utf-8-sig")
-    (OUTDIR / "s3_two_stage_threshold_candidates.md").write_text(render_md(summary), encoding="utf-8")
+    (OUTDIR / "s3_two_stage_threshold_candidates.md").write_text(render_md(summary, stage_asof, current_report_asof), encoding="utf-8")
 
 
 if __name__ == "__main__":

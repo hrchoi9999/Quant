@@ -83,7 +83,7 @@ def main() -> None:
     ap.add_argument('--start', default='2024-01-02')
     ap.add_argument('--end', default='2026-03-17')
     ap.add_argument('--rebalance', default='M', choices=['M','W'])
-    ap.add_argument('--service-profile', default='auto', choices=['auto','stable','balanced','growth'])
+    ap.add_argument('--service-profile', default='balanced', choices=['stable','balanced','growth'])
     ap.add_argument('--outdir', default=str(PROJECT_ROOT / 'reports' / 'model_compare'))
     args = ap.parse_args()
 

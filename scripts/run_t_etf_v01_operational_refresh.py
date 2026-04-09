@@ -15,6 +15,7 @@ SCRIPTS = [
     BASE_DIR / "scripts" / "build_etf_tseries_pit_operational_candidates.py",
     BASE_DIR / "scripts" / "build_etf_tseries_pit_risk_filter.py",
     BASE_DIR / "scripts" / "build_etf_tseries_pit_shadow_tracking.py",
+    BASE_DIR / "scripts" / "build_etf_tseries_pit_rolling_watchlist.py",
 ]
 SYNC_SCRIPT = BASE_DIR / r"src\quant_service\sync_tseries_operational_db.py"
 

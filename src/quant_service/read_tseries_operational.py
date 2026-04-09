@@ -155,6 +155,40 @@ def load_candidate_history(con: sqlite3.Connection, model_code: str) -> pd.DataF
     )
 
 
+def load_rolling_watchlist(con: sqlite3.Connection, model_code: str, asof_date: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    resolved_asof = asof_date or _latest_asof(con, model_code)
+    if not resolved_asof:
+        return pd.DataFrame(), pd.DataFrame()
+    latest = pd.read_sql_query(
+        """
+        SELECT model_code, asof_date, watch_status, watch_tier, is_current, current_bucket, best_bucket_recent,
+               appearances_recent, consecutive_current, last_seen_asof, prev_seen_asof, ticker, name, market,
+               asset_class, group_key, theme_bucket, theme_name_kr, is_s2_overlap, stage1_prob, stage2_prob, mcap, liquidity_20d_value
+        FROM ts_rolling_watchlist_latest
+        WHERE model_code = ? AND asof_date = ?
+        ORDER BY
+            CASE watch_tier WHEN 'core' THEN 1 WHEN 'monitor' THEN 2 ELSE 9 END,
+            CASE watch_status WHEN 'active' THEN 1 WHEN 'new' THEN 2 WHEN 'cooling' THEN 3 ELSE 9 END,
+            COALESCE(stage2_prob, 0) DESC,
+            COALESCE(stage1_prob, 0) DESC,
+            ticker
+        """,
+        con,
+        params=[model_code, resolved_asof],
+    )
+    summary = pd.read_sql_query(
+        """
+        SELECT model_code, asof_date, bucket, count
+        FROM ts_rolling_watchlist_summary
+        WHERE model_code = ? AND asof_date = ?
+        ORDER BY bucket
+        """,
+        con,
+        params=[model_code, resolved_asof],
+    )
+    return latest, summary
+
+
 def _normalize_history_bucket(bucket: str) -> str:
     return BUCKET_MAP.get(str(bucket or "").strip(), str(bucket or "").strip())
 
@@ -306,14 +340,16 @@ def _append_latest_mark_to_market(
     buckets = set(PERFORMANCE_BUCKETS.get(model_code, ("confirmed", "near")))
     current = latest_candidates.copy()
     current["mapped_bucket"] = current["candidate_bucket"].map(_normalize_history_bucket)
-    current = current.loc[
+    filtered = current.loc[
         current["candidate_bucket"].isin(buckets) | current["mapped_bucket"].isin({"confirmed", "near"})
     ].copy()
-    if current.empty:
+    if filtered.empty:
+        filtered = current.copy()
+    if filtered.empty:
         return nav_df
 
-    current["ticker"] = current["ticker"].astype(str).str.zfill(6)
-    basket_size = int(current["ticker"].drop_duplicates().nunique())
+    filtered["ticker"] = filtered["ticker"].astype(str).str.zfill(6)
+    basket_size = int(filtered["ticker"].drop_duplicates().nunique())
     if basket_size == 0:
         return nav_df
 
@@ -435,6 +471,7 @@ def build_snapshot(con: sqlite3.Connection, model_code: str, asof_date: str | No
     run_meta = load_run_meta(con, model_code, latest_asof)
     candidates = load_latest_candidates(con, model_code, latest_asof)
     shadow = load_shadow_summary(con, model_code, latest_asof)
+    rolling_latest, rolling_summary = load_rolling_watchlist(con, model_code, latest_asof)
     performance_summary = build_performance_summary(con, model_code, latest_asof, candidates)
 
     bucket_counts = {}
@@ -458,6 +495,10 @@ def build_snapshot(con: sqlite3.Connection, model_code: str, asof_date: str | No
             top_by_bucket[bucket] = frame[keep].head(10).to_dict(orient="records")
 
     shadow_rows = [] if shadow.empty else shadow.to_dict(orient="records")
+    rolling_payload = {
+        'summary': [] if rolling_summary.empty else rolling_summary.to_dict(orient='records'),
+        'items': [] if rolling_latest.empty else rolling_latest.to_dict(orient='records'),
+    }
     return {
         "model_code": model_code,
         "asof_date": latest_asof,
@@ -467,6 +508,7 @@ def build_snapshot(con: sqlite3.Connection, model_code: str, asof_date: str | No
         "bucket_counts": bucket_counts,
         "top_by_bucket": top_by_bucket,
         "shadow_summary": shadow_rows,
+        "rolling_watchlist": rolling_payload,
         "performance_summary": performance_summary,
     }
 

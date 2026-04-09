@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
+import re
 
 import numpy as np
 import pandas as pd
@@ -20,7 +21,6 @@ FUND_DB = PROJECT_ROOT / r"data\db\fundamentals.db"
 S3_DB = PROJECT_ROOT / r"data\db_s3\features_s3.db"
 UNIVERSE_CSV = PROJECT_ROOT / r"data\universe\universe_mix_top400_latest.csv"
 OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_MODELING"
-ASOF_DATE = pd.Timestamp("2026-03-26")
 LOWER_BUCKETS = ["OUTSIDE", "T50_ex_T30", "T30_ex_T10"]
 STAGE1_TOP_N = 40
 STAGE2_TOP_N = 12
@@ -35,6 +35,23 @@ STAGE2_FEATURES = [
     "revenue_yoy_pct", "op_income_yoy_pct", "dist_ma120_pct", "ma_stack_gap_pct",
     "dist_ma60_pct", "mom20_pct"
 ]
+
+
+def latest_stock_asof() -> pd.Timestamp:
+    pattern = re.compile(r"s3_holdings_last_top20_(\d{4}-\d{2}-\d{2})\.csv$")
+    candidates: list[tuple[str, Path]] = []
+    for p in (PROJECT_ROOT / r"reports\backtest_s3_dev").glob("s3_holdings_last_top20_*.csv"):
+        m = pattern.match(p.name)
+        if m:
+            candidates.append((m.group(1), p))
+    if not candidates:
+        raise FileNotFoundError("No stock S3 current holdings files found")
+    _, latest_path = max(candidates, key=lambda item: item[0])
+    sample = pd.read_csv(latest_path, usecols=["date"], nrows=1)
+    return pd.Timestamp(sample.iloc[0]["date"])
+
+
+ASOF_DATE = latest_stock_asof()
 
 
 def read_sql(db: Path, query: str, parse_dates=None) -> pd.DataFrame:

@@ -34,6 +34,9 @@ cd D:\Quant
 - [user_performance_summary.json](D:/Quant/service_platform/web/public_data/current/user_performance_summary.json)
 - [user_recent_changes.json](D:/Quant/service_platform/web/public_data/current/user_recent_changes.json)
 - [publish_manifest.json](D:/Quant/service_platform/web/public_data/current/publish_manifest.json)
+- [tradingsign_manifest.json](D:/Quant/trading_sign/service_platform/web/public_data/current/tradingsign_manifest.json)
+- [tradingsign_overview.json](D:/Quant/trading_sign/service_platform/web/public_data/current/tradingsign_overview.json)
+- [tradingsign_model_detail.json](D:/Quant/trading_sign/service_platform/web/public_data/current/tradingsign_model_detail.json)
 
 5. Google Sheets
 - `S2_snapshot`
@@ -46,10 +49,10 @@ cd D:\Quant
 ## Quick Sanity Rules
 
 - `stable / balanced / growth` profiles should all publish without missing holdings.
-- `auto` should resolve to one of the supported service profiles.
 - ETF core aliases should be present before S4/S5/S6 publish.
 - KRX universe and cache sources should be aligned before publish.
 - Web snapshot validation must pass before handoff.
+- trading_sign snapshot validation must pass before canonical current republish.
 
 ## Recovery Order
 
@@ -57,8 +60,9 @@ cd D:\Quant
 2. ETF/stock data mismatch: rerun [run_daily_quant_pipeline.py](D:/Quant/src/quant_service/run_daily_quant_pipeline.py)
 3. DB publish issue: [ingest_backtest_results.py](D:/Quant/src/quant_service/ingest_backtest_results.py) -> [publish_backtest_results.py](D:/Quant/src/quant_service/publish_backtest_results.py)
 4. Web payload issue: [build_user_facing_snapshots.py](D:/Quant/service_platform/publishers/build_user_facing_snapshots.py) -> [validate_redbot_web_snapshots.py](D:/Quant/scripts/validate_redbot_web_snapshots.py)
-5. Sheets issue: [sync_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_model_holdings_gsheet.py), [sync_etf_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_etf_model_holdings_gsheet.py)
-6. Internal analytics preview assets are disabled by default; rebuild them only when explicitly requested with `--include-service-analytics`
+5. trading_sign issue: [run_trading_sign_from_quant_pipeline.py](D:/Quant/scripts/run_trading_sign_from_quant_pipeline.py) -> [validate_trading_sign_snapshots.py](D:/Quant/scripts/validate_trading_sign_snapshots.py)
+6. Sheets issue: [sync_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_model_holdings_gsheet.py), [sync_etf_model_holdings_gsheet.py](D:/Quant/src/quant_service/sync_etf_model_holdings_gsheet.py)
+7. Internal analytics preview assets are disabled by default; rebuild them only when explicitly requested with `--include-service-analytics`
 
 ## Internal Admin Preview Bundles
 
