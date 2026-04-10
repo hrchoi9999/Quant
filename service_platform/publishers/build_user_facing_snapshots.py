@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -21,7 +22,9 @@ ROUTER_DIR = ROOT / "reports" / "backtest_router"
 LEGACY_REPORT = CURRENT_DIR / "user_recommendation_report.json"
 CANONICAL_REPORT = CURRENT_DIR / "user_model_snapshot_report.json"
 T_SERIES_DISCOVERY = CURRENT_DIR / "quantservice_tseries_discovery.json"
+CHANGE_HISTORY = CURRENT_DIR / "user_model_change_history.json"
 LEGACY_MANIFEST = CURRENT_DIR / "publish_manifest_user.json"
+REPORT_DATE_RE = re.compile(r"_(20\d{6})\.json$")
 
 
 def load_report(service_profile: str, asof: str) -> dict[str, Any]:
@@ -178,6 +181,155 @@ def build_changes(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
     return {"as_of_date": asof, "changes": rows}
 
 
+def _report_date(path: Path) -> str | None:
+    match = REPORT_DATE_RE.search(path.name)
+    if not match:
+        return None
+    token = match.group(1)
+    return f"{token[:4]}-{token[4:6]}-{token[6:8]}"
+
+
+def _change_row_from_report(row: dict[str, Any], report: dict[str, Any], change_asof: str) -> dict[str, Any]:
+    changes = report.get("model_changes", {})
+    model_metadata = report.get("model_metadata", build_public_model_metadata(row["service_profile"]))
+    copy_aliases = build_copy_aliases(row["service_profile"])
+    increase_items = changes.get("increased_assets", []) or []
+    decrease_items = changes.get("decreased_assets", []) or []
+    return {
+        "as_of_date": change_asof,
+        "user_model_name": row["user_model_name"],
+        "service_profile": row["service_profile"],
+        "change_type": "rebalanced" if increase_items or decrease_items else "unchanged",
+        "summary": report.get("executive_summary", {}).get("summary_basis"),
+        "model_metadata": model_metadata,
+        **copy_aliases,
+        "change_subject_name": changes.get("change_subject_name"),
+        "change_basis_desc": changes.get("change_basis"),
+        "change_reason_desc": changes.get("change_reason_desc"),
+        "increase_items": increase_items,
+        "decrease_items": decrease_items,
+        "reason_text": changes.get("change_basis", "공개 규칙 기반 산출 결과에 따라 구성이 갱신되었습니다."),
+        "compliance_metadata": report.get("compliance_metadata", {}),
+    }
+
+
+def _dedupe_month_items(rows: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
+    by_key: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        source_date = row.get("as_of_date")
+        for item in row.get(key, []) or []:
+            code = item.get("security_code")
+            display_name = str(item.get("display_name", "")).strip()
+            dedupe_key = str(code or display_name)
+            if not dedupe_key:
+                continue
+            bucket = by_key.setdefault(
+                dedupe_key,
+                {
+                    "display_name": display_name,
+                    "security_code": code,
+                    "direction": item.get("direction"),
+                    "latest_delta_weight": item.get("delta_weight"),
+                    "source_dates": [],
+                    "occurrence_count": 0,
+                },
+            )
+            bucket["display_name"] = display_name or bucket["display_name"]
+            bucket["security_code"] = code
+            bucket["direction"] = item.get("direction")
+            bucket["latest_delta_weight"] = item.get("delta_weight")
+            bucket["occurrence_count"] = int(bucket["occurrence_count"]) + 1
+            if source_date and source_date not in bucket["source_dates"]:
+                bucket["source_dates"].append(source_date)
+    return sorted(
+        by_key.values(),
+        key=lambda item: (
+            -int(item.get("occurrence_count") or 0),
+            str(item.get("display_name") or ""),
+        ),
+    )
+
+
+def build_change_history(mapping: dict[str, Any], asof: str, generated_at: str) -> dict[str, Any]:
+    profile_rows = {row["service_profile"]: row for row in mapping["user_models"]}
+    snapshots_by_date: dict[str, list[dict[str, Any]]] = {}
+    for profile, row in profile_rows.items():
+        for path in sorted(REPORT_DIR.glob(f"redbot_user_report_{profile}_*.json")):
+            change_asof = _report_date(path)
+            if not change_asof or change_asof > asof:
+                continue
+            report = json.loads(path.read_text(encoding="utf-8"))
+            snapshots_by_date.setdefault(change_asof, []).append(_change_row_from_report(row, report, change_asof))
+
+    dated_snapshots = []
+    for change_asof in sorted(snapshots_by_date.keys(), reverse=True):
+        models = sorted(
+            snapshots_by_date[change_asof],
+            key=lambda item: list(profile_rows.keys()).index(item["service_profile"]),
+        )
+        dated_snapshots.append(
+            {
+                "period_type": "weekly",
+                "period_key": change_asof,
+                "as_of_date": change_asof,
+                "models": models,
+            }
+        )
+
+    monthly_groups: dict[str, list[dict[str, Any]]] = {}
+    for change_asof, rows in snapshots_by_date.items():
+        monthly_groups.setdefault(change_asof[:7], []).extend(rows)
+
+    monthly = []
+    for month in sorted(monthly_groups.keys(), reverse=True):
+        rows = monthly_groups[month]
+        dates = sorted({str(row.get("as_of_date")) for row in rows if row.get("as_of_date")})
+        models = []
+        for profile, profile_row in profile_rows.items():
+            profile_rows_for_month = [row for row in rows if row.get("service_profile") == profile]
+            if not profile_rows_for_month:
+                continue
+            latest_row = sorted(profile_rows_for_month, key=lambda item: item["as_of_date"])[-1]
+            models.append(
+                {
+                    "user_model_name": profile_row["user_model_name"],
+                    "service_profile": profile,
+                    "change_type": "rebalanced"
+                    if any(row.get("increase_items") or row.get("decrease_items") for row in profile_rows_for_month)
+                    else "unchanged",
+                    "source_dates": sorted({row["as_of_date"] for row in profile_rows_for_month}),
+                    "summary": latest_row.get("summary"),
+                    "change_subject_name": latest_row.get("change_subject_name"),
+                    "change_basis_desc": "해당 월에 생성된 공개 모델 변경 내역을 월 단위로 집계했습니다.",
+                    "change_reason_desc": latest_row.get("change_reason_desc"),
+                    "increase_items": _dedupe_month_items(profile_rows_for_month, "increase_items"),
+                    "decrease_items": _dedupe_month_items(profile_rows_for_month, "decrease_items"),
+                    "compliance_metadata": latest_row.get("compliance_metadata", {}),
+                }
+            )
+        monthly.append(
+            {
+                "period_type": "monthly",
+                "period_key": month,
+                "start_date": dates[0] if dates else None,
+                "end_date": dates[-1] if dates else None,
+                "source_dates": dates,
+                "models": models,
+            }
+        )
+
+    return {
+        "source_name": "handoff:user_model_change_history",
+        "schema_version": "v1",
+        "as_of_date": asof,
+        "generated_at": generated_at,
+        "profiles": list(profile_rows.keys()),
+        "available_dates": sorted(snapshots_by_date.keys(), reverse=True),
+        "weekly": dated_snapshots,
+        "monthly": monthly,
+    }
+
+
 def _normalize_tseries_model(snapshot: dict[str, Any]) -> dict[str, Any]:
     profile = snapshot.get("profile") or {}
     meta = snapshot.get("meta") or {}
@@ -306,7 +458,7 @@ def build_manifest(asof: str, generated_at: str) -> dict[str, Any]:
     return {
         "as_of_date": asof,
         "generated_at": generated_at,
-        "files": ["user_model_catalog.json", "user_model_snapshot_report.json", "user_performance_summary.json", "user_recent_changes.json", "quantservice_tseries_discovery.json"],
+        "files": ["user_model_catalog.json", "user_model_snapshot_report.json", "user_performance_summary.json", "user_recent_changes.json", "user_model_change_history.json", "quantservice_tseries_discovery.json"],
         "channel": "user-facing",
         "version": "v2",
         "compliance_note": "public_model_snapshot_only"
@@ -328,6 +480,7 @@ def main() -> None:
     write_json(CANONICAL_REPORT, build_reports(mapping, args.asof, generated_at))
     write_json(CURRENT_DIR / "user_performance_summary.json", build_performance(mapping, args.asof))
     write_json(CURRENT_DIR / "user_recent_changes.json", build_changes(mapping, args.asof))
+    write_json(CHANGE_HISTORY, build_change_history(mapping, args.asof, generated_at))
     write_json(T_SERIES_DISCOVERY, build_tseries_discovery(args.asof, generated_at))
     manifest = build_manifest(args.asof, generated_at)
     write_json(CURRENT_DIR / "publish_manifest.json", manifest)

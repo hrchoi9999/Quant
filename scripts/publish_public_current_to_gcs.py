@@ -26,6 +26,7 @@ ROOT_OBJECTS = [
     "user_model_snapshot_report.json",
     "user_performance_summary.json",
     "user_recent_changes.json",
+    "user_model_change_history.json",
 ]
 T_SERIES_OBJECT = ("quantservice_tseries_discovery.json", "tseries_discovery/current/quantservice_tseries_discovery.json")
 TRADING_SIGN_OBJECTS = [

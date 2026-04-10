@@ -2,8 +2,8 @@
   "source_name": "handoff:tseries_discovery_current",
   "warnings": [],
   "errors": [],
-  "as_of_date": "2026-04-08",
-  "generated_at": "2026-04-09T12:07:12",
+  "as_of_date": "2026-04-10",
+  "generated_at": "2026-04-10T20:49:24",
   "channel": "tseries-discovery",
   "schema_version": "v1",
   "models": [
@@ -39,8 +39,8 @@
       "run": {
         "refresh_kind": "shadow_refresh",
         "status": "success",
-        "started_at": "2026-04-09 03:06:55",
-        "finished_at": "2026-04-09 03:06:55",
+        "started_at": "2026-04-10 09:58:54",
+        "finished_at": "2026-04-10 09:58:54",
         "notes": "Synced stock operational watchlist, labels, and shadow tracking from local outputs."
       },
       "bucket_counts": {
@@ -555,8 +555,8 @@
       "run": {
         "refresh_kind": "shadow_refresh",
         "status": "success",
-        "started_at": "2026-04-09 03:07:00",
-        "finished_at": "2026-04-09 03:07:00",
+        "started_at": "2026-04-10 09:59:00",
+        "finished_at": "2026-04-10 09:59:00",
         "notes": "Synced ETF PIT operational watchlist and shadow tracking from local outputs with inverse/leverage excluded."
       },
       "bucket_counts": {

@@ -193,6 +193,7 @@ def main() -> None:
     ap.add_argument("--skip-tseries-shadow", action="store_true", help="Skip T-STOCK-V01 / T-ETF-V01 shadow refresh outputs")
     ap.add_argument("--skip-trading-sign", action="store_true", help="Skip trading_sign current snapshot generation and validation")
     ap.add_argument("--skip-remote-current-publish", action="store_true", help="Skip canonical GCS republish of current public snapshot files")
+    ap.add_argument("--skip-generated-csv-db-sync", action="store_true", help="Skip syncing dated generated CSV outputs into generated_outputs.db")
     ap.add_argument("--skip-generated-file-cleanup", action="store_true", help="Skip conservative archive cleanup of dated generated files")
     args = ap.parse_args()
 
@@ -225,6 +226,7 @@ def main() -> None:
     print(f"  tseries_shadow={not bool(args.skip_tseries_shadow)}")
     print(f"  trading_sign={not bool(args.skip_trading_sign)}")
     print(f"  remote_current_publish={not bool(args.skip_remote_current_publish)}")
+    print(f"  generated_csv_db_sync={not bool(args.skip_generated_csv_db_sync)}")
     print(f"  generated_file_cleanup={not bool(args.skip_generated_file_cleanup)}")
 
     for cmd in prep_cmds:
@@ -263,6 +265,9 @@ def main() -> None:
         if args.skip_trading_sign:
             effective_cmd.append("--skip-trading-sign-current")
         _run(effective_cmd, PROJECT_ROOT)
+
+    if not args.skip_generated_csv_db_sync:
+        _run([str(args.python), str(PROJECT_ROOT / r"scripts\sync_generated_csv_to_db.py"), "--asof", args.asof], PROJECT_ROOT)
 
     for cmd in service_analytics_cmds:
         _run(cmd, PROJECT_ROOT)

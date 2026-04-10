@@ -30,7 +30,9 @@ cd D:\Quant
 - Add `--skip-tseries-shadow` if you want to skip T-series shadow refresh during a run
 - Default mode also runs `trading_sign` current snapshot generation and validation after web snapshots, before canonical remote publish
 - Add `--skip-trading-sign` if you want to skip trading_sign generation during a run
-- Default mode also runs conservative generated-file cleanup after remote publish, archiving old dated outputs while protecting `current`, `latest`, and `manifest` files
+- Default mode syncs dated generated CSV outputs into [generated_outputs.db](D:/Quant/data/db/generated_outputs.db) after remote publish and before cleanup
+- Add `--skip-generated-csv-db-sync` if you want to skip generated CSV DB sync during a run
+- Default mode also runs conservative generated-file cleanup after DB sync, archiving old dated outputs while protecting `current`, `latest`, and `manifest` files
 - Add `--skip-generated-file-cleanup` if you want to skip generated-file archive cleanup during a run
 - Add `--skip-remote-current-publish` only if you intentionally want to skip canonical GCS republish of current public snapshot files
 - Add `--model-gsheet` to upload S2/S3/S3 core2 published holdings and S4/S5/S6 ETF model snapshots to Google Sheets
@@ -142,3 +144,9 @@ python .\src\experiments\run_s3_trend_hold_top20_CORE2_TIEBREAK_GATE_SWEEP.py `
 - Policy doc: [GENERATED_FILE_RETENTION_POLICY_20260406.md](D:/Quant/docs/GENERATED_FILE_RETENTION_POLICY_20260406.md)
 - Cleanup script: [cleanup_generated_files.py](D:/Quant/scripts/cleanup_generated_files.py)
 - Archive root: `D:\Quant\archive\generated_retention`
+
+### Generated CSV DB Sync
+
+- Transition doc: [GENERATED_CSV_TO_DB_TRANSITION_20260410.md](D:/Quant/docs/GENERATED_CSV_TO_DB_TRANSITION_20260410.md)
+- Sync script: [sync_generated_csv_to_db.py](D:/Quant/scripts/sync_generated_csv_to_db.py)
+- DB: [generated_outputs.db](D:/Quant/data/db/generated_outputs.db)

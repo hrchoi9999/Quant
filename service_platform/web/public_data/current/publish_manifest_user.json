@@ -1,11 +1,12 @@
 {
-  "as_of_date": "2026-04-08",
-  "generated_at": "2026-04-09T12:07:12",
+  "as_of_date": "2026-04-10",
+  "generated_at": "2026-04-10T20:49:24",
   "files": [
     "user_model_catalog.json",
     "user_model_snapshot_report.json",
     "user_performance_summary.json",
     "user_recent_changes.json",
+    "user_model_change_history.json",
     "quantservice_tseries_discovery.json"
   ],
   "channel": "user-facing",

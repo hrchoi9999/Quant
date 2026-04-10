@@ -17,6 +17,7 @@ REQUIRED = [
     "user_model_snapshot_report.json",
     "user_performance_summary.json",
     "user_recent_changes.json",
+    "user_model_change_history.json",
     "quantservice_tseries_discovery.json",
     "publish_manifest.json",
 ]
@@ -38,12 +39,23 @@ def main() -> None:
     reports = json.loads((CURRENT_DIR / "user_model_snapshot_report.json").read_text(encoding="utf-8"))
     performance = json.loads((CURRENT_DIR / "user_performance_summary.json").read_text(encoding="utf-8"))
     changes = json.loads((CURRENT_DIR / "user_recent_changes.json").read_text(encoding="utf-8"))
+    change_history = json.loads((CURRENT_DIR / "user_model_change_history.json").read_text(encoding="utf-8"))
     tseries = json.loads((CURRENT_DIR / "quantservice_tseries_discovery.json").read_text(encoding="utf-8"))
 
     assert len(catalog.get("models", [])) == 3
     assert len(reports.get("reports", [])) == 3
     assert len(performance.get("models", [])) == 3
     assert len(changes.get("changes", [])) == 3
+    if not change_history.get("weekly"):
+        raise SystemExit("Missing weekly change history")
+    if not change_history.get("monthly"):
+        raise SystemExit("Missing monthly change history")
+    for bucket_name in ("weekly", "monthly"):
+        for bucket in change_history.get(bucket_name, []):
+            if not bucket.get("period_key"):
+                raise SystemExit(f"Missing period_key in {bucket_name} change history")
+            if len(bucket.get("models", [])) != 3:
+                raise SystemExit(f"Expected 3 models in {bucket_name} change history bucket: {bucket}")
 
     tseries_models = tseries.get("models", [])
     assert len(tseries_models) == 2
@@ -130,10 +142,27 @@ def main() -> None:
                 if item.get("direction") != expected_direction:
                     raise SystemExit(f"direction mismatch in change item: {item}")
 
+    for bucket_name in ("weekly", "monthly"):
+        for bucket in change_history.get(bucket_name, []):
+            for row in bucket.get("models", []):
+                for key, expected_direction in (("increase_items", "increase"), ("decrease_items", "decrease")):
+                    for item in row.get(key, []):
+                        if not str(item.get("display_name", "")).strip():
+                            raise SystemExit(f"History change item missing display_name: {item}")
+                        code = item.get("security_code")
+                        if code is not None and (not isinstance(code, str) or len(code) != 6 or not code.isdigit()):
+                            raise SystemExit(f"Invalid security_code in history change item: {item}")
+                        delta = item.get("delta_weight", item.get("latest_delta_weight"))
+                        if delta is not None and not isinstance(delta, (int, float)):
+                            raise SystemExit(f"History delta_weight must be numeric when present: {item}")
+                        if item.get("direction") != expected_direction:
+                            raise SystemExit(f"History direction mismatch in change item: {item}")
+
     print("validated_user_models=3")
     print("validated_reports=3")
     print("validated_performance_models=3")
     print("validated_changes=3")
+    print("validated_change_history=ok")
     print("validated_tseries_models=2")
     print("validated_korean_text=clean")
     print("validated_security_code=ok")
