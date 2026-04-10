@@ -1,14 +1,14 @@
 {
-  "asof": "2026-04-06",
-  "generated_at": "2026-04-06T18:34:42",
+  "asof": "2026-04-08",
+  "generated_at": "2026-04-09T12:07:21",
   "schema_version": "v1",
   "summary": {
     "model_count": 5,
     "signal_count": 98,
     "state_counts": {
       "매수": 0,
-      "보유": 69,
-      "주의": 29,
+      "보유": 84,
+      "주의": 14,
       "매도": 0,
       "매수 대기": 0
     },
@@ -24,12 +24,12 @@
     {
       "model_code": "BALANCED",
       "model_name": "균형형",
-      "signal_date": "2026-04-06",
+      "signal_date": "2026-04-08",
       "record_count": 35,
       "state_counts": {
         "매수": 0,
-        "보유": 27,
-        "주의": 8,
+        "보유": 33,
+        "주의": 2,
         "매도": 0,
         "매수 대기": 0
       }
@@ -37,12 +37,12 @@
     {
       "model_code": "GROWTH",
       "model_name": "성장형",
-      "signal_date": "2026-04-06",
+      "signal_date": "2026-04-08",
       "record_count": 25,
       "state_counts": {
         "매수": 0,
-        "보유": 15,
-        "주의": 10,
+        "보유": 18,
+        "주의": 7,
         "매도": 0,
         "매수 대기": 0
       }
@@ -50,12 +50,12 @@
     {
       "model_code": "STABLE",
       "model_name": "안정형",
-      "signal_date": "2026-04-06",
+      "signal_date": "2026-04-08",
       "record_count": 35,
       "state_counts": {
         "매수": 0,
-        "보유": 27,
-        "주의": 8,
+        "보유": 33,
+        "주의": 2,
         "매도": 0,
         "매수 대기": 0
       }
@@ -63,7 +63,7 @@
     {
       "model_code": "T_ETF_DISCOVERY",
       "model_name": "T ETF 발굴형",
-      "signal_date": "2026-04-06",
+      "signal_date": "2026-04-08",
       "record_count": 2,
       "state_counts": {
         "매수": 0,
@@ -76,7 +76,7 @@
     {
       "model_code": "T_STOCK_DISCOVERY",
       "model_name": "T 주식 발굴형",
-      "signal_date": "2026-04-06",
+      "signal_date": "2026-04-08",
       "record_count": 1,
       "state_counts": {
         "매수": 0,
