@@ -25,15 +25,13 @@ def build_commands(
     core_db: str,
     detail_db: str,
     core2_tag: str,
-    s2_gsheet: bool,
-    model_gsheet: bool,
     include_etf: bool,
     etf_start: str,
     include_service_analytics: bool,
     include_tseries_shadow: bool,
     include_remote_current_publish: bool,
     include_generated_cleanup: bool,
-) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str] | None, list[str] | None, list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
+) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
     prep_cmds: list[list[str]] = [[
         python_exe,
         str(PROJECT_ROOT / r"src\pipelines\rebuild_mix_universe_and_refresh_dbs.py"),
@@ -65,12 +63,6 @@ def build_commands(
         "--market-gate", "--market-scope", "KOSPI", "--market-sma-window", "60", "--market-sma-mult", "1.02",
         "--fee-bps", "5", "--slippage-bps", "5", "--outdir", str(PROJECT_ROOT / r"reports\backtest_regime_refactor"),
     ]
-    if s2_gsheet:
-        s2_cmd.extend([
-            "--gsheet-enable", "--gsheet-cred", str(PROJECT_ROOT / r"config\quant-485814-0df3dc750a8d.json"),
-            "--gsheet-id", "1HAiebouwL6d_ikBd5l6M3t7OO2Zg8bz3uS0aOPwXfXs", "--gsheet-tab", "S2_snapshot",
-            "--gsheet-mode", "overwrite", "--gsheet-ledger", "--gsheet-prefix", "S2",
-        ])
 
     model_cmds = [
         [python_exe, str(PROJECT_ROOT / r"src\experiments\run_s3_trend_hold_top20.py"), "--asof", asof, "--start", "2013-10-14", "--end", asof, "--top-n", "20", "--min-holdings", "10", "--weekly-anchor-weekday", "2"],
@@ -82,9 +74,9 @@ def build_commands(
 
     tseries_shadow_cmds: list[list[str]] = []
     if include_tseries_shadow:
-        tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_stock_v01_operational_refresh.py")])
+        tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_stock_v01_operational_refresh.py"), "--asof", asof])
         if include_etf:
-            tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_etf_v01_operational_refresh.py")])
+            tseries_shadow_cmds.append([python_exe, str(PROJECT_ROOT / r"scripts\run_t_etf_v01_operational_refresh.py"), "--asof", asof])
 
     router_and_reports_cmds = []
     for profile in ["stable", "balanced", "growth"]:
@@ -94,12 +86,6 @@ def build_commands(
 
     ingest_cmd = [python_exe, str(PROJECT_ROOT / r"src\quant_service\ingest_backtest_results.py"), "--asof", asof, "--core-db", core_db, "--detail-db", detail_db]
     publish_cmd = [python_exe, str(PROJECT_ROOT / r"src\quant_service\publish_backtest_results.py"), "--asof", asof, "--core-db", core_db, "--detail-db", detail_db]
-
-    model_gsheet_cmd = None
-    etf_model_gsheet_cmd = None
-    if model_gsheet:
-        model_gsheet_cmd = [python_exe, str(PROJECT_ROOT / r"src\quant_service\sync_model_holdings_gsheet.py"), "--asof", asof, "--core-db", core_db, "--detail-db", detail_db, "--gsheet-cred", str(PROJECT_ROOT / r"config\quant-485814-0df3dc750a8d.json"), "--gsheet-id", "1HAiebouwL6d_ikBd5l6M3t7OO2Zg8bz3uS0aOPwXfXs", "--gsheet-mode", "overwrite"]
-        etf_model_gsheet_cmd = [python_exe, str(PROJECT_ROOT / r"src\quant_service\sync_etf_model_holdings_gsheet.py"), "--asof", asof, "--report-dir", str(PROJECT_ROOT / r"reports\backtest_etf_allocation"), "--gsheet-cred", str(PROJECT_ROOT / r"config\quant-485814-0df3dc750a8d.json"), "--gsheet-id", "1HAiebouwL6d_ikBd5l6M3t7OO2Zg8bz3uS0aOPwXfXs", "--gsheet-mode", "overwrite"]
 
     web_snapshot_cmds = [
         [python_exe, str(PROJECT_ROOT / r"service_platform\publishers\build_user_facing_snapshots.py"), "--asof", asof],
@@ -158,8 +144,6 @@ def build_commands(
         tseries_shadow_cmds,
         ingest_cmd,
         publish_cmd,
-        model_gsheet_cmd,
-        etf_model_gsheet_cmd,
         web_snapshot_cmds,
         trading_sign_cmds,
         remote_publish_cmds,
@@ -175,8 +159,8 @@ def main() -> None:
     ap.add_argument("--core-db", default=str(PROJECT_ROOT / r"data\db\quant_service.db"))
     ap.add_argument("--detail-db", default=str(PROJECT_ROOT / r"data\db\quant_service_detail.db"))
     ap.add_argument("--core2-tag", default="")
-    ap.add_argument("--s2-gsheet", action="store_true")
-    ap.add_argument("--model-gsheet", action="store_true")
+    ap.add_argument("--s2-gsheet", action="store_true", help="Deprecated no-op. Google Sheets sync has been disabled.")
+    ap.add_argument("--model-gsheet", action="store_true", help="Deprecated no-op. Google Sheets sync has been disabled.")
     ap.add_argument("--include-etf", action="store_true")
     ap.add_argument("--etf-start", default="2013-10-14")
     ap.add_argument("--skip-publish", action="store_true")
@@ -198,14 +182,12 @@ def main() -> None:
     args = ap.parse_args()
 
     core2_tag = args.core2_tag or f"daily_{args.asof.replace('-', '')}"
-    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, model_gsheet_cmd, etf_model_gsheet_cmd, web_snapshot_cmds, trading_sign_cmds, remote_publish_cmds, service_analytics_cmds, generated_cleanup_cmds = build_commands(
+    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, web_snapshot_cmds, trading_sign_cmds, remote_publish_cmds, service_analytics_cmds, generated_cleanup_cmds = build_commands(
         asof=args.asof,
         python_exe=str(args.python),
         core_db=str(args.core_db),
         detail_db=str(args.detail_db),
         core2_tag=core2_tag,
-        s2_gsheet=bool(args.s2_gsheet),
-        model_gsheet=bool(args.model_gsheet),
         include_etf=bool(args.include_etf),
         etf_start=str(args.etf_start),
         include_service_analytics=bool(args.include_service_analytics) and not bool(args.skip_service_analytics),
@@ -214,11 +196,14 @@ def main() -> None:
         include_generated_cleanup=not bool(args.skip_generated_file_cleanup),
     )
 
+    if args.s2_gsheet or args.model_gsheet:
+        print("[WARN] Google Sheets integration has been disabled. Legacy gsheet flags are ignored.")
+
     print("[PIPELINE]")
     print(f"  asof={args.asof}")
     print(f"  include_etf={bool(args.include_etf)}")
     print(f"  etf_start={args.etf_start}")
-    print(f"  model_gsheet={bool(args.model_gsheet)}")
+    print("  gsheet_sync=False (disabled)")
     print(
         "  service_analytics="
         f"{bool(args.include_service_analytics) and not bool(args.skip_service_analytics)}"
@@ -248,10 +233,6 @@ def main() -> None:
     _run(ingest_cmd, PROJECT_ROOT)
     if not args.skip_publish:
         _run(publish_cmd, PROJECT_ROOT)
-        if model_gsheet_cmd is not None:
-            _run(model_gsheet_cmd, PROJECT_ROOT)
-        if etf_model_gsheet_cmd is not None:
-            _run(etf_model_gsheet_cmd, PROJECT_ROOT)
 
     for cmd in web_snapshot_cmds:
         _run(cmd, PROJECT_ROOT)

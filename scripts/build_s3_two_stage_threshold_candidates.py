@@ -1,14 +1,17 @@
 from __future__ import annotations
+import argparse
 from pathlib import Path
 import re
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_research_subdir, normalize_run_date
+
 PROJECT_ROOT = Path(r"D:\Quant")
-MODEL_DIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_MODELING\logistic_regression"
-OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_THRESHOLD_CANDIDATES"
+MODEL_DIR = Path()
+OUTDIR = Path()
 
 CONFIGS = [
-    ("operating_v2", 0.52, 0.525, 0.52),
+    ("operating_v2", 0.512, 0.515, 0.512),
     ("conservative", 0.525, 0.53, 0.525),
     ("precise", 0.53, 0.535, 0.53),
 ]
@@ -186,7 +189,7 @@ def render_md(summary: pd.DataFrame, stage_asof: str, current_report_asof: str) 
         "",
         "## Operating Decision",
         "",
-        "- `operating_v2 (0.520 / 0.525 / 0.520)` is the default profile after 2017 backfill recalibration.",
+        "- `operating_v2 (0.512 / 0.515 / 0.512)` is the default profile after the April 2026 refresh recalibration to avoid an empty live candidate set.",
         "- `conservative (0.525 / 0.530 / 0.525)` remains as a tighter reference profile.",
         "- `precise (0.530 / 0.535 / 0.530)` remains as a high-conviction reference profile.",
         "",
@@ -204,7 +207,19 @@ def render_md(summary: pd.DataFrame, stage_asof: str, current_report_asof: str) 
 
 
 def main() -> None:
-    OUTDIR.mkdir(parents=True, exist_ok=True)
+    ap = argparse.ArgumentParser(description="Build S3 two-stage threshold candidate outputs.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest available stage ranking is used.")
+    args = ap.parse_args()
+
+    run_date = normalize_run_date(args.run_date)
+    model_dir = latest_research_subdir(r"S3_TWO_STAGE_MODELING\logistic_regression")
+    outdir = ensure_run_dir(run_date) / "S3_TWO_STAGE_THRESHOLD_CANDIDATES"
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    global MODEL_DIR, OUTDIR
+    MODEL_DIR = model_dir
+    OUTDIR = outdir
     stage1, stage2, s3_current, stage_asof, current_report_asof = load_frames()
     summary_rows = []
     for label, stage1_th, stage2_confirmed_th, stage2_near_th in CONFIGS:

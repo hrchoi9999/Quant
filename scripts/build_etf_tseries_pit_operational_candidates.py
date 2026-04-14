@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
+import re
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260401"
-ASOF_DATE = "2026-03-31"
-TUNED_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_TWO_STAGE_DISCOVERY_TUNED_PIT'
-OUT_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_T_SERIES_OPERATIONALIZATION_PIT'
-OUT_DIR.mkdir(parents=True, exist_ok=True)
+RUN_DATE = ""
+ASOF_DATE = ""
+TUNED_DIR = Path()
+OUT_DIR = Path()
 
 
 def load_csv(name: str) -> pd.DataFrame:
@@ -16,6 +19,19 @@ def load_csv(name: str) -> pd.DataFrame:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF T-series PIT operational candidates.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest tuned PIT asof is used.")
+    args = ap.parse_args()
+
+    global RUN_DATE, ASOF_DATE, TUNED_DIR, OUT_DIR
+    RUN_DATE = normalize_run_date(args.run_date)
+    run_root = ensure_run_dir(RUN_DATE)
+    TUNED_DIR = run_root / 'ETF_TWO_STAGE_DISCOVERY_TUNED_PIT'
+    OUT_DIR = run_root / 'ETF_T_SERIES_OPERATIONALIZATION_PIT'
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    ASOF_DATE = latest_asof_from_dir(TUNED_DIR, r'etf_two_stage_tuned_pit_stage1_candidates_(\d{4}-\d{2}-\d{2})\.csv')
+
     stage1 = load_csv(f'etf_two_stage_tuned_pit_stage1_candidates_{ASOF_DATE}.csv')
     confirmed = load_csv(f'etf_two_stage_tuned_pit_stage2_confirmed_{ASOF_DATE}.csv')
     near = load_csv(f'etf_two_stage_tuned_pit_stage2_near_{ASOF_DATE}.csv')

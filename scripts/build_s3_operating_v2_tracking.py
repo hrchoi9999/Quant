@@ -1,21 +1,49 @@
 from __future__ import annotations
 
+import argparse
 import sqlite3
 from pathlib import Path
+import re
 
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_research_subdir, normalize_run_date
+
 PROJECT_ROOT = Path(r"D:\Quant")
 RESEARCH_DB = PROJECT_ROOT / r"data\db\model_research.db"
-MODEL_DIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_MODELING\logistic_regression"
-STRICT_WF_DIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_STRICT_WALKFORWARD"
-THRESHOLD_DIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_THRESHOLD_CANDIDATES"
-S3_HISTORY = PROJECT_ROOT / r"reports\backtest_s3_dev\s3_holdings_history_top20_2013-10-14_2026-03-25.csv"
-S3_CURRENT = PROJECT_ROOT / r"reports\backtest_s3_dev\s3_holdings_last_top20_2026-03-25.csv"
-OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_OPERATING_V2_TRACKING"
+MODEL_DIR = Path()
+STRICT_WF_DIR = Path()
+THRESHOLD_DIR = Path()
+S3_HISTORY = Path()
+S3_CURRENT = Path()
+OUTDIR = Path()
 
 STAGE1_TH = 0.53
 STAGE2_TH = 0.52
+
+
+def latest_backtest_path(pattern: str) -> Path:
+    matches: list[tuple[str, Path]] = []
+    regex = re.compile(pattern)
+    for path in (PROJECT_ROOT / r"reports\backtest_s3_dev").glob("*"):
+        match = regex.match(path.name)
+        if match:
+            matches.append((match.group(1), path))
+    if not matches:
+        raise FileNotFoundError(f"No S3 backtest file found for {pattern}")
+    return max(matches, key=lambda item: item[0])[1]
+
+
+def latest_threshold_asof() -> str:
+    regex = re.compile(r"operating_v2_stage1_candidates_(\d{4}-\d{2}-\d{2})\.csv$")
+    matches: list[str] = []
+    for path in THRESHOLD_DIR.glob("operating_v2_stage1_candidates_*.csv"):
+        match = regex.match(path.name)
+        if match:
+            matches.append(match.group(1))
+    if not matches:
+        raise FileNotFoundError(f"No threshold candidate files found in {THRESHOLD_DIR}")
+    return max(matches)
 
 
 def read_sql(path: Path, query: str, parse_dates=None) -> pd.DataFrame:
@@ -82,8 +110,9 @@ def prepare_stage_tracking_from_path(stage_name: str, csv_path: Path, label_col:
 
 
 def latest_snapshot_rows() -> tuple[pd.DataFrame, pd.DataFrame]:
-    stage1 = pd.read_csv(THRESHOLD_DIR / "operating_v2_stage1_candidates_2026-03-26.csv", dtype={"ticker": str})
-    stage2 = pd.read_csv(THRESHOLD_DIR / "operating_v2_stage2_candidates_2026-03-26.csv", dtype={"ticker": str})
+    threshold_asof = latest_threshold_asof()
+    stage1 = pd.read_csv(THRESHOLD_DIR / f"operating_v2_stage1_candidates_{threshold_asof}.csv", dtype={"ticker": str})
+    stage2 = pd.read_csv(THRESHOLD_DIR / f"operating_v2_stage2_candidates_{threshold_asof}.csv", dtype={"ticker": str})
     current = pd.read_csv(S3_CURRENT, dtype={"ticker": str})
     current["ticker"] = current["ticker"].astype(str).str.zfill(6)
     current_tickers = set(current["ticker"])
@@ -91,7 +120,7 @@ def latest_snapshot_rows() -> tuple[pd.DataFrame, pd.DataFrame]:
         if df.empty:
             continue
         df["ticker"] = df["ticker"].astype(str).str.zfill(6)
-        df["signal_date"] = pd.Timestamp("2026-03-26")
+        df["signal_date"] = pd.Timestamp(threshold_asof)
         df["stage_name"] = stage_name
         df["threshold"] = threshold
         df["actual_label_from_model"] = pd.NA
@@ -153,7 +182,23 @@ def render_md(summary_overall: pd.DataFrame, summary_by_h: pd.DataFrame, latest_
 
 
 def main() -> None:
-    OUTDIR.mkdir(parents=True, exist_ok=True)
+    ap = argparse.ArgumentParser(description="Build S3 operating_v2 tracking outputs.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; tracking uses latest available threshold asof.")
+    args = ap.parse_args()
+
+    run_date = normalize_run_date(args.run_date)
+    outdir = ensure_run_dir(run_date) / "S3_OPERATING_V2_TRACKING"
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    global MODEL_DIR, STRICT_WF_DIR, THRESHOLD_DIR, S3_HISTORY, S3_CURRENT, OUTDIR
+    MODEL_DIR = latest_research_subdir(r"S3_TWO_STAGE_MODELING\logistic_regression")
+    STRICT_WF_DIR = latest_research_subdir(r"S3_TWO_STAGE_STRICT_WALKFORWARD")
+    THRESHOLD_DIR = ensure_run_dir(run_date) / "S3_TWO_STAGE_THRESHOLD_CANDIDATES"
+    S3_HISTORY = latest_backtest_path(r"s3_holdings_history_top20_\d{4}-\d{2}-\d{2}_(\d{4}-\d{2}-\d{2})\.csv$")
+    S3_CURRENT = latest_backtest_path(r"s3_holdings_last_top20_(\d{4}-\d{2}-\d{2})\.csv$")
+    OUTDIR = outdir
+
     future_labels = build_future_labels()
     official_hist = load_official_history()
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import math
 from pathlib import Path
 
@@ -11,10 +12,11 @@ from sklearn.metrics import roc_auc_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from tseries_refresh_utils import ensure_run_dir, latest_research_subdir, normalize_run_date
+
 PROJECT_ROOT = Path(r"D:\Quant")
-TRANSITION_PATH = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_PIT_BACKFILL_V1\etf_tseries_pit_transition_panel.csv"
-OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_PIT_STRICT_WALKFORWARD"
-OUTDIR.mkdir(parents=True, exist_ok=True)
+TRANSITION_PATH = Path()
+OUTDIR = Path()
 
 NUMERIC_FEATURES_STAGE1 = [
     "ret_60d","ret_120d","ma20_ma60_gap","ma60_ma120_gap",
@@ -94,6 +96,20 @@ def strict_walkforward(panel: pd.DataFrame, num_features: list[str], label_col: 
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF T-series PIT strict walk-forward outputs.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; full available history is used.")
+    args = ap.parse_args()
+
+    run_date = normalize_run_date(args.run_date)
+    backfill_dir = latest_research_subdir(r"ETF_T_SERIES_PIT_BACKFILL_V1")
+    outdir = ensure_run_dir(run_date) / "ETF_T_SERIES_PIT_STRICT_WALKFORWARD"
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    global TRANSITION_PATH, OUTDIR
+    TRANSITION_PATH = backfill_dir / "etf_tseries_pit_transition_panel.csv"
+    OUTDIR = outdir
+
     trans = pd.read_csv(TRANSITION_PATH, dtype={"ticker": str})
     trans["ticker"] = trans["ticker"].astype(str).str.zfill(6)
     trans["signal_date"] = pd.to_datetime(trans["signal_date"])

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import re
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260401"
-IN_DIR = BASE_DIR / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_OPERATIONALIZATION_PIT"
+RUN_DATE = ""
+IN_DIR = Path()
 LOOKBACK_WINDOWS = 3
 COOLING_WINDOWS = 2
 BUCKET_RANK = {"confirmed": 0, "near": 1, "observe": 2}
@@ -55,6 +58,15 @@ def _consecutive_count(frame: pd.DataFrame, ordered_dates: list[pd.Timestamp]) -
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF T-series PIT rolling watchlist.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest watchlist history is used.")
+    args = ap.parse_args()
+
+    global RUN_DATE, IN_DIR
+    RUN_DATE = normalize_run_date(args.run_date)
+    IN_DIR = ensure_run_dir(RUN_DATE) / "ETF_T_SERIES_OPERATIONALIZATION_PIT"
+
     files = _latest_watchlist_files()
     if not files:
         raise SystemExit("no etf latest watchlist files found")

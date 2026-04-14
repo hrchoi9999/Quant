@@ -214,14 +214,14 @@ def main(argv=None):
 
     ap.add_argument("--outdir", default=r".\reports\backtest_regime_refactor")
 
-    # Google Sheets upload (optional; legacy feature parity)
-    ap.add_argument('--gsheet-enable', action='store_true', help='Upload key CSV outputs to Google Sheets')
-    ap.add_argument('--gsheet-cred', default=None, help='Service account json credential path')
-    ap.add_argument('--gsheet-id', default=None, help='Target Google Sheet id')
-    ap.add_argument('--gsheet-tab', default='snapshot', help='Base tab name for snapshot (others derive from this)')
-    ap.add_argument('--gsheet-mode', default='overwrite', choices=['overwrite','append'], help='overwrite or append')
-    ap.add_argument('--gsheet-ledger', action='store_true', help='Also upload ledger tab')
-    ap.add_argument('--gsheet-prefix', default='S2', help='Prefix used in headers/metadata, if supported')
+    # Google Sheets upload (disabled)
+    ap.add_argument('--gsheet-enable', action='store_true', help='Deprecated no-op. Google Sheets upload has been disabled.')
+    ap.add_argument('--gsheet-cred', default=None, help='Deprecated legacy option. Ignored.')
+    ap.add_argument('--gsheet-id', default=None, help='Deprecated legacy option. Ignored.')
+    ap.add_argument('--gsheet-tab', default='snapshot', help='Deprecated legacy option. Ignored.')
+    ap.add_argument('--gsheet-mode', default='overwrite', choices=['overwrite','append'], help='Deprecated legacy option. Ignored.')
+    ap.add_argument('--gsheet-ledger', action='store_true', help='Deprecated legacy option. Ignored.')
+    ap.add_argument('--gsheet-prefix', default='S2', help='Deprecated legacy option. Ignored.')
     args = ap.parse_args(argv)
 
     orig_cwd = Path.cwd()
@@ -415,37 +415,7 @@ def main(argv=None):
 
     # Optional: upload CSV bundle to Google Sheets
     if getattr(args, "gsheet_enable", False):
-        if not getattr(args, "gsheet_cred", None) or not getattr(args, "gsheet_id", None):
-            raise ValueError("--gsheet-enable requires --gsheet-cred and --gsheet-id")
-
-        try:
-            from .outputs import gsheet_plugin as gsheet_mod
-        except Exception:  # pragma: no cover
-            from src.backtest.outputs import gsheet_plugin as gsheet_mod  # type: ignore
-
-        base = getattr(args, "gsheet_tab", "snapshot")
-        tab_snapshot = base
-        tab_windows = f"{base}_windows"
-        tab_trades = f"{base}_trades"
-        tab_selection = f"{base}_selection"
-        tab_ledger = f"{base}_ledger"
-
-        gsheet_mod.upload_gsheet_bundle(
-            snapshot_path=saved.get("snapshot", ""),
-            windows_path=saved.get("windows", ""),
-            trades_path=saved.get("trades", ""),
-            ledger_path=(saved.get("ledger", "") if getattr(args, "gsheet_ledger", False) else None),
-            selection_path=saved.get("selection", ""),
-            cred_path=args.gsheet_cred,
-            sheet_id=args.gsheet_id,
-            tab_snapshot=tab_snapshot,
-            tab_windows=tab_windows,
-            tab_trades=tab_trades,
-            tab_ledger=tab_ledger,
-            tab_selection=tab_selection,
-            mode=args.gsheet_mode,
-            prefix=getattr(args, "gsheet_prefix", "S2"),
-        )
+        print("[GSHEET][SKIP] Google Sheets upload has been disabled. No upload was performed.")
 
     # Minimal log (stdout)
     print("[SAVE]")

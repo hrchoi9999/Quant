@@ -1,29 +1,17 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
-import re
 
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260331"
-SRC_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "S3_TWO_STAGE_THRESHOLD_CANDIDATES"
-OUT_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "T_STOCK_V01_OPERATIONALIZATION"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
-    candidates: list[str] = []
-    regex = re.compile(pattern)
-    for p in src_dir.iterdir():
-        m = regex.match(p.name)
-        if m:
-            candidates.append(m.group(1))
-    if not candidates:
-        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
-    return max(candidates)
-
-ASOF_DATE = latest_asof_from_dir(SRC_DIR, r"operating_v2_stage1_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+RUN_DATE = ""
+SRC_DIR = Path()
+OUT_DIR = Path()
+ASOF_DATE = ""
 
 
 def load_csv(name: str) -> pd.DataFrame:
@@ -35,6 +23,19 @@ def save_csv(df: pd.DataFrame, name: str) -> None:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build T-STOCK-V01 operational candidates.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest threshold asof is used.")
+    args = ap.parse_args()
+
+    global RUN_DATE, SRC_DIR, OUT_DIR, ASOF_DATE
+    RUN_DATE = normalize_run_date(args.run_date)
+    run_root = ensure_run_dir(RUN_DATE)
+    SRC_DIR = run_root / "S3_TWO_STAGE_THRESHOLD_CANDIDATES"
+    OUT_DIR = run_root / "T_STOCK_V01_OPERATIONALIZATION"
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    ASOF_DATE = latest_asof_from_dir(SRC_DIR, r"operating_v2_stage1_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+
     stage1 = load_csv(f"operating_v2_stage1_candidates_{ASOF_DATE}.csv")
     confirmed = load_csv(f"operating_v2_stage2_confirmed_candidates_{ASOF_DATE}.csv")
     near = load_csv(f"operating_v2_stage2_near_candidates_{ASOF_DATE}.csv")

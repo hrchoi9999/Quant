@@ -42,7 +42,13 @@ def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
 
 def _latest_asof(con: sqlite3.Connection, model_code: str) -> str | None:
     row = con.execute(
-        "SELECT MAX(asof_date) AS asof_date FROM ts_runs WHERE model_code = ?",
+        """
+        SELECT asof_date
+        FROM ts_runs
+        WHERE model_code = ?
+        ORDER BY datetime(created_at) DESC, datetime(finished_at) DESC, asof_date DESC
+        LIMIT 1
+        """,
         (model_code,),
     ).fetchone()
     return None if row is None else row["asof_date"]

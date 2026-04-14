@@ -35,8 +35,7 @@ cd D:\Quant
 - Default mode also runs conservative generated-file cleanup after DB sync, archiving old dated outputs while protecting `current`, `latest`, and `manifest` files
 - Add `--skip-generated-file-cleanup` if you want to skip generated-file archive cleanup during a run
 - Add `--skip-remote-current-publish` only if you intentionally want to skip canonical GCS republish of current public snapshot files
-- Add `--model-gsheet` to upload S2/S3/S3 core2 published holdings and S4/S5/S6 ETF model snapshots to Google Sheets
-- Add `--s2-gsheet` if you also want the original S2 backtest bundle uploaded during the S2 run
+- Google Sheets sync has been disabled. `redbot.co.kr` current/remote publish is now the canonical delivery path.
 
 ### Failure runbook
 
@@ -90,14 +89,7 @@ python -m src.backtest.run_backtest_v5 `
   --market-sma-mult 1.02 `
   --fee-bps 5 `
   --slippage-bps 5 `
-  --outdir .\reports\backtest_regime_refactor `
-  --gsheet-enable `
-  --gsheet-cred .\config\quant-485814-0df3dc750a8d.json `
-  --gsheet-id "1HAiebouwL6d_ikBd5l6M3t7OO2Zg8bz3uS0aOPwXfXs" `
-  --gsheet-tab S2_snapshot `
-  --gsheet-mode overwrite `
-  --gsheet-ledger `
-  --gsheet-prefix S2
+  --outdir .\reports\backtest_regime_refactor
 ```
 
 ## S3 Model Backtest Command

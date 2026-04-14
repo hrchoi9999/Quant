@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sqlite3
 from pathlib import Path
 import re
@@ -15,12 +16,14 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
 
+from tseries_refresh_utils import ensure_run_dir, normalize_run_date
+
 PROJECT_ROOT = Path(r"D:\Quant")
 RESEARCH_DB = PROJECT_ROOT / r"data\db\model_research.db"
 FUND_DB = PROJECT_ROOT / r"data\db\fundamentals.db"
 S3_DB = PROJECT_ROOT / r"data\db_s3\features_s3.db"
 UNIVERSE_CSV = PROJECT_ROOT / r"data\universe\universe_mix_top400_latest.csv"
-OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\S3_TWO_STAGE_MODELING"
+OUTDIR = Path()
 LOWER_BUCKETS = ["OUTSIDE", "T50_ex_T30", "T30_ex_T10"]
 STAGE1_TOP_N = 40
 STAGE2_TOP_N = 12
@@ -336,6 +339,13 @@ def render_md(summary_rows: list[dict]) -> str:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Train S3 two-stage discovery models and latest rank snapshots.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest official S3 current holdings date is used.")
+    args = ap.parse_args()
+
+    global OUTDIR
+    OUTDIR = ensure_run_dir(normalize_run_date(args.run_date)) / "S3_TWO_STAGE_MODELING"
     OUTDIR.mkdir(parents=True, exist_ok=True)
     panel = add_future_labels(attach_features(build_base_panel()))
 

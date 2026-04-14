@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import argparse
 import math
 from pathlib import Path
 import sys
+import re
 
 import numpy as np
 import pandas as pd
@@ -14,13 +16,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.backtest.core.data import load_prices_wide
+from tseries_refresh_utils import ensure_run_dir, normalize_run_date
 
 PROJECT_ROOT = Path(r"D:\Quant")
 PRICE_DB = PROJECT_ROOT / r"data\db\price.db"
-PIT_UNIVERSE_CSV = PROJECT_ROOT / r"data\universe\etf_pit_backfill\universe_etf_pit_monthly_201701_202603.csv"
-OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_PIT_BACKFILL_V1"
+PIT_UNIVERSE_CSV = Path()
+OUTDIR = Path()
 RESEARCH_DB = PROJECT_ROOT / r"data\db\model_research.db"
-OUTDIR.mkdir(parents=True, exist_ok=True)
 
 HORIZON_STEPS = {"3M": 3, "6M": 6, "1Y": 12}
 FEATURE_COLS = [
@@ -29,6 +31,19 @@ FEATURE_COLS = [
     "dist_ma20", "dist_ma60", "dist_ma120",
     "ma20_ma60_gap", "ma60_ma120_gap", "rsi20", "liquidity_20d_value",
 ]
+
+
+def latest_pit_universe_csv() -> Path:
+    base = PROJECT_ROOT / r"data\universe\etf_pit_backfill"
+    pattern = re.compile(r"universe_etf_pit_monthly_\d{6}_(\d{6})\.csv$")
+    matches: list[tuple[str, Path]] = []
+    for path in base.glob("universe_etf_pit_monthly_*.csv"):
+        match = pattern.match(path.name)
+        if match:
+            matches.append((match.group(1), path))
+    if not matches:
+        raise FileNotFoundError(f"No ETF PIT universe CSV found in {base}")
+    return max(matches, key=lambda item: item[0])[1]
 
 
 def calc_rsi(series: pd.Series, window: int = 20) -> pd.Series:
@@ -235,6 +250,16 @@ def build_transition_matrix(panel: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF T-series PIT backfill feature/transition panels.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest available PIT universe file is used.")
+    args = ap.parse_args()
+
+    global PIT_UNIVERSE_CSV, OUTDIR
+    PIT_UNIVERSE_CSV = latest_pit_universe_csv()
+    OUTDIR = ensure_run_dir(normalize_run_date(args.run_date)) / "ETF_T_SERIES_PIT_BACKFILL_V1"
+    OUTDIR.mkdir(parents=True, exist_ok=True)
+
     universe, close_wide = load_inputs()
     signal_dates = sorted(pd.to_datetime(universe["selection_asof"]).drop_duplicates().tolist())
     feature_df = build_feature_panel(universe, close_wide)

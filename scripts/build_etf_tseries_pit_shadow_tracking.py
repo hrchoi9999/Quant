@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260401"
-ASOF_DATE = "2026-03-31"
-OUT_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_T_SERIES_OPERATIONALIZATION_PIT'
-WF_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_T_SERIES_PIT_STRICT_WALKFORWARD'
+RUN_DATE = ""
+ASOF_DATE = ""
+OUT_DIR = Path()
+WF_DIR = Path()
 
 
 def is_inverse_or_leverage_name(name: object) -> bool:
@@ -41,6 +44,18 @@ def build_current_shadow() -> pd.DataFrame:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF T-series PIT shadow tracking outputs.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="YYYY-MM-DD candidate asof to use; defaults to latest available in run folder.")
+    args = ap.parse_args()
+
+    global RUN_DATE, ASOF_DATE, OUT_DIR, WF_DIR
+    RUN_DATE = normalize_run_date(args.run_date)
+    run_root = ensure_run_dir(RUN_DATE)
+    OUT_DIR = run_root / 'ETF_T_SERIES_OPERATIONALIZATION_PIT'
+    WF_DIR = run_root / 'ETF_T_SERIES_PIT_STRICT_WALKFORWARD'
+    ASOF_DATE = latest_asof_from_dir(OUT_DIR, r'etf_tseries_pit_risk_filtered_candidates_(\d{4}-\d{2}-\d{2})\.csv')
+
     historical = build_historical_shadow()
     current = build_current_shadow()
     combined = pd.concat([historical, current], ignore_index=True)

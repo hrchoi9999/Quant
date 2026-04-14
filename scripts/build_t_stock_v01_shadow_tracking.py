@@ -1,31 +1,20 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
-import re
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260331"
-OP_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "T_STOCK_V01_OPERATIONALIZATION"
-HIST_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "S3_OPERATING_V2_TRACKING"
+RUN_DATE = ""
+OP_DIR = Path()
+HIST_DIR = Path()
+ASOF_DATE = ""
 
-
-def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
-    candidates: list[str] = []
-    regex = re.compile(pattern)
-    for p in src_dir.iterdir():
-        m = regex.match(p.name)
-        if m:
-            candidates.append(m.group(1))
-    if not candidates:
-        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
-    return max(candidates)
-
-ASOF_DATE = latest_asof_from_dir(OP_DIR, r"t_stock_v01_risk_filtered_candidates_(\d{4}-\d{2}-\d{2})\.csv")
-
-CONF_STAGE2 = 0.525
-NEAR_STAGE2 = 0.52
-OBS_STAGE1 = 0.52
+CONF_STAGE2 = 0.515
+NEAR_STAGE2 = 0.512
+OBS_STAGE1 = 0.512
 
 
 def build_latest_watchlist() -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -93,6 +82,18 @@ def build_history() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build T-STOCK-V01 shadow tracking outputs.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest risk-filtered asof is used.")
+    args = ap.parse_args()
+
+    global RUN_DATE, OP_DIR, HIST_DIR, ASOF_DATE
+    RUN_DATE = normalize_run_date(args.run_date)
+    run_root = ensure_run_dir(RUN_DATE)
+    OP_DIR = run_root / "T_STOCK_V01_OPERATIONALIZATION"
+    HIST_DIR = run_root / "S3_OPERATING_V2_TRACKING"
+    ASOF_DATE = latest_asof_from_dir(OP_DIR, r"t_stock_v01_risk_filtered_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+
     latest, latest_summary = build_latest_watchlist()
     hist, overall, by_horizon = build_history()
 

@@ -1,29 +1,18 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
-import re
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260331"
-IN_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "T_STOCK_V01_OPERATIONALIZATION"
+RUN_DATE = ""
+IN_DIR = Path()
 OUT_DIR = BASE_DIR / "data" / "labels"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-REPORT_DIR = IN_DIR
-
-
-def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
-    candidates: list[str] = []
-    regex = re.compile(pattern)
-    for p in src_dir.iterdir():
-        m = regex.match(p.name)
-        if m:
-            candidates.append(m.group(1))
-    if not candidates:
-        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
-    return max(candidates)
-
-ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+REPORT_DIR = Path()
+ASOF_DATE = ""
 
 THEME_NAME_KR = {
     "defense_aero": "방산/항공우주",
@@ -60,6 +49,18 @@ def classify_theme(name: str) -> str:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build T-STOCK-V01 theme labels.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest operational candidate asof is used.")
+    args = ap.parse_args()
+
+    global RUN_DATE, IN_DIR, REPORT_DIR, ASOF_DATE
+    RUN_DATE = normalize_run_date(args.run_date)
+    run_root = ensure_run_dir(RUN_DATE)
+    IN_DIR = run_root / "T_STOCK_V01_OPERATIONALIZATION"
+    REPORT_DIR = IN_DIR
+    ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+
     df = pd.read_csv(IN_DIR / f"t_stock_v01_operational_candidates_{ASOF_DATE}.csv", dtype={"ticker": str})
     df["theme_bucket"] = df["name"].apply(classify_theme)
     df["theme_name_kr"] = df["theme_bucket"].map(THEME_NAME_KR)

@@ -1561,15 +1561,15 @@ def main() -> None:
     ap.add_argument("--no-snapshot", action="store_true", help="if set, do not save snapshot csv")
 
     
-    # Google Sheets upload (optional)
-    ap.add_argument("--gsheet-enable", action=argparse.BooleanOptionalAction, default=True,
-                    help="Upload snapshot/trades/windows to Google Sheets (default: enabled). Use --no-gsheet-enable to disable.")
-    ap.add_argument("--gsheet-prefix", default="S2", help="Google Sheets: sheet name prefix (default: S2). New sheets will be created as <prefix>_YYYYMMDD_SEQ_kind")
-    ap.add_argument("--gsheet-cred", default=DEFAULT_GSHEET_CRED, help="service account credentials json path")
-    ap.add_argument("--gsheet-id", default=DEFAULT_GSHEET_ID, help="Google Spreadsheet ID (the /d/<ID>/ part)")
-    ap.add_argument("--gsheet-tab", default="", help="Base tab name (e.g., 'S2_snapshot'). Suffixes _trades/_windows are used for additional tables.")
-    ap.add_argument("--gsheet-mode", default="overwrite", choices=["new_sheet","overwrite","append"], help="overwrite clears tab; append adds rows")
-    ap.add_argument("--gsheet-ledger", action="store_true", default=True, help="generate/upload rebalance ledger sheet")
+    # Google Sheets upload (disabled)
+    ap.add_argument("--gsheet-enable", action=argparse.BooleanOptionalAction, default=False,
+                    help="Deprecated no-op. Google Sheets upload has been disabled.")
+    ap.add_argument("--gsheet-prefix", default="S2", help="Deprecated legacy option. Ignored.")
+    ap.add_argument("--gsheet-cred", default=DEFAULT_GSHEET_CRED, help="Deprecated legacy option. Ignored.")
+    ap.add_argument("--gsheet-id", default=DEFAULT_GSHEET_ID, help="Deprecated legacy option. Ignored.")
+    ap.add_argument("--gsheet-tab", default="", help="Deprecated legacy option. Ignored.")
+    ap.add_argument("--gsheet-mode", default="overwrite", choices=["new_sheet","overwrite","append"], help="Deprecated legacy option. Ignored.")
+    ap.add_argument("--gsheet-ledger", action="store_true", default=False, help="Deprecated legacy option. Ignored.")
     ap.add_argument("--gsheet-start-cell", default="A1", help="start cell for writing (default: A1)")
     
     # Trades CSV: keep only recent N years (default: 6). Set 0 to keep all.
@@ -1857,70 +1857,7 @@ def main() -> None:
     
         # --- Google Sheets upload (snapshot/trades/windows) ---
         if args.gsheet_enable:
-            upload_snapshot_bundle, GSheetConfig = _try_import_gsheet_uploader(project_root)
-            if upload_snapshot_bundle is None:
-                expected = (project_root / "src" / "utils" / "gsheet_uploader.py")
-                _log(f"[GSHEET][ERROR] uploader import failed. Expected: {expected}")
-            else:
-                try:
-                    # sheet name prefix (default: S2) -> creates NEW sheets every run:
-                    #   <prefix>_<YYYYMMDD>_<SEQ3>_snapshot|trades|windows
-                    prefix = str(getattr(args, "gsheet_prefix", "S2")).strip() or "S2"
-
-                    # Use snapshot_date (if provided) else end date for naming YYYYMMDD
-                    snap_date = args.snapshot_date or args.end
-                    yyyymmdd = str(snap_date).replace("-", "") if snap_date else None
-
-                    tdf = trade_df if ("trade_df" in locals() and isinstance(trade_df, pd.DataFrame) and len(trade_df) > 0) else None
-                    wdf = win_df if ("win_df" in locals() and isinstance(win_df, pd.DataFrame) and len(win_df) > 0) else None
-
-                    # trades_C: round-trip only (CLOSED) with buy/sell + return_pct
-                    tdf_c = None
-                    if tdf is not None and "status" in tdf.columns:
-                        tdf_c = tdf[tdf["status"].astype(str).str.upper() == "CLOSED"].copy()
-                        keep_cols = ["trade_id","ticker","name","buy_date","buy_price","sell_date","sell_price","holding_days","return","return_pct","status"]
-                        keep_cols = [c for c in keep_cols if c in tdf_c.columns]
-                        if keep_cols:
-                            tdf_c = tdf_c[keep_cols]
-                    if tdf is not None:
-                        tdf = _attach_market_col(tdf, market_map, ticker_col="ticker", out_col="market")
-                    if wdf is not None:
-                        wdf = wdf  # no market needed
-                    if snap_df is not None:
-                        snap_df = _attach_market_col(snap_df, market_map, ticker_col="ticker", out_col="market")
-                    if tdf_c is not None:
-                        tdf_c = _attach_market_col(tdf_c, market_map, ticker_col="ticker", out_col="market")
-
-                    snap_df = _sort_snapshot_by_return(snap_df, return_col="return")
-
-                    # stamp: prefix_YYYYMMDD (overwrite 모드면 동일명 시트에 덮어쓰기)
-                    stamp = f"{prefix}_{yyyymmdd}"
-                    cfg = GSheetConfig(
-                        cred_path=(args.gsheet_cred or DEFAULT_GSHEET_CRED),
-                        spreadsheet_id=(args.gsheet_id or DEFAULT_GSHEET_ID),
-                        mode=str(getattr(args, "gsheet_mode", "new_sheet")),
-                        start_cell=str(getattr(args, "gsheet_start_cell", "A1")),
-                    )
-                    # gsheet sheet-name components (prefix/date/seq).
-                    # For overwrite mode, use a fixed seq=1 to avoid sheet count growth.
-                    date_yyyymmdd = yyyymmdd
-                    seq = 1 if str(args.gsheet_mode).lower() == "overwrite" else (int(datetime.datetime.now().strftime("%H%M%S")) % 1000)
-                    
-                    created = upload_snapshot_bundle(
-                        cfg,
-                        prefix=prefix,
-                        date_yyyymmdd=date_yyyymmdd,
-                        seq=seq,
-                        snapshot_df=snap_df,
-                        trades_df=tdf,
-                        windows_df=wdf,
-                        trades_c_df=tdf_c,
-                        ledger_df=ledger_df,
-                        mode=args.gsheet_mode,
-                    )
-                    _log(f"[GSHEET] created sheets: {created}")
-                except Exception as e:
-                    _log(f"[GSHEET][ERROR] upload failed: {e}")
+            _log("[GSHEET][SKIP] Google Sheets upload has been disabled. No upload was performed.")
     _log("[SUMMARY]")
     _log("=" * 80)
     _log(summary_df.to_string(index=False))

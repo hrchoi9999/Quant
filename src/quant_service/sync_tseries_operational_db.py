@@ -3,24 +3,17 @@ from __future__ import annotations
 import argparse
 import sqlite3
 from pathlib import Path
-import re
+import sys
 import pandas as pd
 
 PROJECT_ROOT = Path(r"D:\Quant")
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 DB_PATH = PROJECT_ROOT / r"data\db\tseries_operational.db"
-RUN_DATE = "20260331"
-
-
-def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
-    candidates: list[str] = []
-    regex = re.compile(pattern)
-    for p in src_dir.iterdir():
-        m = regex.match(p.name)
-        if m:
-            candidates.append(m.group(1))
-    if not candidates:
-        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
-    return max(candidates)
+RUN_DATE = ""
 
 
 
@@ -86,9 +79,9 @@ def upsert_meta_models(con: sqlite3.Connection) -> None:
 
 def sync_stock(con: sqlite3.Connection) -> None:
     model_code = "T-STOCK-V01"
-    op_dir = PROJECT_ROOT / r"reports\model_upgrade_research\20260331\T_STOCK_V01_OPERATIONALIZATION"
+    op_dir = ensure_run_dir(RUN_DATE) / "T_STOCK_V01_OPERATIONALIZATION"
     asof_date = latest_asof_from_dir(op_dir, r"t_stock_v01_latest_watchlist_(\d{4}-\d{2}-\d{2})\.csv")
-    labels_path = PROJECT_ROOT / r"data\labels\t_stock_v01_theme_labels_20260331.csv"
+    labels_path = PROJECT_ROOT / "data" / "labels" / f"t_stock_v01_theme_labels_{RUN_DATE}.csv"
     run_id = f"{model_code}:{asof_date}:shadow_refresh"
     profile_id = f"{model_code}:operating_v2:{asof_date}"
 
@@ -99,7 +92,7 @@ def sync_stock(con: sqlite3.Connection) -> None:
           risk_filter_version, is_current, notes, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         """,
-        (profile_id, model_code, "operating_v2", asof_date, 0.52, 0.525, 0.52, "stock_risk_filter_v1", 1, "Stock operating profile recalibrated after 2017 backfill: stage1 0.52, stage2 confirmed 0.525, stage2 near 0.52."),
+        (profile_id, model_code, "operating_v2", asof_date, 0.512, 0.515, 0.512, "stock_risk_filter_v2", 1, "Stock operating profile recalibrated after the April 2026 refresh review: stage1 0.512, stage2 confirmed 0.515, stage2 near 0.512, and theme cap other relaxed to 5."),
     )
     con.execute(
         """
@@ -107,7 +100,7 @@ def sync_stock(con: sqlite3.Connection) -> None:
           ts_run_id, model_code, profile_id, asof_date, refresh_kind, status, source_snapshot_ref, started_at, finished_at, outdir, notes, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?, ?, datetime('now'))
         """,
-        (run_id, model_code, profile_id, asof_date, "shadow_refresh", "success", f"research_outputs:{RUN_DATE}", str(op_dir), "Synced stock operational watchlist, labels, and shadow tracking from local outputs."),
+        (run_id, model_code, profile_id, asof_date, "shadow_refresh", "success", f"research_outputs:{RUN_DATE}", str(op_dir), "Synced stock operational watchlist, labels, and shadow tracking from local outputs with stage thresholds recalibrated and theme cap other relaxed to 5."),
     )
     con.commit()
 
@@ -186,8 +179,8 @@ def sync_stock(con: sqlite3.Connection) -> None:
 
 def sync_etf(con: sqlite3.Connection) -> None:
     model_code = "T-ETF-V01"
-    asof_date = "2026-03-31"
-    op_dir = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_OPERATIONALIZATION_PIT"
+    op_dir = ensure_run_dir(RUN_DATE) / "ETF_T_SERIES_OPERATIONALIZATION_PIT"
+    asof_date = latest_asof_from_dir(op_dir, r"etf_tseries_pit_latest_watchlist_(\d{4}-\d{2}-\d{2})\.csv")
     run_id = f"{model_code}:{asof_date}:shadow_refresh"
     profile_id = f"{model_code}:operational_pit_v1:{asof_date}"
 
@@ -198,7 +191,7 @@ def sync_etf(con: sqlite3.Connection) -> None:
           risk_filter_version, is_current, notes, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         """,
-        (profile_id, model_code, "operational_pit_v1", asof_date, None, 0.65, 0.60, "etf_pit_risk_filter_v3", 1, "ETF PIT operational profile: stage1 momentum_trend top_ratio 0.08, stage2 vol_trend_compact with confirmed 0.65 and near 0.60. Inverse/leverage excluded, liquidity floor 20d avg trading value >= 20 billion KRW."),
+        (profile_id, model_code, "operational_pit_v1", asof_date, None, 0.65, 0.60, "etf_pit_risk_filter_v4", 1, "ETF PIT operational profile: stage1 momentum_trend top_ratio 0.08, stage2 vol_trend_compact with confirmed 0.65 and near 0.60. Inverse/leverage excluded, liquidity floor 20d avg trading value >= 20 billion KRW, and energy/materials theme cap relaxed to 5."),
     )
     con.execute(
         """
@@ -206,7 +199,7 @@ def sync_etf(con: sqlite3.Connection) -> None:
           ts_run_id, model_code, profile_id, asof_date, refresh_kind, status, source_snapshot_ref, started_at, finished_at, outdir, notes, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?, ?, datetime('now'))
         """,
-        (run_id, model_code, profile_id, asof_date, "shadow_refresh", "success", "research_outputs:20260401", str(op_dir), "Synced ETF PIT operational watchlist and shadow tracking from local outputs with inverse/leverage excluded."),
+        (run_id, model_code, profile_id, asof_date, "shadow_refresh", "success", f"research_outputs:{RUN_DATE}", str(op_dir), "Synced ETF PIT operational watchlist and shadow tracking from local outputs with inverse/leverage excluded and energy/materials theme cap relaxed to 5."),
     )
     con.commit()
 
@@ -233,7 +226,7 @@ def sync_etf(con: sqlite3.Connection) -> None:
     etf_labels["label_scope"] = "t_etf_v01_operational_candidates"
     _write_df(con, "ts_theme_labels", etf_labels, "DELETE FROM ts_theme_labels WHERE model_code=? AND asof_date=?", (model_code, asof_date))
 
-    hist = pd.read_csv(op_dir / "etf_tseries_pit_shadow_tracking_history_20260401.csv", dtype={"ticker": str})
+    hist = pd.read_csv(op_dir / f"etf_tseries_pit_shadow_tracking_history_{RUN_DATE}.csv", dtype={"ticker": str})
     hist["model_code"] = model_code
     hist["horizon"] = None
     hist["market"] = None
@@ -254,7 +247,7 @@ def sync_etf(con: sqlite3.Connection) -> None:
     ]]
     _write_df(con, "ts_candidates_history", hist, "DELETE FROM ts_candidates_history WHERE model_code=?", (model_code,))
 
-    summary = pd.read_csv(op_dir / "etf_tseries_pit_shadow_tracking_historical_summary_20260401.csv")
+    summary = pd.read_csv(op_dir / f"etf_tseries_pit_shadow_tracking_historical_summary_{RUN_DATE}.csv")
     summary["model_code"] = model_code
     summary["asof_date"] = asof_date
     summary = summary.rename(columns={"candidate_count": "obs_n", "avg_pred_prob": "avg_stage1_prob"})
@@ -270,24 +263,15 @@ def sync_etf(con: sqlite3.Connection) -> None:
         model_code,
         asof_date,
         run_id,
-        op_dir / f"t_stock_v01_rolling_watchlist_{asof_date}.csv",
-        op_dir / f"t_stock_v01_rolling_watchlist_summary_{RUN_DATE}.csv",
-    )
-
-    _sync_rolling_watchlist(
-        con,
-        model_code,
-        asof_date,
-        run_id,
         op_dir / f"etf_tseries_pit_rolling_watchlist_{asof_date}.csv",
-        op_dir / "etf_tseries_pit_rolling_watchlist_summary_20260401.csv",
+        op_dir / f"etf_tseries_pit_rolling_watchlist_summary_{RUN_DATE}.csv",
     )
 
     artifacts = pd.DataFrame([
         {"ts_run_id": run_id, "artifact_type": "latest_watchlist", "artifact_path": str(op_dir / f"etf_tseries_pit_latest_watchlist_{asof_date}.csv")},
-        {"ts_run_id": run_id, "artifact_type": "latest_watchlist_summary", "artifact_path": str(op_dir / "etf_tseries_pit_latest_watchlist_summary_20260401.csv")},
-        {"ts_run_id": run_id, "artifact_type": "shadow_tracking_history", "artifact_path": str(op_dir / "etf_tseries_pit_shadow_tracking_history_20260401.csv")},
-        {"ts_run_id": run_id, "artifact_type": "shadow_tracking_summary", "artifact_path": str(op_dir / "etf_tseries_pit_shadow_tracking_historical_summary_20260401.csv")},
+        {"ts_run_id": run_id, "artifact_type": "latest_watchlist_summary", "artifact_path": str(op_dir / f"etf_tseries_pit_latest_watchlist_summary_{RUN_DATE}.csv")},
+        {"ts_run_id": run_id, "artifact_type": "shadow_tracking_history", "artifact_path": str(op_dir / f"etf_tseries_pit_shadow_tracking_history_{RUN_DATE}.csv")},
+        {"ts_run_id": run_id, "artifact_type": "shadow_tracking_summary", "artifact_path": str(op_dir / f"etf_tseries_pit_shadow_tracking_historical_summary_{RUN_DATE}.csv")},
         {"ts_run_id": run_id, "artifact_type": "risk_filtered_candidates", "artifact_path": str(op_dir / f"etf_tseries_pit_risk_filtered_candidates_{asof_date}.csv")},
     ])
     _write_df(con, "ts_artifacts", artifacts, "DELETE FROM ts_artifacts WHERE ts_run_id=?", (run_id,))
@@ -296,7 +280,11 @@ def sync_etf(con: sqlite3.Connection) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Sync T-series operational outputs into tseries_operational.db")
     ap.add_argument("--model", choices=["stock", "etf", "all"], default="all")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
     args = ap.parse_args()
+
+    global RUN_DATE
+    RUN_DATE = normalize_run_date(args.run_date)
 
     con = sqlite3.connect(str(DB_PATH))
     try:

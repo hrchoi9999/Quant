@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import math
 from pathlib import Path
 
@@ -9,11 +10,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from tseries_refresh_utils import ensure_run_dir, latest_research_subdir, normalize_asof_date, normalize_run_date
+
 PROJECT_ROOT = Path(r"D:\Quant")
-TRANSITION_PATH = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_PIT_BACKFILL_V1\etf_tseries_pit_transition_panel.csv"
-FEATURE_PATH = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_T_SERIES_PIT_BACKFILL_V1\etf_tseries_pit_feature_panel.csv"
-OUTDIR = PROJECT_ROOT / r"reports\model_upgrade_research\20260401\ETF_TWO_STAGE_DISCOVERY_TUNED_PIT"
-OUTDIR.mkdir(parents=True, exist_ok=True)
+TRANSITION_PATH = Path()
+FEATURE_PATH = Path()
+OUTDIR = Path()
 
 CAT_FEATURES = ["asset_class", "group_key", "currency_exposure"]
 LOWER_BUCKETS = ["OUTSIDE", "ET50_ex_ET30", "ET30_ex_ET10"]
@@ -22,7 +24,6 @@ STAGE2_FEATURES = ["vol_20d","vol_60d","dist_ma20","dist_ma60","dist_ma120","ma2
 STAGE1_TOP_RATIO = 0.08
 STAGE2_CONF_THRESHOLD = 0.65
 STAGE2_NEAR_THRESHOLD = 0.60
-LATEST_SIGNAL_DATE = "2026-03-25"
 
 
 def build_pipeline(num_features: list[str]) -> Pipeline:
@@ -35,6 +36,22 @@ def build_pipeline(num_features: list[str]) -> Pipeline:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF two-stage tuned PIT candidates.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD output folder.")
+    ap.add_argument("--asof", default=None, help="YYYY-MM-DD cap for latest feature date selection.")
+    args = ap.parse_args()
+
+    run_date = normalize_run_date(args.run_date)
+    asof = normalize_asof_date(args.asof)
+    backfill_dir = latest_research_subdir(r"ETF_T_SERIES_PIT_BACKFILL_V1")
+    outdir = ensure_run_dir(run_date) / "ETF_TWO_STAGE_DISCOVERY_TUNED_PIT"
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    global TRANSITION_PATH, FEATURE_PATH, OUTDIR
+    TRANSITION_PATH = backfill_dir / "etf_tseries_pit_transition_panel.csv"
+    FEATURE_PATH = backfill_dir / "etf_tseries_pit_feature_panel.csv"
+    OUTDIR = outdir
+
     trans = pd.read_csv(TRANSITION_PATH, dtype={"ticker": str})
     trans["ticker"] = trans["ticker"].astype(str).str.zfill(6)
     trans["signal_date"] = pd.to_datetime(trans["signal_date"])
@@ -42,7 +59,11 @@ def main() -> None:
     features["ticker"] = features["ticker"].astype(str).str.zfill(6)
     features["signal_date"] = pd.to_datetime(features["signal_date"])
 
-    latest = features[features["signal_date"] == pd.Timestamp(LATEST_SIGNAL_DATE)].copy()
+    latest_signal_ts = features.loc[features["signal_date"] <= pd.Timestamp(asof), "signal_date"].max()
+    if pd.isna(latest_signal_ts):
+        raise FileNotFoundError(f"No ETF feature panel rows available on or before {asof}")
+    latest_asof = pd.Timestamp(latest_signal_ts).strftime("%Y-%m-%d")
+    latest = features[features["signal_date"] == pd.Timestamp(latest_signal_ts)].copy()
 
     stage1_panel = trans[trans["current_bucket"].isin(LOWER_BUCKETS)].copy()
     stage1_panel = stage1_panel.dropna(subset=STAGE1_FEATURES)
@@ -83,11 +104,11 @@ def main() -> None:
         }
     ])
 
-    latest_s1.to_csv(OUTDIR / 'etf_two_stage_tuned_pit_full_rank_2026-03-31.csv', index=False, encoding='utf-8-sig')
-    stage1_candidates.to_csv(OUTDIR / 'etf_two_stage_tuned_pit_stage1_candidates_2026-03-31.csv', index=False, encoding='utf-8-sig')
-    confirmed.to_csv(OUTDIR / 'etf_two_stage_tuned_pit_stage2_confirmed_2026-03-31.csv', index=False, encoding='utf-8-sig')
-    near.to_csv(OUTDIR / 'etf_two_stage_tuned_pit_stage2_near_2026-03-31.csv', index=False, encoding='utf-8-sig')
-    summary.to_csv(OUTDIR / 'etf_two_stage_tuned_pit_summary_2026-03-31.csv', index=False, encoding='utf-8-sig')
+    latest_s1.to_csv(OUTDIR / f'etf_two_stage_tuned_pit_full_rank_{latest_asof}.csv', index=False, encoding='utf-8-sig')
+    stage1_candidates.to_csv(OUTDIR / f'etf_two_stage_tuned_pit_stage1_candidates_{latest_asof}.csv', index=False, encoding='utf-8-sig')
+    confirmed.to_csv(OUTDIR / f'etf_two_stage_tuned_pit_stage2_confirmed_{latest_asof}.csv', index=False, encoding='utf-8-sig')
+    near.to_csv(OUTDIR / f'etf_two_stage_tuned_pit_stage2_near_{latest_asof}.csv', index=False, encoding='utf-8-sig')
+    summary.to_csv(OUTDIR / f'etf_two_stage_tuned_pit_summary_{latest_asof}.csv', index=False, encoding='utf-8-sig')
 
     lines = [
         '# ETF Two-Stage Discovery Tuned PIT',
@@ -102,7 +123,7 @@ def main() -> None:
         f'- stage2 confirmed: {len(confirmed)}',
         f'- stage2 near: {len(near)}',
     ]
-    (OUTDIR / 'etf_two_stage_tuned_pit_2026-03-31.md').write_text('\n'.join(lines), encoding='utf-8')
+    (OUTDIR / f'etf_two_stage_tuned_pit_{latest_asof}.md').write_text('\n'.join(lines), encoding='utf-8')
 
     print(summary.to_string(index=False))
     print('confirmed=' + ','.join(confirmed['name'].astype(str).tolist()))

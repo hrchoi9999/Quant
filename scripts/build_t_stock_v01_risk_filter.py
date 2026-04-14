@@ -1,28 +1,17 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
-import re
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260331"
-IN_DIR = BASE_DIR / "reports" / "model_upgrade_research" / RUN_DATE / "T_STOCK_V01_OPERATIONALIZATION"
-OUT_DIR = IN_DIR
-LABELS_PATH = BASE_DIR / "data" / "labels" / f"t_stock_v01_theme_labels_{RUN_DATE}.csv"
-
-
-def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
-    candidates: list[str] = []
-    regex = re.compile(pattern)
-    for p in src_dir.iterdir():
-        m = regex.match(p.name)
-        if m:
-            candidates.append(m.group(1))
-    if not candidates:
-        raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
-    return max(candidates)
-
-ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+RUN_DATE = ""
+IN_DIR = Path()
+OUT_DIR = Path()
+LABELS_PATH = Path()
+ASOF_DATE = ""
 
 MCAP_FLOOR = 300_000_000_000
 THEME_CAPS = {
@@ -34,7 +23,7 @@ THEME_CAPS = {
     "medtech_platform": 1,
     "consumer_brand": 1,
     "general_largecap": 1,
-    "other": 1,
+    "other": 5,
 }
 S2_OVERLAP = {
     "112610", "017960", "084370", "006800", "052690", "001720", "298040", "272210", "079550"
@@ -43,6 +32,19 @@ GRADE_ORDER = {"confirmed": 0, "near": 1, "observe": 2}
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build T-STOCK-V01 risk-filtered operational candidates.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest operational candidate asof is used.")
+    args = ap.parse_args()
+
+    global RUN_DATE, IN_DIR, OUT_DIR, LABELS_PATH, ASOF_DATE
+    RUN_DATE = normalize_run_date(args.run_date)
+    run_root = ensure_run_dir(RUN_DATE)
+    IN_DIR = run_root / "T_STOCK_V01_OPERATIONALIZATION"
+    OUT_DIR = IN_DIR
+    LABELS_PATH = BASE_DIR / "data" / "labels" / f"t_stock_v01_theme_labels_{RUN_DATE}.csv"
+    ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+
     df = pd.read_csv(IN_DIR / f"t_stock_v01_operational_candidates_{ASOF_DATE}.csv", dtype={"ticker": str})
     labels = pd.read_csv(LABELS_PATH, dtype={"ticker": str})[["ticker", "theme_bucket", "theme_name_kr"]].drop_duplicates("ticker")
     df = df.merge(labels, on="ticker", how="left")
@@ -82,8 +84,12 @@ def main() -> None:
         "candidate_grade", "ticker", "name", "market", "mcap", "theme_bucket", "theme_name_kr", "is_s2_overlap",
         "stage1_prob", "stage2_prob", "filter_reason"
     ]
-    kept = kept[keep_cols]
-    excluded = excluded[keep_cols].rename(columns={"filter_reason": "exclude_reason"})
+    kept = kept[keep_cols] if not kept.empty else pd.DataFrame(columns=keep_cols)
+    excluded = (
+        excluded[keep_cols].rename(columns={"filter_reason": "exclude_reason"})
+        if not excluded.empty
+        else pd.DataFrame(columns=[c if c != "filter_reason" else "exclude_reason" for c in keep_cols])
+    )
 
     kept.to_csv(OUT_DIR / f"t_stock_v01_risk_filtered_candidates_{ASOF_DATE}.csv", index=False, encoding="utf-8-sig")
     excluded.to_csv(OUT_DIR / f"t_stock_v01_risk_filtered_excluded_{ASOF_DATE}.csv", index=False, encoding="utf-8-sig")
@@ -121,7 +127,7 @@ def main() -> None:
   - medtech_platform: 1
   - consumer_brand: 1
   - general_largecap: 1
-  - other: 1
+  - other: 5
 
 ## Result
 - input total: {len(df)}

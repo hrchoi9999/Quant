@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import pandas as pd
 
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+
 BASE_DIR = Path(r"D:\Quant")
-RUN_DATE = "20260401"
-ASOF_DATE = "2026-03-31"
-IN_DIR = BASE_DIR / 'reports' / 'model_upgrade_research' / RUN_DATE / 'ETF_T_SERIES_OPERATIONALIZATION_PIT'
+RUN_DATE = ""
+ASOF_DATE = ""
+IN_DIR = Path()
 
 LIQUIDITY_FLOOR = 20_000_000_000
 THEME_CAPS = {
@@ -18,7 +21,7 @@ THEME_CAPS = {
     'auto': 1,
     'silver': 1,
     'esg': 1,
-    'energy_materials': 2,
+    'energy_materials': 5,
     'other': 1,
 }
 GRADE_ORDER = {'confirmed':0,'near':1,'observe':2}
@@ -66,6 +69,16 @@ def excluded_by_structural_rule(row: pd.Series) -> str | None:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description="Build ETF T-series PIT risk filter outputs.")
+    ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")
+    ap.add_argument("--asof", default=None, help="YYYY-MM-DD candidate asof to use; defaults to latest available in run folder.")
+    args = ap.parse_args()
+
+    global RUN_DATE, ASOF_DATE, IN_DIR
+    RUN_DATE = normalize_run_date(args.run_date)
+    IN_DIR = ensure_run_dir(RUN_DATE) / 'ETF_T_SERIES_OPERATIONALIZATION_PIT'
+    ASOF_DATE = latest_asof_from_dir(IN_DIR, r'etf_tseries_pit_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv')
+
     df = pd.read_csv(IN_DIR / f'etf_tseries_pit_operational_candidates_{ASOF_DATE}.csv', dtype={'ticker': str})
     df['theme_bucket'] = df.apply(classify_theme, axis=1)
     df['structural_reason'] = df.apply(excluded_by_structural_rule, axis=1)

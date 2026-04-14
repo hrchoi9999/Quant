@@ -1,1001 +1,16 @@
 {
-  "asof": "2026-04-10",
-  "generated_at": "2026-04-10T18:59:22",
+  "asof": "2026-04-14",
+  "generated_at": "2026-04-14T20:42:14",
   "schema_version": "v1",
   "models": [
     {
       "model_code": "BALANCED",
       "model_name": "균형형",
-      "signal_date": "2026-04-10",
+      "signal_date": "2026-04-14",
       "record_count": 35,
       "state_counts": {
         "매수": 0,
-        "보유": 32,
-        "주의": 3,
-        "매도": 0,
-        "매수 대기": 0
-      },
-      "ui_block": {
-        "title": "전일 종가 기준 일간 신호",
-        "description": "이 신호는 전일 종가 기준으로 계산된 참고용 일간 점검 정보입니다.",
-        "disclaimer": "이 상태는 공개 규칙 기반 모델의 참고용 해석이며 특정 이용자에 대한 개별 매매 지시가 아닙니다.",
-        "signal_date": "2026-04-10",
-        "data_asof_date": "2026-04-10",
-        "generated_at": "2026-04-10T18:59:22",
-        "state_chips": [
-          {
-            "state": "매수",
-            "count": 0
-          },
-          {
-            "state": "보유",
-            "count": 32
-          },
-          {
-            "state": "주의",
-            "count": 3
-          },
-          {
-            "state": "매도",
-            "count": 0
-          },
-          {
-            "state": "매수 대기",
-            "count": 0
-          }
-        ],
-        "sections": [
-          {
-            "section_key": "recommended",
-            "title": "추천 종목 신호",
-            "record_count": 0,
-            "state_counts": {
-              "매수": 0,
-              "보유": 0,
-              "주의": 0,
-              "매도": 0,
-              "매수 대기": 0
-            },
-            "signals": []
-          },
-          {
-            "section_key": "held",
-            "title": "보유 종목 신호",
-            "record_count": 35,
-            "state_counts": {
-              "매수": 0,
-              "보유": 32,
-              "주의": 3,
-              "매도": 0,
-              "매수 대기": 0
-            },
-            "signals": [
-              {
-                "ticker": "000250",
-                "security_name": "삼천당제약",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.6842857142857143,
-                "exit_risk_score": 0.16666666666666666
-              },
-              {
-                "ticker": "000270",
-                "security_name": "기아",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.3931428571428571,
-                "exit_risk_score": 0.16666666666666666
-              },
-              {
-                "ticker": "000660",
-                "security_name": "SK하이닉스",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.3378571428571428,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "000720",
-                "security_name": "현대건설",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.3900714285714286,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "000880",
-                "security_name": "한화",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.5347857142857142,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "003380",
-                "security_name": "하림지주",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.74,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "005290",
-                "security_name": "동진쎄미켐",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.6460714285714286,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "005380",
-                "security_name": "현대차",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.41121428571428575,
-                "exit_risk_score": 0.16666666666666666
-              },
-              {
-                "ticker": "005830",
-                "security_name": "DB손해보험",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5142857142857142,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "005940",
-                "security_name": "NH투자증권",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5177142857142857,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "006400",
-                "security_name": "삼성SDI",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.44499999999999995,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "006800",
-                "security_name": "미래에셋증권",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.41364285714285715,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "010120",
-                "security_name": "LS ELECTRIC",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.3818571428571428,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "010950",
-                "security_name": "S-Oil",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.4017142857142857,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "017670",
-                "security_name": "SK텔레콤",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.2817857142857143,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "028050",
-                "security_name": "삼성E&A",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.27378571428571424,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "032830",
-                "security_name": "삼성생명",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.44007142857142856,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "034730",
-                "security_name": "SK",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.4737857142857142,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "039490",
-                "security_name": "키움증권",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5257142857142856,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "047810",
-                "security_name": "한국항공우주",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.43585714285714283,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "052690",
-                "security_name": "한전기술",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.40878571428571425,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "069500",
-                "security_name": "KODEX 200",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.20357142857142857,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "071050",
-                "security_name": "한국금융지주",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5027857142857142,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "079550",
-                "security_name": "LIG넥스원",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.2646428571428572,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "084370",
-                "security_name": "유진테크",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.6275000000000001,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "088350",
-                "security_name": "한화생명",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5122857142857142,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "161510",
-                "security_name": "PLUS 고배당주",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.21249999999999997,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "192720",
-                "security_name": "파워 고배당저변동성",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.18178571428571424,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "267250",
-                "security_name": "HD현대",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.4581428571428571,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "267270",
-                "security_name": "HD건설기계",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.37042857142857144,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "272210",
-                "security_name": "한화시스템",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.43442857142857144,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "298040",
-                "security_name": "효성중공업",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.3830714285714285,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "402340",
-                "security_name": "SK스퀘어",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.3585,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "459580",
-                "security_name": "KODEX CD금리액티브(합성)",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.21928571428571425,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "498400",
-                "security_name": "KODEX 200타겟위클리커버드콜",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.19464285714285712,
-                "exit_risk_score": 0.0
-              }
-            ]
-          }
-        ],
-        "profile_code": "fundamental_slow"
-      },
-      "signals": [
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "000250",
-          "model_code": "BALANCED",
-          "current_state": "주의",
-          "security_name": "삼천당제약",
-          "latest_state_change_date": "2026-04-08",
-          "reason_tags": [
-            "below_ma60_warning"
-          ],
-          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.6842857142857143,
-          "exit_risk_score": 0.16666666666666666,
-          "is_recommended": true,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "000270",
-          "model_code": "BALANCED",
-          "current_state": "주의",
-          "security_name": "기아",
-          "latest_state_change_date": "2026-04-10",
-          "reason_tags": [
-            "below_ma60_warning"
-          ],
-          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.3931428571428571,
-          "exit_risk_score": 0.16666666666666666,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "000660",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "SK하이닉스",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3378571428571428,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "000720",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "현대건설",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3900714285714286,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "000880",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "한화",
-          "latest_state_change_date": "2026-04-08",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5347857142857142,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "003380",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "하림지주",
-          "latest_state_change_date": "2026-04-10",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.74,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "005290",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "동진쎄미켐",
-          "latest_state_change_date": "2026-04-08",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.6460714285714286,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "005380",
-          "model_code": "BALANCED",
-          "current_state": "주의",
-          "security_name": "현대차",
-          "latest_state_change_date": "2026-04-10",
-          "reason_tags": [
-            "below_ma60_warning"
-          ],
-          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.41121428571428575,
-          "exit_risk_score": 0.16666666666666666,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "005830",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "DB손해보험",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5142857142857142,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "005940",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "NH투자증권",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5177142857142857,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "006400",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "삼성SDI",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.44499999999999995,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "006800",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "미래에셋증권",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.41364285714285715,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "010120",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "LS ELECTRIC",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3818571428571428,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "010950",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "S-Oil",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4017142857142857,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "017670",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "SK텔레콤",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.2817857142857143,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "028050",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "삼성E&A",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.27378571428571424,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "032830",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "삼성생명",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.44007142857142856,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "034730",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "SK",
-          "latest_state_change_date": "2026-04-08",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4737857142857142,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "039490",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "키움증권",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5257142857142856,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "047810",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "한국항공우주",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.43585714285714283,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "052690",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "한전기술",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.40878571428571425,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "069500",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "KODEX 200",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.20357142857142857,
-          "exit_risk_score": 0.0,
-          "is_recommended": true,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "071050",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "한국금융지주",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5027857142857142,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "079550",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "LIG넥스원",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.2646428571428572,
-          "exit_risk_score": 0.0,
-          "is_recommended": true,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "084370",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "유진테크",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.6275000000000001,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "088350",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "한화생명",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5122857142857142,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "161510",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "PLUS 고배당주",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.21249999999999997,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "192720",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "파워 고배당저변동성",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.18178571428571424,
-          "exit_risk_score": 0.0,
-          "is_recommended": true,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "267250",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "HD현대",
-          "latest_state_change_date": "2026-04-08",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4581428571428571,
-          "exit_risk_score": 0.0,
-          "is_recommended": true,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "267270",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "HD건설기계",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.37042857142857144,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "272210",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "한화시스템",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.43442857142857144,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "298040",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "효성중공업",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3830714285714285,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "402340",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "SK스퀘어",
-          "latest_state_change_date": "2026-04-08",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3585,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "459580",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "KODEX CD금리액티브(합성)",
-          "latest_state_change_date": "2026-04-02",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.21928571428571425,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        },
-        {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
-          "ticker": "498400",
-          "model_code": "BALANCED",
-          "current_state": "보유",
-          "security_name": "KODEX 200타겟위클리커버드콜",
-          "latest_state_change_date": "2026-04-03",
-          "reason_tags": [
-            "trend_and_state_ok"
-          ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.19464285714285712,
-          "exit_risk_score": 0.0,
-          "is_recommended": false,
-          "is_held": true
-        }
-      ]
-    },
-    {
-      "model_code": "GROWTH",
-      "model_name": "성장형",
-      "signal_date": "2026-04-10",
-      "record_count": 25,
-      "state_counts": {
-        "매수": 0,
-        "보유": 19,
+        "보유": 29,
         "주의": 6,
         "매도": 0,
         "매수 대기": 0
@@ -1004,9 +19,9 @@
         "title": "전일 종가 기준 일간 신호",
         "description": "이 신호는 전일 종가 기준으로 계산된 참고용 일간 점검 정보입니다.",
         "disclaimer": "이 상태는 공개 규칙 기반 모델의 참고용 해석이며 특정 이용자에 대한 개별 매매 지시가 아닙니다.",
-        "signal_date": "2026-04-10",
-        "data_asof_date": "2026-04-10",
-        "generated_at": "2026-04-10T18:59:22",
+        "signal_date": "2026-04-14",
+        "data_asof_date": "2026-04-14",
+        "generated_at": "2026-04-14T20:42:14",
         "state_chips": [
           {
             "state": "매수",
@@ -1014,7 +29,7 @@
           },
           {
             "state": "보유",
-            "count": 19
+            "count": 29
           },
           {
             "state": "주의",
@@ -1046,77 +61,203 @@
           {
             "section_key": "held",
             "title": "보유 종목 신호",
-            "record_count": 25,
+            "record_count": 35,
             "state_counts": {
               "매수": 0,
-              "보유": 19,
+              "보유": 29,
               "주의": 6,
               "매도": 0,
               "매수 대기": 0
             },
             "signals": [
               {
-                "ticker": "003380",
-                "security_name": "하림지주",
+                "ticker": "000250",
+                "security_name": "삼천당제약",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-08",
+                "entry_score": 0.6785714285714285,
+                "exit_risk_score": 0.16666666666666666
+              },
+              {
+                "ticker": "000270",
+                "security_name": "기아",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-10",
+                "entry_score": 0.37957142857142856,
+                "exit_risk_score": 0.16666666666666666
+              },
+              {
+                "ticker": "000660",
+                "security_name": "SK하이닉스",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.37474999999999997,
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.3264285714285714,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "032190",
-                "security_name": "다우데이타",
+                "ticker": "000720",
+                "security_name": "현대건설",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.39292857142857146,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "000880",
+                "security_name": "한화",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.31475,
+                "entry_score": 0.5462142857142857,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "032820",
-                "security_name": "우리기술",
+                "ticker": "003380",
+                "security_name": "하림지주",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.6525,
+                "exit_risk_score": 0.16666666666666666
+              },
+              {
+                "ticker": "005290",
+                "security_name": "동진쎄미켐",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-08",
+                "entry_score": 0.6114285714285714,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "005380",
+                "security_name": "현대차",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-10",
+                "entry_score": 0.40264285714285714,
+                "exit_risk_score": 0.16666666666666666
+              },
+              {
+                "ticker": "005830",
+                "security_name": "DB손해보험",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.36875,
+                "entry_score": 0.5085714285714286,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "043260",
-                "security_name": "성호전자",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.35624999999999996,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "052020",
-                "security_name": "에스티큐브",
+                "ticker": "005940",
+                "security_name": "NH투자증권",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5492499999999999,
+                "entry_score": 0.5202142857142856,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "056080",
-                "security_name": "유진로봇",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.5767499999999999,
-                "exit_risk_score": 0.25
+                "ticker": "006400",
+                "security_name": "삼성SDI",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.45892857142857135,
+                "exit_risk_score": 0.0
               },
               {
-                "ticker": "058610",
-                "security_name": "에스피지",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "ticker": "006800",
+                "security_name": "미래에셋증권",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.35824999999999996,
-                "exit_risk_score": 0.25
+                "entry_score": 0.38221428571428573,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "010120",
+                "security_name": "LS ELECTRIC",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다. 60일선 기울기가 둔화되거나 약세로 돌아섰습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.31649999999999995,
+                "exit_risk_score": 0.3333333333333333
+              },
+              {
+                "ticker": "010950",
+                "security_name": "S-Oil",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.4188571428571428,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "017670",
+                "security_name": "SK텔레콤",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.2978571428571428,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "028050",
+                "security_name": "삼성E&A",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.2762857142857143,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "032830",
+                "security_name": "삼성생명",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.4225714285714286,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "034730",
+                "security_name": "SK",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-08",
+                "entry_score": 0.46021428571428574,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "039490",
+                "security_name": "키움증권",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.49678571428571433,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "047810",
+                "security_name": "한국항공우주",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.5101428571428571,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "052690",
+                "security_name": "한전기술",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.38021428571428567,
+                "exit_risk_score": 0.0
               },
               {
                 "ticker": "069500",
@@ -1124,53 +265,44 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.12649999999999995,
+                "entry_score": 0.20642857142857143,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "082920",
-                "security_name": "비츠로셀",
+                "ticker": "071050",
+                "security_name": "한국금융지주",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.4792499999999999,
+                "entry_score": 0.4859999999999999,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "095340",
-                "security_name": "ISC",
+                "ticker": "079550",
+                "security_name": "LIG넥스원",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.28075,
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.2671428571428571,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "102940",
-                "security_name": "코오롱생명과학",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.48274999999999996,
-                "exit_risk_score": 0.25
-              },
-              {
-                "ticker": "124500",
-                "security_name": "아이티센글로벌",
+                "ticker": "084370",
+                "security_name": "유진테크",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.40675,
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.6303571428571428,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "126340",
-                "security_name": "비나텍",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.5707499999999999,
-                "exit_risk_score": 0.25
+                "ticker": "088350",
+                "security_name": "한화생명",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.5126428571428572,
+                "exit_risk_score": 0.0
               },
               {
                 "ticker": "161510",
@@ -1178,25 +310,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.14899999999999997,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "174900",
-                "security_name": "앱클론",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.60125,
-                "exit_risk_score": 0.25
-              },
-              {
-                "ticker": "189300",
-                "security_name": "인텔리안테크",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.39824999999999994,
+                "entry_score": 0.2042857142857143,
                 "exit_risk_score": 0.0
               },
               {
@@ -1205,52 +319,52 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.12949999999999998,
+                "entry_score": 0.1846428571428571,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "218410",
-                "security_name": "RFHIC",
+                "ticker": "267250",
+                "security_name": "HD현대",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.37957142857142856,
+                "exit_risk_score": 0.16666666666666666
+              },
+              {
+                "ticker": "267270",
+                "security_name": "HD건설기계",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.28825,
+                "entry_score": 0.37007142857142855,
                 "exit_risk_score": 0.0
               },
               {
-                "ticker": "272290",
-                "security_name": "이녹스첨단소재",
+                "ticker": "272210",
+                "security_name": "한화시스템",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.4315714285714286,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "298040",
+                "security_name": "효성중공업",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.3884285714285714,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "402340",
+                "security_name": "SK스퀘어",
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.5552499999999999,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "319400",
-                "security_name": "현대무벡스",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.39325,
-                "exit_risk_score": 0.0
-              },
-              {
-                "ticker": "323280",
-                "security_name": "태성",
-                "current_state": "주의",
-                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.33575,
-                "exit_risk_score": 0.25
-              },
-              {
-                "ticker": "440110",
-                "security_name": "파두",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.34975,
+                "entry_score": 0.2985,
                 "exit_risk_score": 0.0
               },
               {
@@ -1259,7 +373,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.16199999999999995,
+                "entry_score": 0.2164285714285714,
                 "exit_risk_score": 0.0
               },
               {
@@ -1268,17 +382,904 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.13149999999999995,
+                "entry_score": 0.20928571428571424,
+                "exit_risk_score": 0.0
+              }
+            ]
+          }
+        ],
+        "profile_code": "fundamental_slow"
+      },
+      "signals": [
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "000250",
+          "model_code": "BALANCED",
+          "current_state": "주의",
+          "security_name": "삼천당제약",
+          "latest_state_change_date": "2026-04-08",
+          "reason_tags": [
+            "below_ma60_warning"
+          ],
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.6785714285714285,
+          "exit_risk_score": 0.16666666666666666,
+          "is_recommended": true,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "000270",
+          "model_code": "BALANCED",
+          "current_state": "주의",
+          "security_name": "기아",
+          "latest_state_change_date": "2026-04-10",
+          "reason_tags": [
+            "below_ma60_warning"
+          ],
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.37957142857142856,
+          "exit_risk_score": 0.16666666666666666,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "000660",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "SK하이닉스",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.3264285714285714,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "000720",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "현대건설",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.39292857142857146,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "000880",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "한화",
+          "latest_state_change_date": "2026-04-08",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.5462142857142857,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "003380",
+          "model_code": "BALANCED",
+          "current_state": "주의",
+          "security_name": "하림지주",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "below_ma60_warning"
+          ],
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.6525,
+          "exit_risk_score": 0.16666666666666666,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "005290",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "동진쎄미켐",
+          "latest_state_change_date": "2026-04-08",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.6114285714285714,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "005380",
+          "model_code": "BALANCED",
+          "current_state": "주의",
+          "security_name": "현대차",
+          "latest_state_change_date": "2026-04-10",
+          "reason_tags": [
+            "below_ma60_warning"
+          ],
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.40264285714285714,
+          "exit_risk_score": 0.16666666666666666,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "005830",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "DB손해보험",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.5085714285714286,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "005940",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "NH투자증권",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.5202142857142856,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "006400",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "삼성SDI",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.45892857142857135,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "006800",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "미래에셋증권",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.38221428571428573,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "010120",
+          "model_code": "BALANCED",
+          "current_state": "주의",
+          "security_name": "LS ELECTRIC",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "below_ma60_warning",
+            "ma60_slope_warning"
+          ],
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다. 60일선 기울기가 둔화되거나 약세로 돌아섰습니다.",
+          "entry_score": 0.31649999999999995,
+          "exit_risk_score": 0.3333333333333333,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "010950",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "S-Oil",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.4188571428571428,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "017670",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "SK텔레콤",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.2978571428571428,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "028050",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "삼성E&A",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.2762857142857143,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "032830",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "삼성생명",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.4225714285714286,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "034730",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "SK",
+          "latest_state_change_date": "2026-04-08",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.46021428571428574,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "039490",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "키움증권",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.49678571428571433,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "047810",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "한국항공우주",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.5101428571428571,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "052690",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "한전기술",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.38021428571428567,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "069500",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "KODEX 200",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.20642857142857143,
+          "exit_risk_score": 0.0,
+          "is_recommended": true,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "071050",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "한국금융지주",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.4859999999999999,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "079550",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "LIG넥스원",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.2671428571428571,
+          "exit_risk_score": 0.0,
+          "is_recommended": true,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "084370",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "유진테크",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.6303571428571428,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "088350",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "한화생명",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.5126428571428572,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "161510",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "PLUS 고배당주",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.2042857142857143,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "192720",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "파워 고배당저변동성",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.1846428571428571,
+          "exit_risk_score": 0.0,
+          "is_recommended": true,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "267250",
+          "model_code": "BALANCED",
+          "current_state": "주의",
+          "security_name": "HD현대",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "below_ma60_warning"
+          ],
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.37957142857142856,
+          "exit_risk_score": 0.16666666666666666,
+          "is_recommended": true,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "267270",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "HD건설기계",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.37007142857142855,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "272210",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "한화시스템",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.4315714285714286,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "298040",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "효성중공업",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.3884285714285714,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "402340",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "SK스퀘어",
+          "latest_state_change_date": "2026-04-08",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.2985,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "459580",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "KODEX CD금리액티브(합성)",
+          "latest_state_change_date": "2026-04-02",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.2164285714285714,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "498400",
+          "model_code": "BALANCED",
+          "current_state": "보유",
+          "security_name": "KODEX 200타겟위클리커버드콜",
+          "latest_state_change_date": "2026-04-03",
+          "reason_tags": [
+            "trend_and_state_ok"
+          ],
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.20928571428571424,
+          "exit_risk_score": 0.0,
+          "is_recommended": false,
+          "is_held": true
+        }
+      ]
+    },
+    {
+      "model_code": "GROWTH",
+      "model_name": "성장형",
+      "signal_date": "2026-04-14",
+      "record_count": 25,
+      "state_counts": {
+        "매수": 0,
+        "보유": 18,
+        "주의": 7,
+        "매도": 0,
+        "매수 대기": 0
+      },
+      "ui_block": {
+        "title": "전일 종가 기준 일간 신호",
+        "description": "이 신호는 전일 종가 기준으로 계산된 참고용 일간 점검 정보입니다.",
+        "disclaimer": "이 상태는 공개 규칙 기반 모델의 참고용 해석이며 특정 이용자에 대한 개별 매매 지시가 아닙니다.",
+        "signal_date": "2026-04-14",
+        "data_asof_date": "2026-04-14",
+        "generated_at": "2026-04-14T20:42:14",
+        "state_chips": [
+          {
+            "state": "매수",
+            "count": 0
+          },
+          {
+            "state": "보유",
+            "count": 18
+          },
+          {
+            "state": "주의",
+            "count": 7
+          },
+          {
+            "state": "매도",
+            "count": 0
+          },
+          {
+            "state": "매수 대기",
+            "count": 0
+          }
+        ],
+        "sections": [
+          {
+            "section_key": "recommended",
+            "title": "추천 종목 신호",
+            "record_count": 0,
+            "state_counts": {
+              "매수": 0,
+              "보유": 0,
+              "주의": 0,
+              "매도": 0,
+              "매수 대기": 0
+            },
+            "signals": []
+          },
+          {
+            "section_key": "held",
+            "title": "보유 종목 신호",
+            "record_count": 25,
+            "state_counts": {
+              "매수": 0,
+              "보유": 18,
+              "주의": 7,
+              "매도": 0,
+              "매수 대기": 0
+            },
+            "signals": [
+              {
+                "ticker": "003380",
+                "security_name": "하림지주",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.31925000000000003,
+                "exit_risk_score": 0.25
+              },
+              {
+                "ticker": "032190",
+                "security_name": "다우데이타",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-08",
+                "entry_score": 0.30274999999999996,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "032820",
+                "security_name": "우리기술",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.38475000000000004,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "043260",
+                "security_name": "성호전자",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.30024999999999996,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "052020",
+                "security_name": "에스티큐브",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.5332499999999999,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "056080",
+                "security_name": "유진로봇",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.5882499999999999,
+                "exit_risk_score": 0.25
+              },
+              {
+                "ticker": "058610",
+                "security_name": "에스피지",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.35424999999999995,
+                "exit_risk_score": 0.25
+              },
+              {
+                "ticker": "069500",
+                "security_name": "KODEX 200",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.13849999999999996,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "082920",
+                "security_name": "비츠로셀",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.4832499999999999,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "095340",
+                "security_name": "ISC",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.30874999999999997,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "102940",
+                "security_name": "코오롱생명과학",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-10",
+                "entry_score": 0.50725,
+                "exit_risk_score": 0.25
+              },
+              {
+                "ticker": "124500",
+                "security_name": "아이티센글로벌",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-08",
+                "entry_score": 0.40724999999999995,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "126340",
+                "security_name": "비나텍",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.54675,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "161510",
+                "security_name": "PLUS 고배당주",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.16099999999999995,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "174900",
+                "security_name": "앱클론",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.59775,
+                "exit_risk_score": 0.25
+              },
+              {
+                "ticker": "189300",
+                "security_name": "인텔리안테크",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.37024999999999997,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "192720",
+                "security_name": "파워 고배당저변동성",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.13349999999999998,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "218410",
+                "security_name": "RFHIC",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.28774999999999995,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "272290",
+                "security_name": "이녹스첨단소재",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-08",
+                "entry_score": 0.5512499999999999,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "319400",
+                "security_name": "현대무벡스",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-10",
+                "entry_score": 0.39724999999999994,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "323280",
+                "security_name": "태성",
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.34375,
+                "exit_risk_score": 0.25
+              },
+              {
+                "ticker": "440110",
+                "security_name": "파두",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.34925000000000006,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "459580",
+                "security_name": "KODEX CD금리액티브(합성)",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-02",
+                "entry_score": 0.18199999999999994,
+                "exit_risk_score": 0.0
+              },
+              {
+                "ticker": "498400",
+                "security_name": "KODEX 200타겟위클리커버드콜",
+                "current_state": "보유",
+                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+                "latest_state_change_date": "2026-04-03",
+                "entry_score": 0.151,
                 "exit_risk_score": 0.0
               },
               {
                 "ticker": "950160",
                 "security_name": "코오롱티슈진",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.56075,
-                "exit_risk_score": 0.0
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.51325,
+                "exit_risk_score": 0.25
               }
             ]
           }
@@ -1287,25 +1288,25 @@
       },
       "signals": [
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "003380",
           "model_code": "GROWTH",
-          "current_state": "보유",
+          "current_state": "주의",
           "security_name": "하림지주",
-          "latest_state_change_date": "2026-04-10",
+          "latest_state_change_date": "2026-04-14",
           "reason_tags": [
-            "trend_and_state_ok"
+            "below_ma60_warning"
           ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.37474999999999997,
-          "exit_risk_score": 0.0,
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.31925000000000003,
+          "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "032190",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1315,14 +1316,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.31475,
+          "entry_score": 0.30274999999999996,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "032820",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1332,14 +1333,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.36875,
+          "entry_score": 0.38475000000000004,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "043260",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1349,14 +1350,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.35624999999999996,
+          "entry_score": 0.30024999999999996,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "052020",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1366,14 +1367,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5492499999999999,
+          "entry_score": 0.5332499999999999,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "056080",
           "model_code": "GROWTH",
           "current_state": "주의",
@@ -1383,14 +1384,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.5767499999999999,
+          "entry_score": 0.5882499999999999,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "058610",
           "model_code": "GROWTH",
           "current_state": "주의",
@@ -1400,14 +1401,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.35824999999999996,
+          "entry_score": 0.35424999999999995,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "069500",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1417,14 +1418,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.12649999999999995,
+          "entry_score": 0.13849999999999996,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "082920",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1434,14 +1435,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4792499999999999,
+          "entry_score": 0.4832499999999999,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "095340",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1451,14 +1452,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.28075,
+          "entry_score": 0.30874999999999997,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "102940",
           "model_code": "GROWTH",
           "current_state": "주의",
@@ -1468,14 +1469,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.48274999999999996,
+          "entry_score": 0.50725,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "124500",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1485,31 +1486,31 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.40675,
+          "entry_score": 0.40724999999999995,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "126340",
           "model_code": "GROWTH",
-          "current_state": "주의",
+          "current_state": "보유",
           "security_name": "비나텍",
-          "latest_state_change_date": "2026-04-08",
+          "latest_state_change_date": "2026-04-14",
           "reason_tags": [
-            "below_ma60_warning"
+            "trend_and_state_ok"
           ],
-          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.5707499999999999,
-          "exit_risk_score": 0.25,
+          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
+          "entry_score": 0.54675,
+          "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "161510",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1519,14 +1520,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.14899999999999997,
+          "entry_score": 0.16099999999999995,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "174900",
           "model_code": "GROWTH",
           "current_state": "주의",
@@ -1536,14 +1537,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.60125,
+          "entry_score": 0.59775,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "189300",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1553,14 +1554,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.39824999999999994,
+          "entry_score": 0.37024999999999997,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "192720",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1570,14 +1571,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.12949999999999998,
+          "entry_score": 0.13349999999999998,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "218410",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1587,14 +1588,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.28825,
+          "entry_score": 0.28774999999999995,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "272290",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1604,14 +1605,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5552499999999999,
+          "entry_score": 0.5512499999999999,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "319400",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1621,14 +1622,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.39325,
+          "entry_score": 0.39724999999999994,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "323280",
           "model_code": "GROWTH",
           "current_state": "주의",
@@ -1638,14 +1639,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.33575,
+          "entry_score": 0.34375,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "440110",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1655,14 +1656,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.34975,
+          "entry_score": 0.34925000000000006,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "459580",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1672,14 +1673,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.16199999999999995,
+          "entry_score": 0.18199999999999994,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "498400",
           "model_code": "GROWTH",
           "current_state": "보유",
@@ -1689,25 +1690,25 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.13149999999999995,
+          "entry_score": 0.151,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "950160",
           "model_code": "GROWTH",
-          "current_state": "보유",
+          "current_state": "주의",
           "security_name": "코오롱티슈진",
-          "latest_state_change_date": "2026-04-02",
+          "latest_state_change_date": "2026-04-14",
           "reason_tags": [
-            "trend_and_state_ok"
+            "below_ma60_warning"
           ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.56075,
-          "exit_risk_score": 0.0,
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.51325,
+          "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         }
@@ -1716,12 +1717,12 @@
     {
       "model_code": "STABLE",
       "model_name": "안정형",
-      "signal_date": "2026-04-10",
+      "signal_date": "2026-04-14",
       "record_count": 35,
       "state_counts": {
         "매수": 0,
-        "보유": 32,
-        "주의": 3,
+        "보유": 29,
+        "주의": 6,
         "매도": 0,
         "매수 대기": 0
       },
@@ -1729,9 +1730,9 @@
         "title": "전일 종가 기준 일간 신호",
         "description": "이 신호는 전일 종가 기준으로 계산된 참고용 일간 점검 정보입니다.",
         "disclaimer": "이 상태는 공개 규칙 기반 모델의 참고용 해석이며 특정 이용자에 대한 개별 매매 지시가 아닙니다.",
-        "signal_date": "2026-04-10",
-        "data_asof_date": "2026-04-10",
-        "generated_at": "2026-04-10T18:59:22",
+        "signal_date": "2026-04-14",
+        "data_asof_date": "2026-04-14",
+        "generated_at": "2026-04-14T20:42:14",
         "state_chips": [
           {
             "state": "매수",
@@ -1739,11 +1740,11 @@
           },
           {
             "state": "보유",
-            "count": 32
+            "count": 29
           },
           {
             "state": "주의",
-            "count": 3
+            "count": 6
           },
           {
             "state": "매도",
@@ -1774,8 +1775,8 @@
             "record_count": 35,
             "state_counts": {
               "매수": 0,
-              "보유": 32,
-              "주의": 3,
+              "보유": 29,
+              "주의": 6,
               "매도": 0,
               "매수 대기": 0
             },
@@ -1786,7 +1787,7 @@
                 "current_state": "주의",
                 "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.6842857142857143,
+                "entry_score": 0.6785714285714285,
                 "exit_risk_score": 0.25
               },
               {
@@ -1795,7 +1796,7 @@
                 "current_state": "주의",
                 "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
                 "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.3931428571428571,
+                "entry_score": 0.37957142857142856,
                 "exit_risk_score": 0.25
               },
               {
@@ -1804,7 +1805,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.3378571428571428,
+                "entry_score": 0.3264285714285714,
                 "exit_risk_score": 0.0
               },
               {
@@ -1813,7 +1814,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.3900714285714286,
+                "entry_score": 0.39292857142857146,
                 "exit_risk_score": 0.0
               },
               {
@@ -1822,17 +1823,17 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.5347857142857142,
+                "entry_score": 0.5462142857142857,
                 "exit_risk_score": 0.0
               },
               {
                 "ticker": "003380",
                 "security_name": "하림지주",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.74,
-                "exit_risk_score": 0.0
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.6525,
+                "exit_risk_score": 0.25
               },
               {
                 "ticker": "005290",
@@ -1840,7 +1841,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.6460714285714286,
+                "entry_score": 0.6114285714285714,
                 "exit_risk_score": 0.0
               },
               {
@@ -1849,7 +1850,7 @@
                 "current_state": "주의",
                 "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
                 "latest_state_change_date": "2026-04-10",
-                "entry_score": 0.41121428571428575,
+                "entry_score": 0.40264285714285714,
                 "exit_risk_score": 0.25
               },
               {
@@ -1858,7 +1859,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5142857142857142,
+                "entry_score": 0.5085714285714286,
                 "exit_risk_score": 0.0
               },
               {
@@ -1867,7 +1868,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5177142857142857,
+                "entry_score": 0.5202142857142856,
                 "exit_risk_score": 0.0
               },
               {
@@ -1876,7 +1877,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.44499999999999995,
+                "entry_score": 0.45892857142857135,
                 "exit_risk_score": 0.0
               },
               {
@@ -1885,17 +1886,17 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.41364285714285715,
+                "entry_score": 0.38221428571428573,
                 "exit_risk_score": 0.0
               },
               {
                 "ticker": "010120",
                 "security_name": "LS ELECTRIC",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.3818571428571428,
-                "exit_risk_score": 0.0
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다. 60일선 기울기가 둔화되거나 약세로 돌아섰습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.31649999999999995,
+                "exit_risk_score": 0.5
               },
               {
                 "ticker": "010950",
@@ -1903,7 +1904,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.4017142857142857,
+                "entry_score": 0.4188571428571428,
                 "exit_risk_score": 0.0
               },
               {
@@ -1912,7 +1913,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.2817857142857143,
+                "entry_score": 0.2978571428571428,
                 "exit_risk_score": 0.0
               },
               {
@@ -1921,7 +1922,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.27378571428571424,
+                "entry_score": 0.2762857142857143,
                 "exit_risk_score": 0.0
               },
               {
@@ -1930,7 +1931,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.44007142857142856,
+                "entry_score": 0.4225714285714286,
                 "exit_risk_score": 0.0
               },
               {
@@ -1939,7 +1940,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.4737857142857142,
+                "entry_score": 0.46021428571428574,
                 "exit_risk_score": 0.0
               },
               {
@@ -1948,7 +1949,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5257142857142856,
+                "entry_score": 0.49678571428571433,
                 "exit_risk_score": 0.0
               },
               {
@@ -1957,7 +1958,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.43585714285714283,
+                "entry_score": 0.5101428571428571,
                 "exit_risk_score": 0.0
               },
               {
@@ -1966,7 +1967,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.40878571428571425,
+                "entry_score": 0.38021428571428567,
                 "exit_risk_score": 0.0
               },
               {
@@ -1975,7 +1976,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.20357142857142857,
+                "entry_score": 0.20642857142857143,
                 "exit_risk_score": 0.0
               },
               {
@@ -1984,7 +1985,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5027857142857142,
+                "entry_score": 0.4859999999999999,
                 "exit_risk_score": 0.0
               },
               {
@@ -1993,7 +1994,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.2646428571428572,
+                "entry_score": 0.2671428571428571,
                 "exit_risk_score": 0.0
               },
               {
@@ -2002,7 +2003,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.6275000000000001,
+                "entry_score": 0.6303571428571428,
                 "exit_risk_score": 0.0
               },
               {
@@ -2011,7 +2012,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.5122857142857142,
+                "entry_score": 0.5126428571428572,
                 "exit_risk_score": 0.0
               },
               {
@@ -2020,7 +2021,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.21249999999999997,
+                "entry_score": 0.2042857142857143,
                 "exit_risk_score": 0.0
               },
               {
@@ -2029,17 +2030,17 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.18178571428571424,
+                "entry_score": 0.1846428571428571,
                 "exit_risk_score": 0.0
               },
               {
                 "ticker": "267250",
                 "security_name": "HD현대",
-                "current_state": "보유",
-                "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-                "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.4581428571428571,
-                "exit_risk_score": 0.0
+                "current_state": "주의",
+                "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.37957142857142856,
+                "exit_risk_score": 0.25
               },
               {
                 "ticker": "267270",
@@ -2047,7 +2048,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.37042857142857144,
+                "entry_score": 0.37007142857142855,
                 "exit_risk_score": 0.0
               },
               {
@@ -2056,7 +2057,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.43442857142857144,
+                "entry_score": 0.4315714285714286,
                 "exit_risk_score": 0.0
               },
               {
@@ -2065,7 +2066,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.3830714285714285,
+                "entry_score": 0.3884285714285714,
                 "exit_risk_score": 0.0
               },
               {
@@ -2074,7 +2075,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-08",
-                "entry_score": 0.3585,
+                "entry_score": 0.2985,
                 "exit_risk_score": 0.0
               },
               {
@@ -2083,7 +2084,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.21928571428571425,
+                "entry_score": 0.2164285714285714,
                 "exit_risk_score": 0.0
               },
               {
@@ -2092,7 +2093,7 @@
                 "current_state": "보유",
                 "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.19464285714285712,
+                "entry_score": 0.20928571428571424,
                 "exit_risk_score": 0.0
               }
             ]
@@ -2102,8 +2103,8 @@
       },
       "signals": [
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "000250",
           "model_code": "STABLE",
           "current_state": "주의",
@@ -2113,14 +2114,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.6842857142857143,
+          "entry_score": 0.6785714285714285,
           "exit_risk_score": 0.25,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "000270",
           "model_code": "STABLE",
           "current_state": "주의",
@@ -2130,14 +2131,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.3931428571428571,
+          "entry_score": 0.37957142857142856,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "000660",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2147,14 +2148,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3378571428571428,
+          "entry_score": 0.3264285714285714,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "000720",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2164,14 +2165,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3900714285714286,
+          "entry_score": 0.39292857142857146,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "000880",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2181,31 +2182,31 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5347857142857142,
+          "entry_score": 0.5462142857142857,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "003380",
           "model_code": "STABLE",
-          "current_state": "보유",
+          "current_state": "주의",
           "security_name": "하림지주",
-          "latest_state_change_date": "2026-04-10",
+          "latest_state_change_date": "2026-04-14",
           "reason_tags": [
-            "trend_and_state_ok"
+            "below_ma60_warning"
           ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.74,
-          "exit_risk_score": 0.0,
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.6525,
+          "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "005290",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2215,14 +2216,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.6460714285714286,
+          "entry_score": 0.6114285714285714,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "005380",
           "model_code": "STABLE",
           "current_state": "주의",
@@ -2232,14 +2233,14 @@
             "below_ma60_warning"
           ],
           "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
-          "entry_score": 0.41121428571428575,
+          "entry_score": 0.40264285714285714,
           "exit_risk_score": 0.25,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "005830",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2249,14 +2250,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5142857142857142,
+          "entry_score": 0.5085714285714286,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "005940",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2266,14 +2267,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5177142857142857,
+          "entry_score": 0.5202142857142856,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "006400",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2283,14 +2284,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.44499999999999995,
+          "entry_score": 0.45892857142857135,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "006800",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2300,31 +2301,32 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.41364285714285715,
+          "entry_score": 0.38221428571428573,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "010120",
           "model_code": "STABLE",
-          "current_state": "보유",
+          "current_state": "주의",
           "security_name": "LS ELECTRIC",
-          "latest_state_change_date": "2026-04-02",
+          "latest_state_change_date": "2026-04-14",
           "reason_tags": [
-            "trend_and_state_ok"
+            "below_ma60_warning",
+            "ma60_slope_warning"
           ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3818571428571428,
-          "exit_risk_score": 0.0,
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다. 60일선 기울기가 둔화되거나 약세로 돌아섰습니다.",
+          "entry_score": 0.31649999999999995,
+          "exit_risk_score": 0.5,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "010950",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2334,14 +2336,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4017142857142857,
+          "entry_score": 0.4188571428571428,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "017670",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2351,14 +2353,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.2817857142857143,
+          "entry_score": 0.2978571428571428,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "028050",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2368,14 +2370,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.27378571428571424,
+          "entry_score": 0.2762857142857143,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "032830",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2385,14 +2387,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.44007142857142856,
+          "entry_score": 0.4225714285714286,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "034730",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2402,14 +2404,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4737857142857142,
+          "entry_score": 0.46021428571428574,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "039490",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2419,14 +2421,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5257142857142856,
+          "entry_score": 0.49678571428571433,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "047810",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2436,14 +2438,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.43585714285714283,
+          "entry_score": 0.5101428571428571,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "052690",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2453,14 +2455,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.40878571428571425,
+          "entry_score": 0.38021428571428567,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "069500",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2470,14 +2472,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.20357142857142857,
+          "entry_score": 0.20642857142857143,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "071050",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2487,14 +2489,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5027857142857142,
+          "entry_score": 0.4859999999999999,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "079550",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2504,14 +2506,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.2646428571428572,
+          "entry_score": 0.2671428571428571,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "084370",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2521,14 +2523,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.6275000000000001,
+          "entry_score": 0.6303571428571428,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "088350",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2538,14 +2540,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.5122857142857142,
+          "entry_score": 0.5126428571428572,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "161510",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2555,14 +2557,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.21249999999999997,
+          "entry_score": 0.2042857142857143,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "192720",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2572,31 +2574,31 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.18178571428571424,
+          "entry_score": 0.1846428571428571,
           "exit_risk_score": 0.0,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "267250",
           "model_code": "STABLE",
-          "current_state": "보유",
+          "current_state": "주의",
           "security_name": "HD현대",
-          "latest_state_change_date": "2026-04-08",
+          "latest_state_change_date": "2026-04-14",
           "reason_tags": [
-            "trend_and_state_ok"
+            "below_ma60_warning"
           ],
-          "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.4581428571428571,
-          "exit_risk_score": 0.0,
+          "reason_summary": "보유 종목은 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 아래에 있어 추세가 약해졌습니다.",
+          "entry_score": 0.37957142857142856,
+          "exit_risk_score": 0.25,
           "is_recommended": true,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "267270",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2606,14 +2608,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.37042857142857144,
+          "entry_score": 0.37007142857142855,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "272210",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2623,14 +2625,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.43442857142857144,
+          "entry_score": 0.4315714285714286,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "298040",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2640,14 +2642,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3830714285714285,
+          "entry_score": 0.3884285714285714,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "402340",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2657,14 +2659,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.3585,
+          "entry_score": 0.2985,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "459580",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2674,14 +2676,14 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.21928571428571425,
+          "entry_score": 0.2164285714285714,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "498400",
           "model_code": "STABLE",
           "current_state": "보유",
@@ -2691,7 +2693,7 @@
             "trend_and_state_ok"
           ],
           "reason_summary": "중장기 추세가 유지돼 보유 기준을 충족하고 있습니다.",
-          "entry_score": 0.19464285714285712,
+          "entry_score": 0.20928571428571424,
           "exit_risk_score": 0.0,
           "is_recommended": false,
           "is_held": true
@@ -2701,12 +2703,12 @@
     {
       "model_code": "T_ETF_DISCOVERY",
       "model_name": "T ETF 발굴형",
-      "signal_date": "2026-04-10",
-      "record_count": 2,
+      "signal_date": "2026-04-14",
+      "record_count": 5,
       "state_counts": {
         "매수": 0,
         "보유": 0,
-        "주의": 2,
+        "주의": 5,
         "매도": 0,
         "매수 대기": 0
       },
@@ -2714,9 +2716,9 @@
         "title": "전일 종가 기준 일간 신호",
         "description": "이 신호는 전일 종가 기준으로 계산된 참고용 일간 점검 정보입니다.",
         "disclaimer": "이 상태는 공개 규칙 기반 모델의 참고용 해석이며 특정 이용자에 대한 개별 매매 지시가 아닙니다.",
-        "signal_date": "2026-04-10",
-        "data_asof_date": "2026-04-10",
-        "generated_at": "2026-04-10T18:59:22",
+        "signal_date": "2026-04-14",
+        "data_asof_date": "2026-04-14",
+        "generated_at": "2026-04-14T20:42:14",
         "state_chips": [
           {
             "state": "매수",
@@ -2728,7 +2730,7 @@
           },
           {
             "state": "주의",
-            "count": 2
+            "count": 5
           },
           {
             "state": "매도",
@@ -2743,22 +2745,49 @@
           {
             "section_key": "recommended",
             "title": "추천 종목 신호",
-            "record_count": 2,
+            "record_count": 5,
             "state_counts": {
               "매수": 0,
               "보유": 0,
-              "주의": 2,
+              "주의": 5,
               "매도": 0,
               "매수 대기": 0
             },
             "signals": [
               {
+                "ticker": "261220",
+                "security_name": "KODEX WTI원유선물(H)",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.22999999999999998,
+                "exit_risk_score": null
+              },
+              {
                 "ticker": "305540",
                 "security_name": "TIGER 2차전지테마",
                 "current_state": "주의",
-                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 단기 과열 부담이 커 바로 진입하기엔 부담이 있습니다.",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.10624999999999996,
+                "entry_score": 0.1575,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "305720",
+                "security_name": "KODEX 2차전지산업",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.215,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "364980",
+                "security_name": "TIGER 2차전지TOP10",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 단기 과열 부담이 커 바로 진입하기엔 부담이 있습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.09999999999999995,
                 "exit_risk_score": null
               },
               {
@@ -2767,7 +2796,7 @@
                 "current_state": "주의",
                 "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
                 "latest_state_change_date": "2026-04-02",
-                "entry_score": 0.24999999999999997,
+                "entry_score": 0.27249999999999996,
                 "exit_risk_score": null
               }
             ]
@@ -2790,8 +2819,26 @@
       },
       "signals": [
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "261220",
+          "model_code": "T_ETF_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "KODEX WTI원유선물(H)",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "weak_fund_accel",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.22999999999999998,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "305540",
           "model_code": "T_ETF_DISCOVERY",
           "current_state": "주의",
@@ -2799,18 +2846,54 @@
           "latest_state_change_date": "2026-04-02",
           "reason_tags": [
             "weak_fund_accel",
-            "overheated",
             "entry_score_below_threshold"
           ],
-          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 단기 과열 부담이 커 바로 진입하기엔 부담이 있습니다.",
-          "entry_score": 0.10624999999999996,
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.1575,
           "exit_risk_score": null,
           "is_recommended": true,
           "is_held": false
         },
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "305720",
+          "model_code": "T_ETF_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "KODEX 2차전지산업",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "weak_fund_accel",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.215,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "364980",
+          "model_code": "T_ETF_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "TIGER 2차전지TOP10",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "weak_fund_accel",
+            "overheated",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 단기 과열 부담이 커 바로 진입하기엔 부담이 있습니다.",
+          "entry_score": 0.09999999999999995,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "462010",
           "model_code": "T_ETF_DISCOVERY",
           "current_state": "주의",
@@ -2821,7 +2904,7 @@
             "entry_score_below_threshold"
           ],
           "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
-          "entry_score": 0.24999999999999997,
+          "entry_score": 0.27249999999999996,
           "exit_risk_score": null,
           "is_recommended": true,
           "is_held": false
@@ -2831,12 +2914,12 @@
     {
       "model_code": "T_STOCK_DISCOVERY",
       "model_name": "T 주식 발굴형",
-      "signal_date": "2026-04-10",
-      "record_count": 1,
+      "signal_date": "2026-04-14",
+      "record_count": 7,
       "state_counts": {
         "매수": 0,
         "보유": 0,
-        "주의": 1,
+        "주의": 7,
         "매도": 0,
         "매수 대기": 0
       },
@@ -2844,9 +2927,9 @@
         "title": "전일 종가 기준 일간 신호",
         "description": "이 신호는 전일 종가 기준으로 계산된 참고용 일간 점검 정보입니다.",
         "disclaimer": "이 상태는 공개 규칙 기반 모델의 참고용 해석이며 특정 이용자에 대한 개별 매매 지시가 아닙니다.",
-        "signal_date": "2026-04-10",
-        "data_asof_date": "2026-04-10",
-        "generated_at": "2026-04-10T18:59:22",
+        "signal_date": "2026-04-14",
+        "data_asof_date": "2026-04-14",
+        "generated_at": "2026-04-14T20:42:14",
         "state_chips": [
           {
             "state": "매수",
@@ -2858,7 +2941,7 @@
           },
           {
             "state": "주의",
-            "count": 1
+            "count": 7
           },
           {
             "state": "매도",
@@ -2873,22 +2956,76 @@
           {
             "section_key": "recommended",
             "title": "추천 종목 신호",
-            "record_count": 1,
+            "record_count": 7,
             "state_counts": {
               "매수": 0,
               "보유": 0,
-              "주의": 1,
+              "주의": 7,
               "매도": 0,
               "매수 대기": 0
             },
             "signals": [
               {
+                "ticker": "001430",
+                "security_name": "세아베스틸지주",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.4785714285714286,
+                "exit_risk_score": null
+              },
+              {
                 "ticker": "011200",
                 "security_name": "HMM",
                 "current_state": "주의",
-                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 단기 과열 부담이 커 바로 진입하기엔 부담이 있습니다.",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
                 "latest_state_change_date": "2026-04-03",
-                "entry_score": 0.6000000000000001,
+                "entry_score": 0.30714285714285705,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "022100",
+                "security_name": "포스코DX",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.3464285714285714,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "042700",
+                "security_name": "한미반도체",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.29642857142857143,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "272210",
+                "security_name": "한화시스템",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.4714285714285715,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "302440",
+                "security_name": "SK바이오사이언스",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 중기 추세가 장기 추세 위로 정렬되지 않았습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.33214285714285713,
+                "exit_risk_score": null
+              },
+              {
+                "ticker": "361610",
+                "security_name": "SK아이이테크놀로지",
+                "current_state": "주의",
+                "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 중기 추세가 장기 추세 위로 정렬되지 않았습니다.",
+                "latest_state_change_date": "2026-04-14",
+                "entry_score": 0.25535714285714284,
                 "exit_risk_score": null
               }
             ]
@@ -2911,18 +3048,130 @@
       },
       "signals": [
         {
-          "signal_date": "2026-04-10",
-          "data_asof_date": "2026-04-10",
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "001430",
+          "model_code": "T_STOCK_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "세아베스틸지주",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "close_below_ma60",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.4785714285714286,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
           "ticker": "011200",
           "model_code": "T_STOCK_DISCOVERY",
           "current_state": "주의",
           "security_name": "HMM",
           "latest_state_change_date": "2026-04-03",
           "reason_tags": [
-            "overheated"
+            "weak_fund_accel",
+            "entry_score_below_threshold"
           ],
-          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 단기 과열 부담이 커 바로 진입하기엔 부담이 있습니다.",
-          "entry_score": 0.6000000000000001,
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.30714285714285705,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "022100",
+          "model_code": "T_STOCK_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "포스코DX",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "close_below_ma60",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.3464285714285714,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "042700",
+          "model_code": "T_STOCK_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "한미반도체",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "weak_fund_accel",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 실적 가속 신호가 아직 충분히 강하지 않습니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.29642857142857143,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "272210",
+          "model_code": "T_STOCK_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "한화시스템",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종합 진입 점수가 기준선에 못 미쳤습니다.",
+          "entry_score": 0.4714285714285715,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "302440",
+          "model_code": "T_STOCK_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "SK바이오사이언스",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "close_below_ma60",
+            "ma60_not_above_ma120",
+            "ma60_slope_not_positive",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 중기 추세가 장기 추세 위로 정렬되지 않았습니다.",
+          "entry_score": 0.33214285714285713,
+          "exit_risk_score": null,
+          "is_recommended": true,
+          "is_held": false
+        },
+        {
+          "signal_date": "2026-04-14",
+          "data_asof_date": "2026-04-14",
+          "ticker": "361610",
+          "model_code": "T_STOCK_DISCOVERY",
+          "current_state": "주의",
+          "security_name": "SK아이이테크놀로지",
+          "latest_state_change_date": "2026-04-14",
+          "reason_tags": [
+            "close_below_ma60",
+            "ma60_not_above_ma120",
+            "ma60_slope_not_positive",
+            "entry_score_below_threshold"
+          ],
+          "reason_summary": "추천 후보는 추가 확인이 필요한 경고 상태입니다. 종가가 60일선 위에 올라서지 못했습니다. 중기 추세가 장기 추세 위로 정렬되지 않았습니다.",
+          "entry_score": 0.25535714285714284,
           "exit_risk_score": null,
           "is_recommended": true,
           "is_held": false
