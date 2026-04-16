@@ -20,7 +20,7 @@ cd D:\Quant
 - `--include-etf`: build ETF universe latest alias, upsert `instrument_master`, and incrementally load ETF prices into `price.db`
 - `--etf-start`: first-load fallback start date for ETFs. Default is `2013-10-14`
 - `--asof` omitted: local today date is used automatically
-- Source fallback rule: if upstream universe/price artifact generation cannot resolve the requested `--asof` directly (for example, source API failure, delayed source update, or an actual non-trading day), the pipeline falls back to the latest compatible artifacts on or before the requested date
+- Source fallback rule: if upstream universe/price artifact generation cannot resolve the requested `--asof` directly (for example, source API failure, delayed source update, or an actual non-trading day), the stock universe builder now tries `pykrx -> Naver market-cap pages -> FinanceDataReader -> cache` before falling back to the latest compatible artifacts on or before the requested date
 - This means `S2`/`S3` stock outputs can still be published for the requested `asof`, while some source run files may still carry the most recent compatible trading-day end token in their filenames
 - Default storage: `quant_service.db` + `quant_service_detail.db`
 - Default mode rebuilds service web snapshots, admin new-entry tracker payload, and republishes canonical public/admin current files to GCS so the live website/admin tools can refresh without redeploy
@@ -40,6 +40,7 @@ cd D:\Quant
 ### Failure runbook
 
 - `price/regime/fundamentals` update failure: check external market data access first, then verify [price.db](D:/Quant/data/db/price.db), [regime.db](D:/Quant/data/db/regime.db), [fundamentals.db](D:/Quant/data/db/fundamentals.db) max dates
+- `KRX stock universe` source failure: [build_universe_krx.py](D:/Quant/src/collectors/universe/build_universe_krx.py) should fall back from `pykrx` to Naver market-cap pages, then FinanceDataReader, then cache. Confirm logs show `used_asof=<requested>, source=naver` before accepting a fresh non-cache fallback.
 - `ETF universe` failure: rerun [build_universe_etf_krx.py](D:/Quant/src/collectors/universe/build_universe_etf_krx.py) and check [universe_etf_master_latest.csv](D:/Quant/data/universe/universe_etf_master_latest.csv)
 - `ETF prices` failure: rerun [fetch_etf_prices_daily.py](D:/Quant/src/collectors/prices/fetch_etf_prices_daily.py) and check ETF rows in [price.db](D:/Quant/data/db/price.db) `prices_daily`
 - `S2` backtest failure: check latest files under [backtest_regime_refactor](D:/Quant/reports/backtest_regime_refactor) and confirm [universe_mix_top400_latest_fundready.csv](D:/Quant/data/universe/universe_mix_top400_latest_fundready.csv) exists

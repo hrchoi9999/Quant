@@ -1,14 +1,14 @@
 {
-  "asof": "2026-04-14",
-  "generated_at": "2026-04-14T20:42:14",
+  "asof": "2026-04-16",
+  "generated_at": "2026-04-16T19:59:41",
   "schema_version": "v1",
   "summary": {
     "model_count": 5,
-    "signal_count": 107,
+    "signal_count": 108,
     "state_counts": {
-      "매수": 0,
-      "보유": 76,
-      "주의": 31,
+      "매수": 2,
+      "보유": 86,
+      "주의": 20,
       "매도": 0,
       "매수 대기": 0
     },
@@ -24,12 +24,12 @@
     {
       "model_code": "BALANCED",
       "model_name": "균형형",
-      "signal_date": "2026-04-14",
+      "signal_date": "2026-04-16",
       "record_count": 35,
       "state_counts": {
         "매수": 0,
-        "보유": 29,
-        "주의": 6,
+        "보유": 32,
+        "주의": 3,
         "매도": 0,
         "매수 대기": 0
       }
@@ -37,12 +37,12 @@
     {
       "model_code": "GROWTH",
       "model_name": "성장형",
-      "signal_date": "2026-04-14",
+      "signal_date": "2026-04-16",
       "record_count": 25,
       "state_counts": {
         "매수": 0,
-        "보유": 18,
-        "주의": 7,
+        "보유": 22,
+        "주의": 3,
         "매도": 0,
         "매수 대기": 0
       }
@@ -50,12 +50,12 @@
     {
       "model_code": "STABLE",
       "model_name": "안정형",
-      "signal_date": "2026-04-14",
+      "signal_date": "2026-04-16",
       "record_count": 35,
       "state_counts": {
         "매수": 0,
-        "보유": 29,
-        "주의": 6,
+        "보유": 32,
+        "주의": 3,
         "매도": 0,
         "매수 대기": 0
       }
@@ -63,7 +63,7 @@
     {
       "model_code": "T_ETF_DISCOVERY",
       "model_name": "T ETF 발굴형",
-      "signal_date": "2026-04-14",
+      "signal_date": "2026-04-16",
       "record_count": 5,
       "state_counts": {
         "매수": 0,
@@ -76,12 +76,12 @@
     {
       "model_code": "T_STOCK_DISCOVERY",
       "model_name": "T 주식 발굴형",
-      "signal_date": "2026-04-14",
-      "record_count": 7,
+      "signal_date": "2026-04-16",
+      "record_count": 8,
       "state_counts": {
-        "매수": 0,
+        "매수": 2,
         "보유": 0,
-        "주의": 7,
+        "주의": 6,
         "매도": 0,
         "매수 대기": 0
       }

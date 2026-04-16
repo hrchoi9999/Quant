@@ -64,6 +64,40 @@ def _coerce_int_series(s: pd.Series) -> pd.Series:
     )
 
 
+def _is_naver_non_stock_name(name: str) -> bool:
+    text = str(name).strip()
+    upper = text.upper()
+    etf_prefixes = (
+        "KODEX",
+        "TIGER",
+        "ACE",
+        "SOL",
+        "PLUS",
+        "RISE",
+        "HANARO",
+        "ARIRANG",
+        "KOSEF",
+        "TIMEFOLIO",
+        "KBSTAR",
+        "WON",
+        "FOCUS",
+        "마이티",
+        "파워",
+        "히어로즈",
+        "TREX",
+        "UNICORN",
+        "마이다스",
+        "VITA",
+    )
+    if upper.startswith(etf_prefixes):
+        return True
+    if upper.endswith("ETN") or " ETN" in upper or "ETN " in upper:
+        return True
+    if "스팩" in text:
+        return True
+    return False
+
+
 def _standardize_master(df: pd.DataFrame, market: str) -> pd.DataFrame:
     df = df.copy()
 
@@ -196,6 +230,92 @@ def _build_master_pykrx(market: str, asof_req: str, max_back_days: int) -> Tuple
 
     df = pd.DataFrame(rows)
     return _standardize_master(df, market), asof
+
+
+# ----------------------------
+# naver
+# ----------------------------
+def _naver_last_page(soup) -> int:
+    last = 1
+    for a in soup.select("td.pgRR a, td.pgR a, a"):
+        href = a.get("href", "")
+        m = re.search(r"[?&]page=(\d+)", href)
+        if m:
+            last = max(last, int(m.group(1)))
+    return last
+
+
+def _build_master_naver(market: str, asof_req: str) -> Tuple[pd.DataFrame, str]:
+    import requests
+    from bs4 import BeautifulSoup
+
+    sosok_map = {"KOSPI": 0, "KOSDAQ": 1}
+    if market == "ALL":
+        frames = []
+        for child_market in ["KOSPI", "KOSDAQ"]:
+            frame, _ = _build_master_naver(child_market, asof_req)
+            frames.append(frame)
+        merged = pd.concat(frames, ignore_index=True).drop_duplicates(subset=["ticker"])
+        return _standardize_master(merged, market), asof_req
+    if market not in sosok_map:
+        raise RuntimeError(f"[naver] unsupported market={market}; supported=KOSPI,KOSDAQ,ALL")
+
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
+    sosok = sosok_map[market]
+    first_url = f"https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page=1"
+    response = session.get(first_url, timeout=30)
+    response.raise_for_status()
+    response.encoding = "euc-kr"
+    soup = BeautifulSoup(response.text, "lxml")
+    last_page = _naver_last_page(soup)
+
+    rows: list[dict[str, object]] = []
+    for page in range(1, last_page + 1):
+        if page == 1:
+            page_soup = soup
+        else:
+            url = f"https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}"
+            response = session.get(url, timeout=30)
+            response.raise_for_status()
+            response.encoding = "euc-kr"
+            page_soup = BeautifulSoup(response.text, "lxml")
+        for tr in page_soup.select("table.type_2 tr"):
+            link = tr.select_one("a.tltle")
+            if link is None:
+                continue
+            href = link.get("href", "")
+            m = re.search(r"code=(\d{6})", href)
+            if not m:
+                continue
+            tds = [td.get_text(strip=True) for td in tr.select("td")]
+            if len(tds) < 7:
+                continue
+            mcap_eok = str(tds[6]).replace(",", "").strip()
+            mcap_value = pd.to_numeric(mcap_eok, errors="coerce")
+            mcap = 0 if pd.isna(mcap_value) else int(mcap_value) * 100_000_000
+            if mcap <= 0:
+                continue
+            rows.append(
+                {
+                    "ticker": m.group(1),
+                    "name": link.get_text(strip=True),
+                    "market": market,
+                    "mcap": mcap,
+                }
+            )
+
+    if not rows:
+        raise RuntimeError(f"[naver] no rows parsed. market={market}, asof={asof_req}")
+    df = pd.DataFrame(rows)
+    before = len(df)
+    df = df[~df["name"].map(_is_naver_non_stock_name)].copy()
+    after = len(df)
+    if after == 0:
+        raise RuntimeError(f"[naver] all rows removed by non-stock filter. market={market}, before={before}")
+    if before != after:
+        print(f"[INFO] naver non-stock filter applied: before={before}, after={after}, removed={before-after}")
+    return _standardize_master(df, market), asof_req
 
 
 # ----------------------------
@@ -339,9 +459,9 @@ def main() -> None:
     ap.add_argument("--market", type=str, default="KOSPI", help="ALL|KOSPI|KOSDAQ|KONEX")
     ap.add_argument("--asof", type=str, default=None, help="YYYYMMDD (미지정 시 오늘)")
     ap.add_argument("--max-back-days", type=int, default=60)
-    ap.add_argument("--source", type=str, default="auto", choices=["auto", "pykrx", "fdr", "cache"])
-    ap.add_argument("--on-fail", type=str, default="auto", choices=["auto", "cache", "fdr", "raise"],
-                    help="source 지정 후 실패 시 동작 (auto=cache→fdr, cache=cache만, fdr=fdr만, raise=즉시 예외)")
+    ap.add_argument("--source", type=str, default="auto", choices=["auto", "pykrx", "naver", "fdr", "cache"])
+    ap.add_argument("--on-fail", type=str, default="auto", choices=["auto", "naver", "cache", "fdr", "raise"],
+                    help="source 지정 후 실패 시 동작 (auto=naver→fdr→cache, naver=naver만, cache=cache만, fdr=fdr만, raise=즉시 예외)")
 
     # NEW: active filter
     ap.add_argument("--price-db", type=str, default=None, help="예: D:\\Quant\\data\\db\\price.db")
@@ -373,6 +493,13 @@ def main() -> None:
             print(f"[WARN] source=fdr 실패: {e}")
             return None
 
+    def _try_naver():
+        try:
+            return _build_master_naver(market, asof_req)
+        except Exception as e:
+            print(f"[WARN] source=naver 실패: {e}")
+            return None
+
     def _try_cache():
         try:
             return _build_master_cache(project_root, market, asof_req)
@@ -383,12 +510,20 @@ def main() -> None:
 
     def _apply_on_fail(primary: str):
         # primary 소스가 실패했을 때, args.on_fail 정책에 따라 대체 소스를 시도합니다.
-        # - auto : cache -> fdr
+        # - auto : naver -> fdr -> cache
+        # - naver: naver
         # - cache: cache
         # - fdr  : fdr
         # - raise: 즉시 예외
         if args.on_fail == "raise":
             raise RuntimeError(f"source={primary} 지정했지만 실패했습니다. (on-fail=raise)")
+
+        if args.on_fail == "naver":
+            out2 = _try_naver()
+            if out2:
+                m2, a2 = out2
+                return m2, a2, "naver"
+            raise RuntimeError(f"source={primary} 실패 후 naver도 실패했습니다.")
 
         if args.on_fail == "cache":
             out2 = _try_cache()
@@ -404,16 +539,20 @@ def main() -> None:
                 return m2, a2, "fdr"
             raise RuntimeError(f"source={primary} 실패 후 fdr도 실패했습니다.")
 
-        # auto: cache -> fdr
-        out2 = _try_cache()
+        # auto: naver -> fdr -> cache. Cache is last so source breaks do not freeze universe unnecessarily.
+        out2 = _try_naver()
         if out2:
             m2, a2 = out2
-            return m2, a2, "cache"
+            return m2, a2, "naver"
         out3 = _try_fdr()
         if out3:
             m3, a3 = out3
             return m3, a3, "fdr"
-        raise RuntimeError(f"source={primary} 실패 후 cache/fdr 모두 실패했습니다.")
+        out4 = _try_cache()
+        if out4:
+            m4, a4 = out4
+            return m4, a4, "cache"
+        raise RuntimeError(f"source={primary} 실패 후 naver/fdr/cache 모두 실패했습니다.")
 
     if args.source == "pykrx":
         out = _try_pykrx()
@@ -431,6 +570,14 @@ def main() -> None:
         else:
             master, used_asof, used_source = _apply_on_fail("fdr")
 
+    elif args.source == "naver":
+        out = _try_naver()
+        if out:
+            master, used_asof = out
+            used_source = "naver"
+        else:
+            master, used_asof, used_source = _apply_on_fail("naver")
+
     elif args.source == "cache":
         out = _try_cache()
         if out:
@@ -440,23 +587,28 @@ def main() -> None:
             master, used_asof, used_source = _apply_on_fail("cache")
 
     else:
-        # auto: pykrx -> cache -> fdr  (mcap 안정성을 위해 cache를 fdr보다 우선)
+        # auto: pykrx -> naver -> fdr -> cache
         out = _try_pykrx()
         if out:
             master, used_asof = out
             used_source = "pykrx"
         else:
-            out = _try_cache()
+            out = _try_naver()
             if out:
                 master, used_asof = out
-                used_source = "cache"
+                used_source = "naver"
             else:
                 out = _try_fdr()
                 if out:
                     master, used_asof = out
                     used_source = "fdr"
                 else:
-                    raise RuntimeError("auto 소스: pykrx/cache/fdr 모두 실패했습니다.")
+                    out = _try_cache()
+                    if out:
+                        master, used_asof = out
+                        used_source = "cache"
+                    else:
+                        raise RuntimeError("auto 소스: pykrx/naver/fdr/cache 모두 실패했습니다.")
 
 
     # save master (1) 실제 used_asof 파일 (정확한 스냅샷 보존)

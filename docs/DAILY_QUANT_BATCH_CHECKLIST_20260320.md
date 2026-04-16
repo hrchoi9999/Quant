@@ -14,6 +14,7 @@ cd D:\Quant
 - [regime.db](D:/Quant/data/db/regime.db) `regime_history` max(date)
 - [features_s3.db](D:/Quant/data/db_s3/features_s3.db) `s3_price_features_daily` max(date)
 - ETF rows and latest date in [price.db](D:/Quant/data/db/price.db)
+- If `pykrx` stock universe returns 0 rows, confirm [build_universe_krx.py](D:/Quant/src/collectors/universe/build_universe_krx.py) uses the Naver fallback before cache.
 
 2. Model outputs
 - S2: [backtest_regime_refactor](D:/Quant/reports/backtest_regime_refactor)
@@ -48,6 +49,7 @@ cd D:\Quant
 - `stable / balanced / growth` profiles should all publish without missing holdings.
 - ETF core aliases should be present before S4/S5/S6 publish.
 - KRX universe and cache sources should be aligned before publish.
+- Stock universe fallback order is `pykrx -> Naver -> FinanceDataReader -> cache`; cache should be last, not the first non-pykrx fallback.
 - Web snapshot validation must pass before handoff.
 - Admin new-entry tracker validation must pass before admin handoff.
 - trading_sign snapshot validation must pass before canonical current republish.
