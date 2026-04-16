@@ -16,19 +16,19 @@ cd D:\Quant
 
 ### Notes
 
-- Default flow: data refresh -> S2 backtest -> S3/S3 core2/S4/S5/S6 backtests (ETF models from 2023-06-08) -> Router/profile reports (from 2023-06-08) -> T-STOCK-V01 / T-ETF-V01 shadow refresh -> ingest -> publish -> web snapshots -> trading_sign current snapshots -> canonical public current republish
+- Default flow: data refresh -> S2 backtest -> S3/S3 core2/S4/S5/S6 backtests (ETF models from 2023-06-08) -> Router/profile reports (from 2023-06-08) -> T-STOCK-V01 / T-ETF-V01 shadow refresh -> ingest -> publish -> web snapshots -> admin new-entry tracker -> trading_sign current snapshots -> canonical public/admin current republish
 - `--include-etf`: build ETF universe latest alias, upsert `instrument_master`, and incrementally load ETF prices into `price.db`
 - `--etf-start`: first-load fallback start date for ETFs. Default is `2013-10-14`
 - `--asof` omitted: local today date is used automatically
 - Source fallback rule: if upstream universe/price artifact generation cannot resolve the requested `--asof` directly (for example, source API failure, delayed source update, or an actual non-trading day), the pipeline falls back to the latest compatible artifacts on or before the requested date
 - This means `S2`/`S3` stock outputs can still be published for the requested `asof`, while some source run files may still carry the most recent compatible trading-day end token in their filenames
 - Default storage: `quant_service.db` + `quant_service_detail.db`
-- Default mode rebuilds service web snapshots and republishes canonical public current files to GCS so the live website can refresh without redeploy
+- Default mode rebuilds service web snapshots, admin new-entry tracker payload, and republishes canonical public/admin current files to GCS so the live website/admin tools can refresh without redeploy
 - Internal service analytics DB, review CSV/Markdown, and admin preview bundles are disabled by default
 - Add `--include-service-analytics` only if you intentionally want to rebuild internal admin preview analytics assets
 - Default mode also runs `T-STOCK-V01` shadow refresh, and if `--include-etf` is set it also runs `T-ETF-V01` shadow refresh using existing local research outputs
 - Add `--skip-tseries-shadow` if you want to skip T-series shadow refresh during a run
-- Default mode also runs `trading_sign` current snapshot generation and validation after web snapshots, before canonical remote publish
+- Default mode also runs admin new-entry tracker generation/validation and `trading_sign` current snapshot generation/validation after web snapshots, before canonical remote publish
 - Add `--skip-trading-sign` if you want to skip trading_sign generation during a run
 - Default mode syncs dated generated CSV outputs into [generated_outputs.db](D:/Quant/data/db/generated_outputs.db) after remote publish and before cleanup
 - Add `--skip-generated-csv-db-sync` if you want to skip generated CSV DB sync during a run

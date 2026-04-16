@@ -31,7 +31,7 @@ def build_commands(
     include_tseries_shadow: bool,
     include_remote_current_publish: bool,
     include_generated_cleanup: bool,
-) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
+) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[str], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
     prep_cmds: list[list[str]] = [[
         python_exe,
         str(PROJECT_ROOT / r"src\pipelines\rebuild_mix_universe_and_refresh_dbs.py"),
@@ -92,6 +92,11 @@ def build_commands(
         [python_exe, str(PROJECT_ROOT / r"scripts\validate_redbot_web_snapshots.py"), "--asof", asof],
     ]
 
+    admin_new_entry_cmds: list[list[str]] = [
+        [python_exe, str(PROJECT_ROOT / r"scripts\build_admin_new_entry_tracker.py"), "--asof", asof],
+        [python_exe, str(PROJECT_ROOT / r"scripts\validate_admin_new_entry_tracker.py"), "--asof", asof],
+    ]
+
     trading_sign_cmds: list[list[str]] = [
         [
             python_exe,
@@ -145,6 +150,7 @@ def build_commands(
         ingest_cmd,
         publish_cmd,
         web_snapshot_cmds,
+        admin_new_entry_cmds,
         trading_sign_cmds,
         remote_publish_cmds,
         service_analytics_cmds,
@@ -182,7 +188,7 @@ def main() -> None:
     args = ap.parse_args()
 
     core2_tag = args.core2_tag or f"daily_{args.asof.replace('-', '')}"
-    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, web_snapshot_cmds, trading_sign_cmds, remote_publish_cmds, service_analytics_cmds, generated_cleanup_cmds = build_commands(
+    prep_cmds, s2_cmd, model_cmds, router_and_reports_cmds, tseries_shadow_cmds, ingest_cmd, publish_cmd, web_snapshot_cmds, admin_new_entry_cmds, trading_sign_cmds, remote_publish_cmds, service_analytics_cmds, generated_cleanup_cmds = build_commands(
         asof=args.asof,
         python_exe=str(args.python),
         core_db=str(args.core_db),
@@ -235,6 +241,9 @@ def main() -> None:
         _run(publish_cmd, PROJECT_ROOT)
 
     for cmd in web_snapshot_cmds:
+        _run(cmd, PROJECT_ROOT)
+
+    for cmd in admin_new_entry_cmds:
         _run(cmd, PROJECT_ROOT)
 
     if not args.skip_trading_sign:

@@ -34,6 +34,7 @@ cd D:\Quant
 - [user_performance_summary.json](D:/Quant/service_platform/web/public_data/current/user_performance_summary.json)
 - [user_recent_changes.json](D:/Quant/service_platform/web/public_data/current/user_recent_changes.json)
 - [publish_manifest.json](D:/Quant/service_platform/web/public_data/current/publish_manifest.json)
+- [admin_new_entry_tracker.json](D:/Quant/service_platform/web/admin_data/current/admin_new_entry_tracker.json)
 - [tradingsign_manifest.json](D:/Quant/trading_sign/service_platform/web/public_data/current/tradingsign_manifest.json)
 - [tradingsign_overview.json](D:/Quant/trading_sign/service_platform/web/public_data/current/tradingsign_overview.json)
 - [tradingsign_model_detail.json](D:/Quant/trading_sign/service_platform/web/public_data/current/tradingsign_model_detail.json)
@@ -48,6 +49,7 @@ cd D:\Quant
 - ETF core aliases should be present before S4/S5/S6 publish.
 - KRX universe and cache sources should be aligned before publish.
 - Web snapshot validation must pass before handoff.
+- Admin new-entry tracker validation must pass before admin handoff.
 - trading_sign snapshot validation must pass before canonical current republish.
 
 ## Recovery Order

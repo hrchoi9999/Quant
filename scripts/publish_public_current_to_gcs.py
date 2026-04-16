@@ -12,6 +12,7 @@ from google.oauth2 import service_account
 
 PROJECT_ROOT = Path(r"D:\Quant")
 CURRENT_DIR = PROJECT_ROOT / r"service_platform\web\public_data\current"
+ADMIN_CURRENT_DIR = PROJECT_ROOT / r"service_platform\web\admin_data\current"
 TRADING_SIGN_CURRENT_DIR = PROJECT_ROOT / r"trading_sign\service_platform\web\public_data\current"
 DEFAULT_CRED_CANDIDATES = [
     Path(r"D:\QuantService\data\gcp\quantmarket-handoff-uploader.json"),
@@ -29,6 +30,7 @@ ROOT_OBJECTS = [
     "user_model_change_history.json",
 ]
 T_SERIES_OBJECT = ("quantservice_tseries_discovery.json", "tseries_discovery/current/quantservice_tseries_discovery.json")
+ADMIN_TRACKER_OBJECT = ("admin_new_entry_tracker.json", "admin/current/admin_new_entry_tracker.json")
 TRADING_SIGN_OBJECTS = [
     ("tradingsign_overview.json", "trading_sign/current/tradingsign_overview.json"),
     ("tradingsign_model_detail.json", "trading_sign/current/tradingsign_model_detail.json"),
@@ -92,6 +94,7 @@ def main() -> None:
     ap.add_argument("--cred")
     ap.add_argument("--skip-user-current", action="store_true")
     ap.add_argument("--skip-tseries-current", action="store_true")
+    ap.add_argument("--skip-admin-current", action="store_true")
     ap.add_argument("--skip-trading-sign-current", action="store_true")
     args = ap.parse_args()
 
@@ -112,6 +115,13 @@ def main() -> None:
             raise SystemExit(f"missing local tseries current file: {src}")
         _upload_file(args.bucket, src, object_name, token)
 
+    if not args.skip_admin_current:
+        src_name, object_name = ADMIN_TRACKER_OBJECT
+        src = ADMIN_CURRENT_DIR / src_name
+        if not src.exists():
+            raise SystemExit(f"missing local admin current file: {src}")
+        _upload_file(args.bucket, src, object_name, token)
+
     if not args.skip_trading_sign_current:
         for src_name, object_name in TRADING_SIGN_OBJECTS:
             src = TRADING_SIGN_CURRENT_DIR / src_name
@@ -126,6 +136,7 @@ def main() -> None:
         "generated_at": manifest.get("generated_at"),
         "published_user_current": not args.skip_user_current,
         "published_tseries_current": not args.skip_tseries_current,
+        "published_admin_current": not args.skip_admin_current,
         "published_trading_sign_current": not args.skip_trading_sign_current,
         "credential_path": str(cred_path),
     }, ensure_ascii=False, indent=2))
