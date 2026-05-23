@@ -1,6 +1,6 @@
 param(
     [string]$SourcePath = 'D:\Quant',
-    [string]$BackupRoot = 'D:\QuantBackup',
+    [string]$BackupRoot = 'D:\QuantBackup\Quant',
     [int]$KeepLatest = 14
 )
 

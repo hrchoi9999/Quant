@@ -1,5 +1,5 @@
 param(
-    [string]$BackupRoot = 'D:\QuantBackup',
+    [string]$BackupRoot = 'D:\QuantBackup\Quant',
     [int]$MaxAgeDays = 3
 )
 

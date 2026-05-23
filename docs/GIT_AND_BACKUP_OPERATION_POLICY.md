@@ -38,7 +38,7 @@ The following should remain local or be handled by backup/artifact storage:
 
 - Run daily Quant backup after the daily pipeline is complete.
 - Current scheduled task: `Quant Daily Backup`.
-- Default backup destination: `D:\QuantBackup`.
+- Default backup destination: `D:\QuantBackup\Quant`.
 - Keep latest 14 Quant ZIP backups and latest 14 Git bundles.
 - Backup ZIP excludes heavy transient directories such as `.git`, `_tmp`, and `venv64`.
 - Git bundle is created separately to preserve repository history.
