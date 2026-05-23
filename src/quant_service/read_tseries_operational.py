@@ -91,7 +91,7 @@ def load_latest_candidates(con: sqlite3.Connection, model_code: str, asof_date: 
     return pd.read_sql_query(
         """
         SELECT model_code, asof_date, candidate_bucket, ticker, name, market, asset_class,
-               group_key, theme_bucket, theme_name_kr, is_s2_overlap,
+               group_key, role_key, role_confidence, role_reason, theme_bucket, theme_name_kr, is_s2_overlap,
                stage1_prob, stage2_prob, mcap, liquidity_20d_value,
                risk_filtered_flag, source_run_id, details_json
         FROM ts_candidates_latest
@@ -151,7 +151,8 @@ def load_candidate_history(con: sqlite3.Connection, model_code: str) -> pd.DataF
     return pd.read_sql_query(
         """
         SELECT model_code, signal_date, horizon, candidate_bucket, ticker, name, market,
-               asset_class, group_key, theme_bucket, theme_name_kr, stage1_prob, stage2_prob
+               asset_class, group_key, role_key, role_confidence, role_reason, theme_bucket, theme_name_kr,
+               stage1_prob, stage2_prob
         FROM ts_candidates_history
         WHERE model_code = ?
         ORDER BY signal_date, candidate_bucket, ticker
@@ -169,7 +170,8 @@ def load_rolling_watchlist(con: sqlite3.Connection, model_code: str, asof_date: 
         """
         SELECT model_code, asof_date, watch_status, watch_tier, is_current, current_bucket, best_bucket_recent,
                appearances_recent, consecutive_current, last_seen_asof, prev_seen_asof, ticker, name, market,
-               asset_class, group_key, theme_bucket, theme_name_kr, is_s2_overlap, stage1_prob, stage2_prob, mcap, liquidity_20d_value
+               asset_class, group_key, role_key, role_confidence, role_reason, theme_bucket, theme_name_kr,
+               is_s2_overlap, stage1_prob, stage2_prob, mcap, liquidity_20d_value
         FROM ts_rolling_watchlist_latest
         WHERE model_code = ? AND asof_date = ?
         ORDER BY
@@ -491,6 +493,9 @@ def build_snapshot(con: sqlite3.Connection, model_code: str, asof_date: str | No
                 "ticker",
                 "name",
                 "market",
+                "role_key",
+                "role_confidence",
+                "role_reason",
                 "theme_bucket",
                 "theme_name_kr",
                 "stage1_prob",

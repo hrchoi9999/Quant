@@ -21,10 +21,27 @@ Thumbs.db
 
 # --- data artifacts (권장) ---
 data/**/*.db
+data/**/*.db-shm
+data/**/*.db-wal
 data/**/*.sqlite
 data/**/*.parquet
 data/**/*.csv
 data/**/*.pkl
+data/models/**/*.joblib
+data/models/**/*_metadata.json
+trading_sign/data/**/*.db
+
+# --- generated web payloads ---
+service_platform/web/admin_data/current/*.json
+service_platform/web/public_data/current/*.json
+service_platform/web/public_data/history/*.json
+trading_sign/service_platform/web/public_data/current/*.json
+
+# --- local secrets ---
+config/KRX_API_Key.json
+config/*appkey*.txt
+config/*secret*.txt
+config/*secretkey*.txt
 
 # 원천/가공 데이터 폴더 자체를 통째로 빼고 싶다면 (선택)
 # data/raw/

@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-14",
+  "principle": "return_first",
+  "archive_policy": {
+    "latest_archive_root": "D:\\Quant\\archive\\ai_model_research_20260514",
+    "latest_archive_manifest": "D:\\Quant\\archive\\ai_model_research_20260514\\archive_manifest.json",
+    "latest_archived_file_count": 343,
+    "latest_archived_mb": 84.99,
+    "physical_archive_rule": "Research and ablation artifacts are moved out of default operational report/model paths, while source scripts remain in place when they are imported by operating jobs."
+  },
+  "tiers": {
+    "A_OPERATING_CORE": {
+      "meaning": "daily pipeline core. Keep running unless return contribution weakens.",
+      "run_policy": "daily"
+    },
+    "B_OBSERVATION": {
+      "meaning": "shadow observation. Keep payload visible, but review promotion by live return.",
+      "run_policy": "daily_or_weekly_by_cost"
+    },
+    "C_RESEARCH_ARCHIVE": {
+      "meaning": "research retained. Excluded from daily pipeline unless explicitly requested.",
+      "run_policy": "manual_or_scheduled_research"
+    },
+    "D_EXCLUDED_CANDIDATE": {
+      "meaning": "not deleted, but removed from default daily operation due weak return evidence or duplicate operational value.",
+      "run_policy": "manual_only"
+    }
+  },
+  "models": {
+    "AI-GROWTH-VALUATION-V01": {
+      "tier": "A_OPERATING_CORE",
+      "run_policy": "daily",
+      "reason": "strategy overlay tests showed useful return tilt potential."
+    },
+    "AI-DOWNSIDE-RISK-V01": {
+      "tier": "A_OPERATING_CORE",
+      "run_policy": "daily",
+      "reason": "loss avoidance and risk tag are directly useful for strategy overlays."
+    },
+    "AI-CANDIDATE-RANK-DELTA-V01": {
+      "tier": "A_OPERATING_CORE",
+      "run_policy": "daily",
+      "reason": "candidate rerank/drop separation is directly applicable to S/T/I/C overlays."
+    },
+    "E-ETF-V01": {
+      "tier": "A_OPERATING_CORE",
+      "run_policy": "daily",
+      "reason": "ETF track is a separate strategic priority and mode-switch results show return lift."
+    },
+    "AI-CANDIDATE-VALIDATION-V01": {
+      "tier": "B_OBSERVATION",
+      "run_policy": "daily",
+      "reason": "candidate quality tags remain useful, but standalone return lift is not yet dramatic."
+    },
+    "AI-THEME-PERSISTENCE-V01": {
+      "tier": "B_OBSERVATION",
+      "run_policy": "weekly_candidate",
+      "reason": "theme-level signal is useful as a supplement, but daily retraining priority is lower than core overlays."
+    },
+    "AI-MODEL-SELECTION-V01": {
+      "tier": "C_RESEARCH_ARCHIVE",
+      "run_policy": "manual_only",
+      "reason": "interpretation value exists, but direct portfolio return contribution is not yet confirmed."
+    },
+    "QM_FULL_FEATURE_SET_EXPERIMENTS": {
+      "tier": "C_RESEARCH_ARCHIVE",
+      "run_policy": "manual_only",
+      "reason": "broad feature sets add complexity and have not become champion features."
+    },
+    "LOW_RETURN_AI_VARIANTS": {
+      "tier": "D_EXCLUDED_CANDIDATE",
+      "run_policy": "manual_only",
+      "reason": "AUC or explanation-only variants without return improvement should not run in default operation."
+    },
+    "DUPLICATE_SHADOW_TRACKERS": {
+      "tier": "D_EXCLUDED_CANDIDATE",
+      "run_policy": "manual_only",
+      "reason": "trackers with overlapping purpose should be consolidated into current payloads."
+    },
+    "DAILY_RESEARCH_ABLATIONS": {
+      "tier": "D_EXCLUDED_CANDIDATE",
+      "run_policy": "manual_only_with_include_ai_research",
+      "reason": "ablation jobs are development tools, not daily operation requirements."
+    }
+  },
+  "pipeline_default_changes": [
+    {
+      "script": "scripts/run_e_series_etf_selection_policy_ablation.py",
+      "previous": "default_daily_ai_overlay",
+      "current": "manual_only_with_--include-ai-research",
+      "reason": "policy ablation is research validation; walk-forward and operational hardening remain in daily operation."
+    }
+  ]
+}

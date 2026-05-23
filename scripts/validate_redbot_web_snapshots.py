@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(r"D:\Quant")
@@ -23,13 +24,26 @@ REQUIRED = [
 ]
 
 
+def _default_asof() -> str:
+    manifest_path = CURRENT_DIR / "publish_manifest.json"
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        asof = manifest.get("as_of_date")
+        if asof:
+            return str(asof)
+    return date.today().strftime("%Y-%m-%d")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate Redbot web user-facing snapshots")
-    parser.add_argument("--asof", default="2026-03-20")
+    parser.add_argument("--asof", default=None, help="Snapshot date to rebuild before validation. Defaults to current manifest as_of_date.")
+    parser.add_argument("--skip-build", action="store_true", help="Validate existing current files without rebuilding them.")
     args = parser.parse_args()
 
-    sys.argv = [sys.argv[0], "--asof", args.asof]
-    build_main()
+    asof = args.asof or _default_asof()
+    if not args.skip_build:
+        sys.argv = [sys.argv[0], "--asof", asof]
+        build_main()
 
     missing = [name for name in REQUIRED if not (CURRENT_DIR / name).exists()]
     if missing:

@@ -59,6 +59,26 @@ Rules:
 - Managed manually or by a later dedicated archive policy.
 - We avoid automatic moves here because these files are often used for ad hoc inspection.
 
+### 5. Legacy pre-KRX evidence
+
+Archive out of operational report paths after the KRX correction baseline is established.
+
+Targets:
+- `D:\Quant\reports\historical_rebase\precheck_20260417\before`
+- `D:\Quant\reports\historical_rebase\krx_rebase_20260417\before`
+
+Rules:
+- Move to `D:\Quant\archive\legacy_pre_krx\YYYYMMDD\...`.
+- Keep comparison summaries and clean diff CSVs in `reports\historical_rebase`.
+- Leave a pointer README in the original report folder.
+- Do not delete or rewrite `price.db`; legacy DB rows are replaced only through controlled KRX upsert/backfill.
+
+Manual archive command:
+
+```powershell
+D:\Quant\venv64\Scripts\python.exe D:\Quant\scripts\archive_pre_krx_legacy_outputs.py --asof 2026-04-18 --execute
+```
+
 ## Initial Retention Windows
 
 - `data\universe`: 30 days

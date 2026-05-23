@@ -64,7 +64,7 @@ def _coerce_int_series(s: pd.Series) -> pd.Series:
     )
 
 
-def _is_naver_non_stock_name(name: str) -> bool:
+def _is_non_stock_name(name: str) -> bool:
     text = str(name).strip()
     upper = text.upper()
     etf_prefixes = (
@@ -96,6 +96,19 @@ def _is_naver_non_stock_name(name: str) -> bool:
     if "스팩" in text:
         return True
     return False
+
+
+def _filter_non_stock_rows(df: pd.DataFrame, *, source: str, market: str) -> pd.DataFrame:
+    if "name" not in df.columns or df.empty:
+        return df
+    before = len(df)
+    out = df[~df["name"].map(_is_non_stock_name)].copy()
+    removed = before - len(out)
+    if removed:
+        print(f"[INFO] {source} non-stock filter applied: market={market}, before={before}, after={len(out)}, removed={removed}")
+    if before and out.empty:
+        raise RuntimeError(f"[{source}] all rows removed by non-stock filter. market={market}, before={before}")
+    return out
 
 
 def _standardize_master(df: pd.DataFrame, market: str) -> pd.DataFrame:
@@ -207,7 +220,7 @@ def _build_master_pykrx(market: str, asof_req: str, max_back_days: int) -> Tuple
             rows.append({"ticker": t6, "name": nm, "market": market, "mcap": int(cap_map.get(t6, 0))})
 
         df = pd.DataFrame(rows)
-        return _standardize_master(df, market), asof
+        return _standardize_master(_filter_non_stock_rows(df, source="pykrx", market=market), market), asof
 
     # cap이 비었으면 ticker_list 기반으로 구성
     tickers = list(valid_set)
@@ -229,7 +242,35 @@ def _build_master_pykrx(market: str, asof_req: str, max_back_days: int) -> Tuple
         rows.append({"ticker": t6, "name": nm, "market": market, "mcap": int(cap_map.get(t6, 0))})
 
     df = pd.DataFrame(rows)
-    return _standardize_master(df, market), asof
+    return _standardize_master(_filter_non_stock_rows(df, source="pykrx", market=market), market), asof
+
+
+# ----------------------------
+# KRX OpenAPI
+# ----------------------------
+def _build_master_krx_openapi(market: str, asof_req: str) -> Tuple[pd.DataFrame, str]:
+    import sys
+
+    current = Path(__file__).resolve()
+    root = _find_project_root(current.parent)
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
+    from src.collectors.krx_openapi import fetch_stock_daily, stock_daily_to_universe
+
+    if market == "ALL":
+        frames = []
+        for child_market in ["KOSPI", "KOSDAQ"]:
+            frame, _ = _build_master_krx_openapi(child_market, asof_req)
+            frames.append(frame)
+        merged = pd.concat(frames, ignore_index=True).drop_duplicates(subset=["ticker"])
+        return _standardize_master(merged, market), asof_req
+    if market not in {"KOSPI", "KOSDAQ"}:
+        raise RuntimeError(f"[krx_openapi] unsupported market={market}; supported=KOSPI,KOSDAQ,ALL")
+    daily = fetch_stock_daily(market, asof_req)
+    if daily.empty:
+        raise RuntimeError(f"[krx_openapi] empty daily rows. market={market}, basDd={asof_req}")
+    universe = stock_daily_to_universe(daily, market)
+    return _standardize_master(_filter_non_stock_rows(universe, source="krx_openapi", market=market), market), asof_req
 
 
 # ----------------------------
@@ -308,14 +349,7 @@ def _build_master_naver(market: str, asof_req: str) -> Tuple[pd.DataFrame, str]:
     if not rows:
         raise RuntimeError(f"[naver] no rows parsed. market={market}, asof={asof_req}")
     df = pd.DataFrame(rows)
-    before = len(df)
-    df = df[~df["name"].map(_is_naver_non_stock_name)].copy()
-    after = len(df)
-    if after == 0:
-        raise RuntimeError(f"[naver] all rows removed by non-stock filter. market={market}, before={before}")
-    if before != after:
-        print(f"[INFO] naver non-stock filter applied: before={before}, after={after}, removed={before-after}")
-    return _standardize_master(df, market), asof_req
+    return _standardize_master(_filter_non_stock_rows(df, source="naver", market=market), market), asof_req
 
 
 # ----------------------------
@@ -349,7 +383,7 @@ def _build_master_fdr(market: str, asof_req: str) -> Tuple[pd.DataFrame, str]:
         df = df[df["market"].astype(str).str.upper().str.contains(market, na=False)].copy()
         df["market"] = market
 
-    return _standardize_master(df, market), asof_req
+    return _standardize_master(_filter_non_stock_rows(df, source="fdr", market=market), market), asof_req
 
 
 # ----------------------------
@@ -384,7 +418,7 @@ def _build_master_cache(project_root: Path, market: str, asof_req: str) -> Tuple
     df = pd.read_csv(f, dtype={"ticker": "string"})
     m = re.search(r"(\d{8})$", f.stem)
     used_asof = m.group(1) if m else asof_req
-    return _standardize_master(df, market), used_asof
+    return _standardize_master(_filter_non_stock_rows(df, source="cache", market=market), market), used_asof
 
 
 # ----------------------------
@@ -459,9 +493,9 @@ def main() -> None:
     ap.add_argument("--market", type=str, default="KOSPI", help="ALL|KOSPI|KOSDAQ|KONEX")
     ap.add_argument("--asof", type=str, default=None, help="YYYYMMDD (미지정 시 오늘)")
     ap.add_argument("--max-back-days", type=int, default=60)
-    ap.add_argument("--source", type=str, default="auto", choices=["auto", "pykrx", "naver", "fdr", "cache"])
-    ap.add_argument("--on-fail", type=str, default="auto", choices=["auto", "naver", "cache", "fdr", "raise"],
-                    help="source 지정 후 실패 시 동작 (auto=naver→fdr→cache, naver=naver만, cache=cache만, fdr=fdr만, raise=즉시 예외)")
+    ap.add_argument("--source", type=str, default="auto", choices=["auto", "krx_openapi", "pykrx", "naver", "fdr", "cache"])
+    ap.add_argument("--on-fail", type=str, default="auto", choices=["auto", "krx_openapi", "pykrx", "naver", "cache", "fdr", "raise"],
+                    help="source 지정 후 실패 시 동작 (auto=krx_openapi→pykrx→naver→fdr→cache, naver=naver만, cache=cache만, fdr=fdr만, raise=즉시 예외)")
 
     # NEW: active filter
     ap.add_argument("--price-db", type=str, default=None, help="예: D:\\Quant\\data\\db\\price.db")
@@ -484,6 +518,13 @@ def main() -> None:
             return _build_master_pykrx(market, asof_req, args.max_back_days)
         except Exception as e:
             print(f"[WARN] source=pykrx 실패: {e}")
+            return None
+
+    def _try_krx_openapi():
+        try:
+            return _build_master_krx_openapi(market, asof_req)
+        except Exception as e:
+            print(f"[WARN] source=krx_openapi 실패: {e}")
             return None
 
     def _try_fdr():
@@ -510,13 +551,29 @@ def main() -> None:
 
     def _apply_on_fail(primary: str):
         # primary 소스가 실패했을 때, args.on_fail 정책에 따라 대체 소스를 시도합니다.
-        # - auto : naver -> fdr -> cache
+        # - auto : krx_openapi -> pykrx -> naver -> fdr -> cache
+        # - krx_openapi: krx_openapi
+        # - pykrx: pykrx
         # - naver: naver
         # - cache: cache
         # - fdr  : fdr
         # - raise: 즉시 예외
         if args.on_fail == "raise":
             raise RuntimeError(f"source={primary} 지정했지만 실패했습니다. (on-fail=raise)")
+
+        if args.on_fail == "krx_openapi":
+            out2 = _try_krx_openapi()
+            if out2:
+                m2, a2 = out2
+                return m2, a2, "krx_openapi"
+            raise RuntimeError(f"source={primary} 실패 후 krx_openapi도 실패했습니다.")
+
+        if args.on_fail == "pykrx":
+            out2 = _try_pykrx()
+            if out2:
+                m2, a2 = out2
+                return m2, a2, "pykrx"
+            raise RuntimeError(f"source={primary} 실패 후 pykrx도 실패했습니다.")
 
         if args.on_fail == "naver":
             out2 = _try_naver()
@@ -539,22 +596,32 @@ def main() -> None:
                 return m2, a2, "fdr"
             raise RuntimeError(f"source={primary} 실패 후 fdr도 실패했습니다.")
 
-        # auto: naver -> fdr -> cache. Cache is last so source breaks do not freeze universe unnecessarily.
-        out2 = _try_naver()
-        if out2:
-            m2, a2 = out2
-            return m2, a2, "naver"
-        out3 = _try_fdr()
-        if out3:
-            m3, a3 = out3
-            return m3, a3, "fdr"
-        out4 = _try_cache()
-        if out4:
-            m4, a4 = out4
-            return m4, a4, "cache"
-        raise RuntimeError(f"source={primary} 실패 후 naver/fdr/cache 모두 실패했습니다.")
+        # auto: krx_openapi -> pykrx -> naver -> fdr -> cache. Cache is last so source breaks do not freeze universe unnecessarily.
+        fallback_order = [
+            ("krx_openapi", _try_krx_openapi),
+            ("pykrx", _try_pykrx),
+            ("naver", _try_naver),
+            ("fdr", _try_fdr),
+            ("cache", _try_cache),
+        ]
+        for source_name, source_fn in fallback_order:
+            if source_name == primary:
+                continue
+            out2 = source_fn()
+            if out2:
+                m2, a2 = out2
+                return m2, a2, source_name
+        raise RuntimeError(f"source={primary} 실패 후 krx_openapi/pykrx/naver/fdr/cache 모두 실패했습니다.")
 
-    if args.source == "pykrx":
+    if args.source == "krx_openapi":
+        out = _try_krx_openapi()
+        if out:
+            master, used_asof = out
+            used_source = "krx_openapi"
+        else:
+            master, used_asof, used_source = _apply_on_fail("krx_openapi")
+
+    elif args.source == "pykrx":
         out = _try_pykrx()
         if out:
             master, used_asof = out
@@ -587,28 +654,33 @@ def main() -> None:
             master, used_asof, used_source = _apply_on_fail("cache")
 
     else:
-        # auto: pykrx -> naver -> fdr -> cache
-        out = _try_pykrx()
+        # auto: krx_openapi -> pykrx -> naver -> fdr -> cache
+        out = _try_krx_openapi()
         if out:
             master, used_asof = out
-            used_source = "pykrx"
+            used_source = "krx_openapi"
         else:
-            out = _try_naver()
+            out = _try_pykrx()
             if out:
                 master, used_asof = out
-                used_source = "naver"
+                used_source = "pykrx"
             else:
-                out = _try_fdr()
+                out = _try_naver()
                 if out:
                     master, used_asof = out
-                    used_source = "fdr"
+                    used_source = "naver"
                 else:
-                    out = _try_cache()
+                    out = _try_fdr()
                     if out:
                         master, used_asof = out
-                        used_source = "cache"
+                        used_source = "fdr"
                     else:
-                        raise RuntimeError("auto 소스: pykrx/naver/fdr/cache 모두 실패했습니다.")
+                        out = _try_cache()
+                        if out:
+                            master, used_asof = out
+                            used_source = "cache"
+                        else:
+                            raise RuntimeError("auto 소스: krx_openapi/pykrx/naver/fdr/cache 모두 실패했습니다.")
 
 
     # save master (1) 실제 used_asof 파일 (정확한 스냅샷 보존)

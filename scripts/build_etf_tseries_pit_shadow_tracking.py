@@ -32,7 +32,7 @@ def build_historical_shadow() -> pd.DataFrame:
 def build_current_shadow() -> pd.DataFrame:
     df = pd.read_csv(OUT_DIR / f'etf_tseries_pit_risk_filtered_candidates_{ASOF_DATE}.csv', dtype={'ticker': str})
     if df.empty:
-        return pd.DataFrame(columns=['source','stage','signal_date','asof_date','ticker','name','candidate_grade','pred_prob','target_hit','tracking_status'])
+        return pd.DataFrame(columns=['source','stage','signal_date','asof_date','ticker','name','candidate_grade','role_key','theme_bucket','pred_prob','target_hit','tracking_status'])
     df['stage'] = df['candidate_grade'].map({'confirmed':'stage2_et10_to_et3','near':'stage2_et10_to_et3','observe':'stage1_lower_to_et10'})
     df['pred_prob'] = df['stage2_prob'].where(df['stage2_prob'].notna(), df['stage1_prob'])
     df['target_hit'] = pd.NA
@@ -40,7 +40,10 @@ def build_current_shadow() -> pd.DataFrame:
     df['source'] = 'latest_operational_pit'
     df['asof_date'] = ASOF_DATE
     df['signal_date'] = ASOF_DATE
-    return df[['source','stage','signal_date','asof_date','ticker','name','candidate_grade','pred_prob','target_hit','tracking_status']]
+    for col in ['role_key', 'theme_bucket']:
+        if col not in df.columns:
+            df[col] = None
+    return df[['source','stage','signal_date','asof_date','ticker','name','candidate_grade','role_key','theme_bucket','pred_prob','target_hit','tracking_status']]
 
 
 def main() -> None:
@@ -58,6 +61,9 @@ def main() -> None:
 
     historical = build_historical_shadow()
     current = build_current_shadow()
+    for col in ['role_key', 'theme_bucket']:
+        if col not in historical.columns:
+            historical[col] = None
     combined = pd.concat([historical, current], ignore_index=True)
     combined.to_csv(OUT_DIR / f'etf_tseries_pit_shadow_tracking_history_{RUN_DATE}.csv', index=False, encoding='utf-8-sig')
 

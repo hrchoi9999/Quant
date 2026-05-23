@@ -71,13 +71,35 @@ def _build_etf_instrument_master(etf_master_csv: Path, asof: str) -> pd.DataFram
 def _build_etf_meta(etf_meta_csv: Path, etf_core_csv: Path, asof: str) -> pd.DataFrame:
     meta = pd.read_csv(etf_meta_csv, dtype={'ticker':'string'}).copy()
     core = pd.read_csv(etf_core_csv, dtype={'ticker':'string'}).copy()
-    core_tickers = set(core['ticker'].astype(str).str.zfill(6).tolist())
     meta['ticker'] = meta['ticker'].astype(str).str.zfill(6)
-    meta['core_eligible'] = meta['ticker'].isin(core_tickers)
-    meta['meta_source'] = 'task02_core_meta'
-    meta['rule_version'] = '2026-03-17_001'
+    core['ticker'] = core['ticker'].astype(str).str.zfill(6)
+    core_assignment_cols = [
+        c for c in [
+            'ticker', 'group_key', 'role_key', 'role_confidence', 'role_reason',
+            'role_schema_version', 'purity_issue',
+        ]
+        if c in core.columns
+    ]
+    core_assignments = core[core_assignment_cols].drop_duplicates(subset=['ticker']).copy()
+    core_assignments['core_eligible'] = True
+    meta = meta.merge(core_assignments, on='ticker', how='left', suffixes=('', '_core'))
+    meta['core_eligible'] = meta['core_eligible'].fillna(False)
+    for col in ['group_key', 'role_key', 'role_confidence', 'role_reason', 'role_schema_version', 'purity_issue']:
+        core_col = f'{col}_core'
+        if core_col in meta.columns:
+            meta[col] = meta[core_col].where(meta['core_eligible'], meta.get(col, ''))
+            meta = meta.drop(columns=[core_col])
+    meta['meta_source'] = 'common_role_core_meta'
+    meta['rule_version'] = str(meta.get('role_schema_version', pd.Series(['ETF_ROLE_COMMON_V1'])).iloc[0] or 'ETF_ROLE_COMMON_V1')
     meta['asof'] = asof
-    keep = ['ticker','asset_class','group_key','currency_exposure','is_inverse','is_leveraged','core_eligible','liquidity_20d_value','asof','meta_source','rule_version']
+    keep = [
+        'ticker','asset_class','group_key','currency_exposure','is_inverse','is_leveraged',
+        'core_eligible','liquidity_20d_value','asof','meta_source','rule_version',
+        'role_key','role_confidence','role_reason','role_schema_version','purity_issue',
+    ]
+    for col in keep:
+        if col not in meta.columns:
+            meta[col] = ''
     return meta[keep]
 
 

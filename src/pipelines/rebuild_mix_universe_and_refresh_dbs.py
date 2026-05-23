@@ -300,7 +300,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--universe-dir", default=r"D:\Quant\data\universe")
 
     p.add_argument("--krx-script", default=r"D:\Quant\src\collectors\universe\build_universe_krx.py")
-    p.add_argument("--krx-source", default="pykrx", choices=["pykrx", "krx"])
+    p.add_argument(
+        "--krx-source",
+        default="auto",
+        choices=["auto", "krx_openapi", "pykrx", "naver", "fdr", "cache"],
+        help="Stock universe source priority. auto uses KRX OpenAPI first.",
+    )
     p.add_argument("--mix-script", default=r"D:\Quant\src\collectors\universe\build_universe_mix_200_200.py")
 
     p.add_argument("--kospi-topn", type=int, default=200)
@@ -313,13 +318,20 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--price-start", default="2017-02-08")
     p.add_argument("--price-end", default=None, help="기본: --asof")
     p.add_argument("--price-script", default=r"D:\Quant\src\collectors\price\price_backfill.py")
+    p.add_argument("--krx-openapi-price-script", default=r"D:\Quant\src\collectors\price\fetch_krx_openapi_daily_prices.py")
+    p.add_argument("--skip-krx-openapi-price", action="store_true")
     p.add_argument("--price-mode", choices=["missing-only", "full", "skip"], default="missing-only")
     p.add_argument("--tail-lookback-days", type=int, default=7)
     p.add_argument("--price-sleep", type=float, default=0.2)
     p.add_argument("--price-retries", type=int, default=2)
 
     p.add_argument("--no-regime", action="store_true")
-    p.add_argument("--regime-years", type=int, default=10)
+    p.add_argument(
+        "--regime-years",
+        type=int,
+        default=2,
+        help="Regime refresh window. Default is operational incremental window; use a larger value for full rebuilds.",
+    )
     p.add_argument("--regime-db", default=r"D:\Quant\data\db\regime.db")
     p.add_argument("--regime-table", default="regime_history")
 
@@ -441,6 +453,28 @@ def main() -> None:
     if args.price_mode != "skip" and not args.dry_run:
         mix_df = _load_universe(paths.mix_universe, args.ticker_col)
         tickers = mix_df[args.ticker_col].tolist()
+
+        if not args.skip_krx_openapi_price:
+            _run(
+                [
+                    sys.executable,
+                    str(Path(args.krx_openapi_price_script)),
+                    "--start",
+                    price_target_end,
+                    "--end",
+                    price_target_end,
+                    "--markets",
+                    "KOSPI,KOSDAQ",
+                    "--db",
+                    args.price_db,
+                    "--tickers-file",
+                    str(paths.mix_universe),
+                    "--ticker-col",
+                    args.ticker_col,
+                ],
+                cwd=cwd,
+                dry_run=args.dry_run,
+            )
 
         if args.price_mode == "full":
             todo_all = sorted(set(map(_zfill6, tickers)))

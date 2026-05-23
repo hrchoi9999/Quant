@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 import pandas as pd
 
-from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_asof_date, normalize_run_date
 
 BASE_DIR = Path(r"D:\Quant")
 RUN_DATE = ""
@@ -92,7 +92,8 @@ def main() -> None:
     run_root = ensure_run_dir(RUN_DATE)
     OP_DIR = run_root / "T_STOCK_V01_OPERATIONALIZATION"
     HIST_DIR = run_root / "S3_OPERATING_V2_TRACKING"
-    ASOF_DATE = latest_asof_from_dir(OP_DIR, r"t_stock_v01_risk_filtered_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+    max_asof = normalize_asof_date(args.asof) if args.asof else None
+    ASOF_DATE = latest_asof_from_dir(OP_DIR, r"t_stock_v01_risk_filtered_candidates_(\d{4}-\d{2}-\d{2})\.csv", max_asof=max_asof)
 
     latest, latest_summary = build_latest_watchlist()
     hist, overall, by_horizon = build_history()

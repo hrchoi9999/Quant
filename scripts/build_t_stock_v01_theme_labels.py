@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 import pandas as pd
 
-from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_run_date
+from tseries_refresh_utils import ensure_run_dir, latest_asof_from_dir, normalize_asof_date, normalize_run_date
 
 BASE_DIR = Path(r"D:\Quant")
 RUN_DATE = ""
@@ -59,7 +59,8 @@ def main() -> None:
     run_root = ensure_run_dir(RUN_DATE)
     IN_DIR = run_root / "T_STOCK_V01_OPERATIONALIZATION"
     REPORT_DIR = IN_DIR
-    ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv")
+    max_asof = normalize_asof_date(args.asof) if args.asof else None
+    ASOF_DATE = latest_asof_from_dir(IN_DIR, r"t_stock_v01_operational_candidates_(\d{4}-\d{2}-\d{2})\.csv", max_asof=max_asof)
 
     df = pd.read_csv(IN_DIR / f"t_stock_v01_operational_candidates_{ASOF_DATE}.csv", dtype={"ticker": str})
     df["theme_bucket"] = df["name"].apply(classify_theme)

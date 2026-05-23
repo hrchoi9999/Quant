@@ -3,11 +3,14 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import re
+import sqlite3
 import pandas as pd
 
-from tseries_refresh_utils import ensure_run_dir, normalize_run_date
+from tseries_refresh_utils import ensure_run_dir, normalize_asof_date, normalize_run_date
 
 BASE_DIR = Path(r"D:\Quant")
+DB_PATH = BASE_DIR / r"data\db\tseries_operational.db"
+MODEL_CODE = "T-STOCK-V01"
 RUN_DATE = ""
 IN_DIR = Path()
 LOOKBACK_WINDOWS = 4
@@ -17,14 +20,18 @@ STATE_RANK = {"active": 0, "new": 1, "cooling": 2}
 TIER_RANK = {"core": 0, "monitor": 1}
 
 
-def _latest_watchlist_files() -> list[tuple[pd.Timestamp, Path]]:
+def _latest_watchlist_files(max_asof: str | None = None) -> list[tuple[pd.Timestamp, Path]]:
     items: list[tuple[pd.Timestamp, Path]] = []
     pattern = re.compile(r"t_stock_v01_latest_watchlist_(\d{4}-\d{2}-\d{2})\.csv$")
+    max_ts = pd.Timestamp(max_asof) if max_asof else None
     for path in IN_DIR.glob("t_stock_v01_latest_watchlist_*.csv"):
         m = pattern.match(path.name)
         if not m:
             continue
-        items.append((pd.Timestamp(m.group(1)), path))
+        asof_ts = pd.Timestamp(m.group(1))
+        if max_ts is not None and asof_ts > max_ts:
+            continue
+        items.append((asof_ts, path))
     return sorted(items, key=lambda x: x[0])
 
 
@@ -41,11 +48,60 @@ def _load_history(files: list[tuple[pd.Timestamp, Path]]) -> pd.DataFrame:
         frames.append(df)
     if not frames:
         return pd.DataFrame()
-    hist = pd.concat(frames, ignore_index=True)
+    return _prepare_history(pd.concat(frames, ignore_index=True))
+
+
+def _prepare_history(hist: pd.DataFrame) -> pd.DataFrame:
+    if hist.empty:
+        return hist
+    hist = hist.rename(columns={"candidate_grade": "candidate_bucket"})
+    if "candidate_bucket" not in hist.columns:
+        hist["candidate_bucket"] = "observe"
     hist["ticker"] = hist["ticker"].astype(str).str.zfill(6)
     hist["asof_date"] = pd.to_datetime(hist["asof_date"])
     hist["bucket_rank"] = hist["candidate_bucket"].map(lambda v: BUCKET_RANK.get(str(v), 9))
     return hist
+
+
+def _load_db_history(current_asof: pd.Timestamp) -> pd.DataFrame:
+    if not DB_PATH.exists():
+        return pd.DataFrame()
+    try:
+        with sqlite3.connect(str(DB_PATH)) as con:
+            hist = pd.read_sql_query(
+                """
+                SELECT
+                  asof_date,
+                  candidate_bucket,
+                  ticker,
+                  name,
+                  market,
+                  theme_bucket,
+                  theme_name_kr,
+                  is_s2_overlap,
+                  stage1_prob,
+                  stage2_prob,
+                  mcap
+                FROM ts_candidates_latest
+                WHERE model_code = ?
+                  AND asof_date < ?
+                """,
+                con,
+                params=(MODEL_CODE, current_asof.strftime("%Y-%m-%d")),
+            )
+    except sqlite3.Error:
+        return pd.DataFrame()
+    return _prepare_history(hist)
+
+
+def _merge_history(local_history: pd.DataFrame, db_history: pd.DataFrame) -> pd.DataFrame:
+    if db_history.empty:
+        return local_history
+    if local_history.empty:
+        return db_history
+    local_dates = set(local_history["asof_date"].dt.strftime("%Y-%m-%d"))
+    db_history = db_history.loc[~db_history["asof_date"].dt.strftime("%Y-%m-%d").isin(local_dates)].copy()
+    return pd.concat([db_history, local_history], ignore_index=True)
 
 
 def _consecutive_count(frame: pd.DataFrame, ordered_dates: list[pd.Timestamp]) -> int:
@@ -69,18 +125,21 @@ def main() -> None:
     RUN_DATE = normalize_run_date(args.run_date)
     IN_DIR = ensure_run_dir(RUN_DATE) / "T_STOCK_V01_OPERATIONALIZATION"
 
-    files = _latest_watchlist_files()
+    max_asof = normalize_asof_date(args.asof) if args.asof else None
+    files = _latest_watchlist_files(max_asof=max_asof)
     if not files:
         raise SystemExit("no stock latest watchlist files found")
 
-    history = _load_history(files)
-    latest_dates = [dt for dt, _ in files][-LOOKBACK_WINDOWS:]
-    current_asof = latest_dates[-1]
+    current_asof = [dt for dt, _ in files][-1]
+    local_history = _load_history(files)
+    history = _merge_history(local_history, _load_db_history(current_asof))
+    ordered_dates = sorted(pd.to_datetime(history["asof_date"].dropna().unique()))
+    latest_dates = ordered_dates[-LOOKBACK_WINDOWS:]
     recent = history.loc[history["asof_date"].isin(latest_dates)].copy()
     if recent.empty:
         raise SystemExit("recent stock watchlist history is empty")
 
-    cooling_dates = [dt for dt, _ in files][-(LOOKBACK_WINDOWS + COOLING_WINDOWS):]
+    cooling_dates = ordered_dates[-(LOOKBACK_WINDOWS + COOLING_WINDOWS):]
     cooling_hist = history.loc[history["asof_date"].isin(cooling_dates)].copy()
 
     rows: list[dict] = []
@@ -91,7 +150,8 @@ def main() -> None:
         is_current = not current_row.empty
         appearances_recent = int(recent_grp["asof_date"].nunique())
         consecutive_current = _consecutive_count(recent_grp, latest_dates) if is_current else 0
-        best_row = recent_grp.sort_values(["bucket_rank", "asof_date"]).iloc[0]
+        rank_grp = recent_grp if not recent_grp.empty else grp
+        best_row = rank_grp.sort_values(["bucket_rank", "asof_date"]).iloc[0]
         last_seen = grp["asof_date"].max()
         prev_seen = grp["asof_date"].sort_values().iloc[-2] if len(grp) >= 2 else pd.NaT
         if is_current:

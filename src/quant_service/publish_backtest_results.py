@@ -168,8 +168,12 @@ def _quality_payload(run_id: str, nav: pd.DataFrame, current_holdings: pd.DataFr
 def _rationale_title(model_code: str) -> str:
     if model_code == "S2":
         return "Regime and market filter aligned"
+    if model_code == "S2_PIT_V01":
+        return "PIT fundamentals and market filter aligned"
     if model_code == "S3_CORE2":
         return "Core trend score with breadth gate"
+    if model_code == "S3_ACCEL_V01":
+        return "Acceleration-aware trend reordering aligned"
     if model_code == "S4":
         return "Risk-on ETF allocation"
     if model_code == "S5":
@@ -184,8 +188,12 @@ def _rationale_detail(model_code: str, row: pd.Series) -> str:
     score_txt = "" if pd.isna(score) else f" score={float(score):.4f};"
     if model_code == "S2":
         return f"Selected by S2 regime screen and market gate.{score_txt}".strip()
+    if model_code == "S2_PIT_V01":
+        return f"Selected by S2 PIT fundamentals screen with annual-quarter-acceleration blend and market gate.{score_txt}".strip()
     if model_code == "S3_CORE2":
         return f"Selected by core score and breadth gate conditions.{score_txt}".strip()
+    if model_code == "S3_ACCEL_V01":
+        return f"Selected by S3 acceleration-aware reordering with stabilization buffer and replacement cap.{score_txt}".strip()
     if model_code in {"S4", "S5", "S6"}:
         reason = row.get('reason_summary')
         return f"Selected by {model_code} ETF allocation rule. {reason or ''}".strip()

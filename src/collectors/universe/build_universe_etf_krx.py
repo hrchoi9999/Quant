@@ -1,13 +1,9 @@
-﻿# build_universe_etf_krx.py ver 2026-03-16_003
+# build_universe_etf_krx.py ver 2026-04-18_001
 """
-Build a KRX ETF master universe using PyKRX.
+Build a KRX ETF master universe using KRX OpenAPI.
 
-Primary path:
-- pykrx.stock.get_etf_ticker_list(asof)
-- pykrx.stock.get_etf_ticker_name(ticker)
-
-Fallback path:
-- pykrx.website.krx.etx.core.상장종목검색().fetch(market='ETF')
+Source:
+- KRX OpenAPI ETF daily trading endpoint (/etp/etf_bydd_trd)
 """
 
 from __future__ import annotations
@@ -15,11 +11,21 @@ from __future__ import annotations
 import argparse
 import shutil
 import sqlite3
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable, Tuple
+from typing import Iterable
 
 import pandas as pd
+
+try:
+    from src.collectors.krx_openapi import fetch_etf_daily, load_api_key, normalize_bas_dd
+except Exception:
+    CURRENT = Path(__file__).resolve()
+    ROOT = next((p for p in [CURRENT] + list(CURRENT.parents) if (p / "src").exists()), CURRENT.parent)
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from src.collectors.krx_openapi import fetch_etf_daily, load_api_key, normalize_bas_dd
 
 
 def _find_project_root(start_path: Path) -> Path:
@@ -30,92 +36,45 @@ def _find_project_root(start_path: Path) -> Path:
 
 
 def _normalize_asof(value: str) -> str:
-    s = str(value).strip().replace("-", "")
-    if len(s) != 8 or not s.isdigit():
-        raise ValueError(f"invalid asof: {value}")
-    return s
+    return normalize_bas_dd(value)
 
 
 def _utcnow_iso() -> str:
     return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
 
-def _resolve_trading_day(asof: str, max_back_days: int) -> str:
-    from pykrx import stock
+def _build_universe_rows_from_krx_openapi(asof: str, api_key: str) -> tuple[pd.DataFrame, str]:
+    frame = fetch_etf_daily(asof, api_key)
+    if frame.empty:
+        return pd.DataFrame(columns=["ticker", "name", "asset_type", "asof", "is_active"]), "krx_openapi_empty"
 
+    out = frame[["ticker", "name"]].copy()
+    out["ticker"] = out["ticker"].astype(str).str.strip().str.replace(r"\.0$", "", regex=True).str.zfill(6)
+    out["name"] = out["name"].astype(str).str.strip()
+    out = out[out["ticker"].str.fullmatch(r"\d{6}", na=False)].copy()
+    out = out.drop_duplicates("ticker").sort_values("ticker").reset_index(drop=True)
+    out["asset_type"] = "ETF"
+    out["asof"] = asof
+    out["is_active"] = 1
+    return out[["ticker", "name", "asset_type", "asof", "is_active"]], "krx_openapi_etf_daily"
+
+
+def _resolve_trading_day_and_rows(asof: str, max_back_days: int, api_key: str) -> tuple[str, pd.DataFrame, str]:
     ref = datetime.strptime(asof, "%Y%m%d").date()
-    last_error = None
+    last_error: Exception | None = None
     for lag in range(max_back_days + 1):
         probe = (ref - timedelta(days=lag)).strftime("%Y%m%d")
         try:
-            tickers = stock.get_etf_ticker_list(probe)
+            df, source = _build_universe_rows_from_krx_openapi(probe, api_key)
         except Exception as exc:
             last_error = exc
             continue
-        if tickers:
-            return probe
+        if not df.empty:
+            return probe, df, source
 
     if last_error is not None:
-        print(f"[WARN] get_etf_ticker_list fallback triggered: {last_error}")
-    return asof
-
-
-def _build_universe_rows_pykrx(asof: str) -> pd.DataFrame:
-    from pykrx import stock
-
-    tickers = stock.get_etf_ticker_list(asof)
-    rows = []
-    for ticker in tickers:
-        ticker = str(ticker).strip().zfill(6)
-        if not ticker.isdigit():
-            continue
-        try:
-            name = stock.get_etf_ticker_name(ticker)
-        except Exception:
-            name = ""
-        rows.append(
-            {
-                "ticker": ticker,
-                "name": str(name).strip(),
-                "asset_type": "ETF",
-                "asof": asof,
-                "is_active": 1,
-            }
-        )
-
-    return pd.DataFrame(rows, columns=["ticker", "name", "asset_type", "asof", "is_active"])
-
-
-def _build_universe_rows_fallback(asof: str) -> pd.DataFrame:
-    import pykrx.website.krx.etx.core as etx_core
-
-    finder_cls = getattr(etx_core, "\uC0C1\uC7A5\uC885\uBAA9\uAC80\uC0C9")
-    df = finder_cls().fetch(market="ETF").copy()
-    if df.empty:
-        return pd.DataFrame(columns=["ticker", "name", "asset_type", "asof", "is_active"])
-
-    df = df.rename(columns={"short_code": "ticker", "codeName": "name"})
-    df["ticker"] = df["ticker"].astype(str).str.strip().str.replace(r"\.0$", "", regex=True).str.zfill(6)
-    df["name"] = df["name"].astype(str).str.strip()
-    df = df[df["ticker"].str.fullmatch(r"\d{6}", na=False)].copy()
-    df["asset_type"] = "ETF"
-    df["asof"] = asof
-    df["is_active"] = 1
-    return df[["ticker", "name", "asset_type", "asof", "is_active"]]
-
-
-def _build_universe_rows(asof: str) -> Tuple[pd.DataFrame, str]:
-    try:
-        df = _build_universe_rows_pykrx(asof)
-        if not df.empty:
-            return df, "pykrx_stock"
-    except Exception as exc:
-        print(f"[WARN] pykrx ETF universe primary failed: {exc}")
-
-    df = _build_universe_rows_fallback(asof)
-    if df.empty:
-        raise RuntimeError(f"ETF universe is empty for asof={asof}")
-    return df, "pykrx_finder_fallback"
+        raise RuntimeError(f"KRX OpenAPI ETF universe failed through {max_back_days} back days: {last_error}") from last_error
+    raise RuntimeError(f"KRX OpenAPI ETF universe is empty for asof={asof}")
 
 
 def _ensure_instrument_master(con: sqlite3.Connection) -> None:
@@ -163,7 +122,7 @@ def _upsert_instrument_master(db_path: Path, rows: Iterable[tuple[str, str, str,
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build KRX ETF universe master CSV.")
+    parser = argparse.ArgumentParser(description="Build KRX OpenAPI ETF universe master CSV.")
     parser.add_argument("--asof", required=True, help="YYYYMMDD or YYYY-MM-DD")
     parser.add_argument("--max-back-days", type=int, default=10, help="Trading day fallback window")
     parser.add_argument(
@@ -184,14 +143,15 @@ def main() -> None:
         default="",
         help="Optional price.db path. Defaults to data/db/price.db",
     )
+    parser.add_argument("--api-key-file", default=str(Path(r"D:\Quant\config\KRX_API_Key.json")))
     args = parser.parse_args()
 
     here = Path(__file__).resolve()
     project_root = _find_project_root(here.parent)
     asof_req = _normalize_asof(args.asof)
-    asof = _resolve_trading_day(asof_req, args.max_back_days)
+    api_key = load_api_key(args.api_key_file)
+    asof, df, source = _resolve_trading_day_and_rows(asof_req, args.max_back_days, api_key)
 
-    df, source = _build_universe_rows(asof)
     df = df.drop_duplicates(subset=["ticker"]).sort_values(["ticker"]).reset_index(drop=True)
 
     out_path = (

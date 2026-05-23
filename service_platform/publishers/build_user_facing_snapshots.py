@@ -53,6 +53,24 @@ def build_copy_aliases(service_profile: str) -> dict[str, str]:
         "model_definition_detail": meta["model_role_desc"],
     }
 
+
+def _rank_allocation_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ranked: list[dict[str, Any]] = []
+    sortable: list[tuple[float, int, dict[str, Any]]] = []
+    for idx, item in enumerate(items):
+        weight = item.get("target_weight")
+        try:
+            weight_value = float(weight or 0.0)
+        except (TypeError, ValueError):
+            weight_value = 0.0
+        sortable.append((weight_value, idx, dict(item)))
+    for rank_no, (_, _, item) in enumerate(sorted(sortable, key=lambda row: (-row[0], row[1])), start=1):
+        item["rank_no"] = rank_no
+        item["strategy_fit_score"] = round(float(item.get("target_weight") or 0.0), 6)
+        item["strategy_fit_score_basis"] = "target_weight_proxy"
+        ranked.append(item)
+    return ranked
+
 def build_catalog(mapping: dict[str, Any], asof: str) -> dict[str, Any]:
     models = []
     for idx, row in enumerate(mapping["user_models"], start=1):
@@ -102,6 +120,7 @@ def build_reports(mapping: dict[str, Any], asof: str, generated_at: str) -> dict
         report = load_report(row["service_profile"], asof)
         model_metadata = report.get("model_metadata", build_public_model_metadata(row["service_profile"]))
         copy_aliases = build_copy_aliases(row["service_profile"])
+        allocation_items = _rank_allocation_items(report["model_portfolio"])
         reports.append({
             "user_model_name": row["user_model_name"],
             "service_profile": row["service_profile"],
@@ -109,7 +128,7 @@ def build_reports(mapping: dict[str, Any], asof: str, generated_at: str) -> dict
             "model_metadata": model_metadata,
             **copy_aliases,
             "market_view": report["executive_summary"]["market_view"],
-            "allocation_items": report["model_portfolio"],
+            "allocation_items": allocation_items,
             "rationale_items": report["model_rationale"],
             "risk_level": report["risk_guide"]["risk_level"],
             "performance_summary": report["recent_performance"],

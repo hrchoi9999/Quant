@@ -13,12 +13,16 @@ SEED_MODELS = [
     ("S2", "Quant S2", "Regime-aware weekly top-N model with fundamentals and market gate.", "KR_EQUITY", "W", "KRX_BENCHMARK", "MEDIUM", "active", 1),
     ("S3", "Quant S3", "Trend-hold top 20 model using price and fundamental acceleration features.", "KR_EQUITY", "W", "KRX_BENCHMARK", "MEDIUM_HIGH", "active", 1),
     ("S3_CORE2", "Quant S3 core2", "Trend-hold top 20 core model with market breadth gate and tie-break logic.", "KR_EQUITY", "W", "KRX_BENCHMARK", "HIGH", "active", 1),
+    ("S2_PIT_V01", "Quant S2 PIT V01", "Weekly top-N stock model using PIT annual-quarter-acceleration fundamentals with market gate.", "KR_EQUITY", "W", "KRX_BENCHMARK", "MEDIUM_HIGH", "active", 1),
+    ("S3_ACCEL_V01", "Quant S3 Accel V01", "Stabilized high-turnover S3 branch using acceleration-aware reordering with buffer and replacement cap.", "KR_EQUITY", "W", "KRX_BENCHMARK", "HIGH", "active", 1),
 ]
 
 SEED_MODEL_VERSIONS = [
     ("S2__2026_03_12_001", "S2", "2026.03.12.001", "src.backtest.run_backtest_s2_refactor_v1", "Current S2 refactor runner baseline.", None, 1),
     ("S3__2026_03_12_001", "S3", "2026.03.12.001", "src.experiments.run_s3_trend_hold_top20", "Current S3 base runner with CLI date support.", None, 1),
     ("S3_CORE2__2026_03_12_001", "S3_CORE2", "2026.03.12.001", "src.experiments.run_s3_trend_hold_top20_CORE2_TIEBREAK_GATE_SWEEP", "Current S3 core2 runner with breadth gate.", None, 1),
+    ("S2_PIT_V01__2026_04_24_001", "S2_PIT_V01", "2026.04.24.001", "scripts.run_s2_pit_v01_operational_backtest", "Operational S2 PIT challenger using point-in-time annual-quarter-acceleration fundamentals.", None, 1),
+    ("S3_ACCEL_V01__2026_04_24_001", "S3_ACCEL_V01", "2026.04.24.001", "scripts.run_s3_accel_v01_operational_backtest", "Operational stabilized high-turnover S3 acceleration branch with buffer and replacement cap.", None, 1),
 ]
 
 SEED_BENCHMARKS = [

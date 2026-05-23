@@ -10,6 +10,7 @@ import pandas as pd
 try:
     from src.features.calc_liquidity_20d import calc_liquidity_20d
     from src.universe.etf_classifier import classify_etfs, default_rule_paths, load_overrides, load_rules
+    from src.universe.etf_role_classifier import add_role_classification, build_role_based_core_universe
 except Exception:
     CURRENT = Path(__file__).resolve()
     ROOT = next((p for p in [CURRENT] + list(CURRENT.parents) if (p / "src").exists()), CURRENT.parent)
@@ -17,6 +18,7 @@ except Exception:
         sys.path.insert(0, str(ROOT))
     from src.features.calc_liquidity_20d import calc_liquidity_20d
     from src.universe.etf_classifier import classify_etfs, default_rule_paths, load_overrides, load_rules
+    from src.universe.etf_role_classifier import add_role_classification, build_role_based_core_universe
 
 PROJECT_ROOT = Path(r"D:\Quant")
 
@@ -53,6 +55,11 @@ def main() -> None:
     ap.add_argument("--rules-yml", default="")
     ap.add_argument("--overrides-csv", default="")
     ap.add_argument("--outdir", default=str(PROJECT_ROOT / r"data\universe"))
+    ap.add_argument(
+        "--legacy-group-core",
+        action="store_true",
+        help="Use the legacy group_key top-k core builder instead of the common role-based core frame.",
+    )
     args = ap.parse_args()
 
     universe_dir = PROJECT_ROOT / "data" / "universe"
@@ -81,21 +88,28 @@ def main() -> None:
     meta_df["min_liquidity_pass"] = meta_df["min_liquidity_pass"].astype("boolean").fillna(False).astype(bool)
     meta_df["asof"] = asof
 
-    candidate_df = meta_df[
-        meta_df["min_liquidity_pass"]
-        & meta_df["group_key"].astype(str).ne("")
-        & (~meta_df["exclude_from_core"])
-        & (~meta_df["is_leveraged"])
-        & ((~meta_df["is_inverse"]) | (meta_df["group_key"] == "hedge_inverse_kr"))
-    ].copy()
+    meta_df = add_role_classification(meta_df)
 
-    top_k = rules["defaults"].get("top_k_by_group", {})
-    core_parts = []
-    for group_key, sub in candidate_df.groupby("group_key"):
-        limit = int(top_k.get(group_key, 1))
-        picked = sub.sort_values(["liquidity_20d_value", "ticker"], ascending=[False, True]).head(limit).copy()
-        core_parts.append(picked)
-    core_df = pd.concat(core_parts, ignore_index=True) if core_parts else pd.DataFrame(columns=candidate_df.columns)
+    if args.legacy_group_core:
+        candidate_df = meta_df[
+            meta_df["min_liquidity_pass"]
+            & meta_df["group_key"].astype(str).ne("")
+            & (~meta_df["exclude_from_core"])
+            & (~meta_df["is_leveraged"])
+            & ((~meta_df["is_inverse"]) | (meta_df["group_key"] == "hedge_inverse_kr"))
+        ].copy()
+
+        top_k = rules["defaults"].get("top_k_by_group", {})
+        core_parts = []
+        for group_key, sub in candidate_df.groupby("group_key"):
+            limit = int(top_k.get(group_key, 1))
+            picked = sub.sort_values(["liquidity_20d_value", "ticker"], ascending=[False, True]).head(limit).copy()
+            core_parts.append(picked)
+        core_df = pd.concat(core_parts, ignore_index=True) if core_parts else pd.DataFrame(columns=candidate_df.columns)
+        core_frame = "legacy_group_key"
+    else:
+        core_df = build_role_based_core_universe(meta_df)
+        core_frame = "common_role_key"
 
     core_cols = [
         "ticker",
@@ -109,6 +123,10 @@ def main() -> None:
         "liquidity_20d_value",
         "min_liquidity_pass",
         "asof",
+        "role_key",
+        "role_confidence",
+        "role_reason",
+        "role_schema_version",
     ]
     core_df = core_df.sort_values(["group_key", "liquidity_20d_value", "ticker"], ascending=[True, False, True]).reset_index(drop=True)
     core_df[core_cols].to_csv(outdir / f"universe_etf_core_{asof}.csv", index=False, encoding="utf-8-sig")
@@ -119,6 +137,7 @@ def main() -> None:
     print(f"[INFO] overrides={overrides_path}")
     print(f"[INFO] meta_rows={len(meta_df)}")
     print(f"[INFO] core_rows={len(core_df)}")
+    print(f"[INFO] core_frame={core_frame}")
     print(f"[INFO] core_csv={outdir / f'universe_etf_core_{asof}.csv'}")
     print(f"[INFO] meta_csv={outdir / f'etf_meta_{asof}.csv'}")
 

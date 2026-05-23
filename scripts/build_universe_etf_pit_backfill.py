@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import sqlite3
+import re
 
 PROJECT_ROOT = Path(r"D:\Quant")
 PRICE_DB = PROJECT_ROOT / r"data\db\price.db"
@@ -122,6 +124,19 @@ def build_monthly_signal_dates(prices: pd.DataFrame) -> list[pd.Timestamp]:
     return signal_dates
 
 
+def latest_cached_monthly_csv(end_date: pd.Timestamp) -> Path | None:
+    pattern = re.compile(r"universe_etf_pit_monthly_(\d{6})_(\d{6})\.csv$")
+    end_month = end_date.strftime("%Y%m")
+    candidates: list[tuple[str, Path]] = []
+    for path in OUT_UNIVERSE_DIR.glob("universe_etf_pit_monthly_*.csv"):
+        match = pattern.match(path.name)
+        if match and match.group(2) <= end_month:
+            candidates.append((match.group(2), path))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: item[0])[1]
+
+
 def choose_meta_for_asof(meta: pd.DataFrame, asof: pd.Timestamp) -> pd.DataFrame:
     le = meta[meta["asof"] <= asof].copy()
     if not le.empty:
@@ -206,8 +221,34 @@ def build_asof_universe(asof: pd.Timestamp, prices: pd.DataFrame, meta: pd.DataF
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Build point-in-time ETF universe snapshots for T-ETF.")
+    parser.add_argument("--asof", default=None, help="YYYY-MM-DD end date. Alias for --end.")
+    parser.add_argument("--end", default=None, help="YYYY-MM-DD end date.")
+    parser.add_argument("--run-date", default=None, help="YYYYMMDD report folder. Defaults to the end date.")
+    parser.add_argument("--full-rebuild", action="store_true", help="Rebuild all monthly ETF PIT universes from 2017 instead of reusing cached months.")
+    args = parser.parse_args()
+
+    end_value = args.end or args.asof
+    global END_DATE, OUT_REPORT_DIR
+    if end_value:
+        END_DATE = pd.Timestamp(str(end_value))
+
+    run_date = str(args.run_date or END_DATE.strftime("%Y%m%d")).replace("-", "")
+    OUT_REPORT_DIR = PROJECT_ROOT / "reports" / "model_upgrade_research" / run_date / "ETF_PIT_BACKFILL"
+    OUT_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+
     prices, meta, inst = load_data()
     signal_dates = build_monthly_signal_dates(prices)
+    cache_path = None if args.full_rebuild else latest_cached_monthly_csv(END_DATE)
+    cached_monthly = pd.DataFrame()
+    if cache_path is not None:
+        cached_monthly = pd.read_csv(cache_path, dtype={"ticker": str})
+        cached_monthly["ticker"] = cached_monthly["ticker"].astype(str).str.zfill(6)
+        cached_monthly["selection_asof"] = pd.to_datetime(cached_monthly["selection_asof"])
+        current_month_start = pd.Timestamp(END_DATE.strftime("%Y-%m-01"))
+        cached_monthly = cached_monthly[cached_monthly["selection_asof"] < current_month_start].copy()
+        signal_dates = [d for d in signal_dates if d >= current_month_start]
+
     monthly_parts = []
     summary_rows = []
 
@@ -231,12 +272,34 @@ def main() -> None:
             "max_first_price_date": univ["first_price_date"].max(),
         })
 
-    monthly_df = pd.concat(monthly_parts, ignore_index=True) if monthly_parts else pd.DataFrame()
-    summary_df = pd.DataFrame(summary_rows).sort_values("selection_asof")
+    rebuilt_df = pd.concat(monthly_parts, ignore_index=True) if monthly_parts else pd.DataFrame()
+    if not cached_monthly.empty:
+        monthly_df = pd.concat([cached_monthly, rebuilt_df], ignore_index=True)
+        monthly_df = monthly_df.sort_values(["selection_asof", "expanded_group", "liquidity_20d_value", "ticker"], ascending=[True, True, False, True])
+        monthly_df = monthly_df.drop_duplicates(["selection_asof", "ticker"], keep="last").reset_index(drop=True)
+    else:
+        monthly_df = rebuilt_df
+    summary_df = (
+        monthly_df.groupby("selection_asof", as_index=False)
+        .agg(
+            selected_count=("ticker", "count"),
+            min_first_price_date=("first_price_date", "min"),
+            max_first_price_date=("first_price_date", "max"),
+        )
+        .sort_values("selection_asof")
+    )
+    if summary_rows:
+        rebuilt_summary = pd.DataFrame(summary_rows)[["selection_asof", "eligible_count"]].copy()
+        rebuilt_summary["selection_asof"] = pd.to_datetime(rebuilt_summary["selection_asof"])
+        summary_df = summary_df.merge(rebuilt_summary, on="selection_asof", how="left")
+    else:
+        summary_df["eligible_count"] = pd.NA
+    summary_df = summary_df[["selection_asof", "eligible_count", "selected_count", "min_first_price_date", "max_first_price_date"]]
 
-    monthly_path = OUT_UNIVERSE_DIR / "universe_etf_pit_monthly_201701_202603.csv"
-    summary_path = OUT_REPORT_DIR / "etf_pit_backfill_monthly_summary_201701_202603.csv"
-    coverage_path = OUT_REPORT_DIR / "etf_pit_backfill_group_coverage_201701_202603.csv"
+    suffix = f"{START_DATE.strftime('%Y%m')}_{END_DATE.strftime('%Y%m')}"
+    monthly_path = OUT_UNIVERSE_DIR / f"universe_etf_pit_monthly_{suffix}.csv"
+    summary_path = OUT_REPORT_DIR / f"etf_pit_backfill_monthly_summary_{suffix}.csv"
+    coverage_path = OUT_REPORT_DIR / f"etf_pit_backfill_group_coverage_{suffix}.csv"
 
     monthly_df.to_csv(monthly_path, index=False, encoding="utf-8-sig")
     summary_df.to_csv(summary_path, index=False, encoding="utf-8-sig")
@@ -251,6 +314,8 @@ def main() -> None:
         "",
         "## Goal",
         "- Build a point-in-time monthly ETF universe from 2017 for T-ETF backfill.",
+        f"- Build mode: {'full_rebuild' if args.full_rebuild or cache_path is None else 'incremental_current_month'}",
+        f"- Cache source: {cache_path if cache_path is not None else 'none'}",
         "",
         "## PIT rules",
         "- Use the last trading day of each month as `selection_asof`.",
@@ -277,7 +342,7 @@ def main() -> None:
         f"- last selection month: {summary_df['selection_asof'].max() if not summary_df.empty else 'n/a'}",
         f"- latest selected count: {int(summary_df['selected_count'].iloc[-1]) if not summary_df.empty else 0}",
     ]
-    (OUT_REPORT_DIR / "etf_pit_backfill_design_20260331.md").write_text("\n".join(lines), encoding="utf-8")
+    (OUT_REPORT_DIR / f"etf_pit_backfill_design_{END_DATE.strftime('%Y%m%d')}.md").write_text("\n".join(lines), encoding="utf-8")
 
     print(f"[OK] monthly_rows={len(monthly_df)}")
     print(f"[OK] months={len(summary_df)}")

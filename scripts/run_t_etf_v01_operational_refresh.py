@@ -10,6 +10,7 @@ from tseries_refresh_utils import normalize_asof_date, normalize_run_date, run_d
 
 
 SCRIPTS = [
+    BASE_DIR / "scripts" / "build_universe_etf_pit_backfill.py",
     BASE_DIR / "scripts" / "build_etf_tseries_pit_backfill_v1.py",
     BASE_DIR / "scripts" / "build_etf_two_stage_tuned_pit_candidates.py",
     BASE_DIR / "scripts" / "build_etf_tseries_pit_strict_walkforward.py",
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Refresh T-ETF-V01 operational outputs.")
     ap.add_argument("--asof", default=None, help="YYYY-MM-DD. Used for run folder naming.")
     ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD. Overrides output run date.")
+    ap.add_argument("--full-rebuild", action="store_true", help="Force full ETF PIT universe rebuild instead of cached current-month refresh.")
     args = ap.parse_args()
 
     asof = normalize_asof_date(args.asof)
@@ -37,7 +39,10 @@ if __name__ == "__main__":
     run_root.mkdir(parents=True, exist_ok=True)
 
     for script in SCRIPTS:
-        run_step(script, "--asof", asof, "--run-date", run_date)
-    run_step(Path(SYNC_SCRIPT), "--model", "etf", "--run-date", run_date)
+        extra = ["--asof", asof, "--run-date", run_date]
+        if args.full_rebuild and script.name == "build_universe_etf_pit_backfill.py":
+            extra.append("--full-rebuild")
+        run_step(script, *extra)
+    run_step(Path(SYNC_SCRIPT), "--model", "etf", "--run-date", run_date, "--asof", asof)
 
 

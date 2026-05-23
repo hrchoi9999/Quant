@@ -54,13 +54,17 @@ def latest_research_subdir(relative_parts: str) -> Path:
     return max(matches, key=lambda p: next(part.name for part in [p] + list(p.parents) if re.fullmatch(r"\d{8}", part.name)))
 
 
-def latest_asof_from_dir(src_dir: Path, pattern: str) -> str:
+def latest_asof_from_dir(src_dir: Path, pattern: str, max_asof: str | None = None) -> str:
     candidates: list[str] = []
     regex = re.compile(pattern)
+    max_value = normalize_asof_date(max_asof) if max_asof else None
     for path in src_dir.iterdir():
         match = regex.match(path.name)
         if match:
-            candidates.append(match.group(1))
+            value = match.group(1)
+            if max_value and value > max_value:
+                continue
+            candidates.append(value)
     if not candidates:
         raise FileNotFoundError(f"No matching files for {pattern} in {src_dir}")
     return max(candidates)

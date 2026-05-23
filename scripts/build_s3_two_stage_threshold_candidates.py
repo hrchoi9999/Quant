@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import pandas as pd
 
-from tseries_refresh_utils import ensure_run_dir, latest_research_subdir, normalize_run_date
+from tseries_refresh_utils import ensure_run_dir, latest_research_subdir, normalize_asof_date, normalize_run_date
 
 PROJECT_ROOT = Path(r"D:\Quant")
 MODEL_DIR = Path()
@@ -17,13 +17,18 @@ CONFIGS = [
 ]
 
 
-def latest_s3_current_path() -> Path:
+def latest_s3_current_path(max_asof: str | None = None) -> Path:
     pattern = re.compile(r"s3_holdings_last_top20_(\d{4}-\d{2}-\d{2})\.csv$")
     matches: list[tuple[str, Path]] = []
+    max_key = pd.Timestamp(max_asof).strftime("%Y-%m-%d") if max_asof else None
     for p in (PROJECT_ROOT / r"reports\backtest_s3_dev").glob("s3_holdings_last_top20_*.csv"):
         m = pattern.match(p.name)
-        if m:
-            matches.append((m.group(1), p))
+        if not m:
+            continue
+        key = m.group(1)
+        if max_key and key > max_key:
+            continue
+        matches.append((key, p))
     if not matches:
         raise FileNotFoundError("No official S3 current holdings file found")
     return max(matches, key=lambda item: item[0])[1]
@@ -39,10 +44,10 @@ def read_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path, dtype={"ticker": str})
 
 
-def load_frames() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
+def load_frames(asof: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str]:
     s1 = read_csv(MODEL_DIR / "latest_stage1_rank.csv")
     s2 = read_csv(MODEL_DIR / "latest_stage2_rank.csv")
-    s3_path = latest_s3_current_path()
+    s3_path = latest_s3_current_path(asof)
     s3 = read_csv(s3_path)
     for df in (s1, s2, s3):
         df["ticker"] = df["ticker"].astype(str).str.zfill(6)
@@ -213,14 +218,16 @@ def main() -> None:
     args = ap.parse_args()
 
     run_date = normalize_run_date(args.run_date)
-    model_dir = latest_research_subdir(r"S3_TWO_STAGE_MODELING\logistic_regression")
+    asof = normalize_asof_date(args.asof) if args.asof else None
+    run_model_dir = ensure_run_dir(run_date) / r"S3_TWO_STAGE_MODELING\logistic_regression"
+    model_dir = run_model_dir if run_model_dir.exists() else latest_research_subdir(r"S3_TWO_STAGE_MODELING\logistic_regression")
     outdir = ensure_run_dir(run_date) / "S3_TWO_STAGE_THRESHOLD_CANDIDATES"
     outdir.mkdir(parents=True, exist_ok=True)
 
     global MODEL_DIR, OUTDIR
     MODEL_DIR = model_dir
     OUTDIR = outdir
-    stage1, stage2, s3_current, stage_asof, current_report_asof = load_frames()
+    stage1, stage2, s3_current, stage_asof, current_report_asof = load_frames(asof)
     summary_rows = []
     for label, stage1_th, stage2_confirmed_th, stage2_near_th in CONFIGS:
         s1, s2_all, s2_confirmed, s2_near = threshold_view(stage1, stage2, stage1_th, stage2_confirmed_th, stage2_near_th)

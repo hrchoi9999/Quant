@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
 
-from tseries_refresh_utils import ensure_run_dir, normalize_run_date
+from tseries_refresh_utils import ensure_run_dir, normalize_asof_date, normalize_run_date
 
 PROJECT_ROOT = Path(r"D:\Quant")
 RESEARCH_DB = PROJECT_ROOT / r"data\db\model_research.db"
@@ -54,7 +54,7 @@ def latest_stock_asof() -> pd.Timestamp:
     return pd.Timestamp(sample.iloc[0]["date"])
 
 
-ASOF_DATE = latest_stock_asof()
+ASOF_DATE: pd.Timestamp | None = None
 
 
 def read_sql(db: Path, query: str, parse_dates=None) -> pd.DataFrame:
@@ -276,6 +276,9 @@ def eval_topn(pred_df: pd.DataFrame, stage_name: str, top_n: int) -> tuple[pd.Da
 
 
 def build_latest_snapshot() -> pd.DataFrame:
+    if ASOF_DATE is None:
+        raise RuntimeError("ASOF_DATE is not initialized")
+
     universe = pd.read_csv(UNIVERSE_CSV, dtype={"ticker": str})[["ticker", "name", "market", "mcap"]]
     universe["ticker"] = universe["ticker"].astype(str).str.zfill(6)
 
@@ -344,7 +347,8 @@ def main() -> None:
     ap.add_argument("--asof", default=None, help="Accepted for interface consistency; latest official S3 current holdings date is used.")
     args = ap.parse_args()
 
-    global OUTDIR
+    global OUTDIR, ASOF_DATE
+    ASOF_DATE = pd.Timestamp(normalize_asof_date(args.asof)) if args.asof else latest_stock_asof()
     OUTDIR = ensure_run_dir(normalize_run_date(args.run_date)) / "S3_TWO_STAGE_MODELING"
     OUTDIR.mkdir(parents=True, exist_ok=True)
     panel = add_future_labels(attach_features(build_base_panel()))

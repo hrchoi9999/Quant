@@ -15,6 +15,7 @@ SCRIPTS = [
     BASE / "scripts" / "build_t_stock_v01_theme_labels.py",
     BASE / "scripts" / "build_t_stock_v01_risk_filter.py",
     BASE / "scripts" / "build_t_stock_v01_shadow_tracking.py",
+    BASE / "scripts" / "build_t_stock_v01_validation_report.py",
     BASE / "scripts" / "build_t_stock_v01_rolling_watchlist.py",
 ]
 SYNC_SCRIPT = BASE / r"src\quant_service\sync_tseries_operational_db.py"
@@ -40,7 +41,7 @@ def main() -> None:
             raise SystemExit(proc.returncode)
 
     proc = subprocess.run(
-        [str(PY), str(SYNC_SCRIPT), "--model", "stock", "--run-date", run_date],
+        [str(PY), str(SYNC_SCRIPT), "--model", "stock", "--run-date", run_date, "--asof", asof],
         cwd=str(BASE),
     )
     if proc.returncode != 0:

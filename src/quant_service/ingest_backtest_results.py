@@ -12,7 +12,9 @@ import pandas as pd
 
 PROJECT_ROOT = Path(r"D:\Quant")
 REPORTS_S2 = PROJECT_ROOT / r"reports\backtest_regime_refactor"
+REPORTS_S2_PIT = PROJECT_ROOT / r"reports\backtest_s2_pit_v01"
 REPORTS_S3 = PROJECT_ROOT / r"reports\backtest_s3_dev"
+REPORTS_S3_ACCEL = PROJECT_ROOT / r"reports\backtest_s3_accel_v01"
 REPORTS_ETF = PROJECT_ROOT / r"reports\backtest_etf_allocation"
 CORE_DB = PROJECT_ROOT / r"data\db\quant_service.db"
 DETAIL_DB = PROJECT_ROOT / r"data\db\quant_service_detail.db"
@@ -22,6 +24,8 @@ MODEL_VERSION_MAP = {
     "S2": "S2__2026_03_12_001",
     "S3": "S3__2026_03_12_001",
     "S3_CORE2": "S3_CORE2__2026_03_12_001",
+    "S2_PIT_V01": "S2_PIT_V01__2026_04_24_001",
+    "S3_ACCEL_V01": "S3_ACCEL_V01__2026_04_24_001",
     "S4": "S4__2026_03_20_001",
     "S5": "S5__2026_03_20_001",
     "S6": "S6__2026_03_20_001",
@@ -31,6 +35,8 @@ MODEL_META = {
     "S2": {"display_name": "Quant S2", "description": "Fundamental stock strategy", "asset_class": "stock", "rebalance_frequency": "W", "benchmark_code": "KOSPI", "risk_grade": "medium"},
     "S3": {"display_name": "Quant S3", "description": "Trend stock strategy", "asset_class": "stock", "rebalance_frequency": "W", "benchmark_code": "KOSDAQ", "risk_grade": "high"},
     "S3_CORE2": {"display_name": "Quant S3 core2", "description": "Trend stock strategy with breadth gate", "asset_class": "stock", "rebalance_frequency": "W", "benchmark_code": "KOSDAQ", "risk_grade": "high"},
+    "S2_PIT_V01": {"display_name": "Quant S2 PIT V01", "description": "Point-in-time fundamentals stock strategy with annual-quarter-acceleration blend", "asset_class": "stock", "rebalance_frequency": "W", "benchmark_code": "KOSPI", "risk_grade": "medium_high"},
+    "S3_ACCEL_V01": {"display_name": "Quant S3 Accel V01", "description": "Stabilized high-turnover trend stock strategy with acceleration-aware reordering", "asset_class": "stock", "rebalance_frequency": "W", "benchmark_code": "KOSDAQ", "risk_grade": "high"},
     "S4": {"display_name": "Quant S4", "description": "Risk-on ETF allocation", "asset_class": "etf", "rebalance_frequency": "M", "benchmark_code": "KOSPI", "risk_grade": "high"},
     "S5": {"display_name": "Quant S5", "description": "Neutral ETF allocation", "asset_class": "etf", "rebalance_frequency": "M", "benchmark_code": "KOSPI", "risk_grade": "medium"},
     "S6": {"display_name": "Quant S6", "description": "Defensive ETF allocation", "asset_class": "etf", "rebalance_frequency": "M", "benchmark_code": "KOSPI", "risk_grade": "low"},
@@ -49,8 +55,10 @@ def _to_date_str(s: str) -> str:
 
 
 def _extract_last_yyyymmdd(text: str) -> str | None:
-    matches = re.findall(r"(\d{8})", str(text))
-    return matches[-1] if matches else None
+    normalized: list[str] = []
+    for match in re.findall(r"(20\d{2}-\d{2}-\d{2}|20\d{6})", str(text)):
+        normalized.append(match.replace("-", ""))
+    return normalized[-1] if normalized else None
 
 
 def _latest_path_lte(directory: Path, pattern: str, requested_token: str) -> Path | None:
@@ -211,6 +219,43 @@ def _latest_s2_spec(asof_date: str, batch_id: str, snapshot_id: str) -> RunSpec:
     )
 
 
+def _latest_s2_pit_spec(asof_date: str, batch_id: str, snapshot_id: str) -> RunSpec:
+    end_token = _as_yyyymmdd(asof_date)
+    summary = _latest_path_lte(REPORTS_S2_PIT, "regime_bt_summary_*.csv", end_token)
+    if summary is None:
+        raise FileNotFoundError(f"No S2 PIT summary found on or before {end_token} in {REPORTS_S2_PIT}")
+    stem_suffix = summary.stem.replace("regime_bt_summary_", "")
+    run_id = f"RUN__S2_PIT_V01__{end_token}__{stem_suffix}"
+
+    def _p(prefix: str, extra: str = "") -> Path:
+        return REPORTS_S2_PIT / f"{prefix}_{stem_suffix}{extra}.csv"
+
+    return RunSpec(
+        model_code="S2_PIT_V01",
+        run_id=run_id,
+        batch_id=batch_id,
+        snapshot_id=snapshot_id,
+        start_date=_to_date_str(stem_suffix.split("_")[-2]),
+        end_date=_to_date_str(_extract_last_yyyymmdd(stem_suffix) or end_token),
+        asof_date=asof_date,
+        outdir=REPORTS_S2_PIT,
+        summary_path=summary,
+        nav_path=_p("regime_bt_equity"),
+        holdings_path=_p("regime_bt_holdings"),
+        trade_path=_p("regime_bt_ledger"),
+        artifacts=[
+            summary,
+            _p("regime_bt_equity"),
+            _p("regime_bt_holdings"),
+            _p("regime_bt_ledger"),
+            _p("regime_bt_snapshot"),
+            _p("regime_bt_snapshot", "__trades"),
+            _p("regime_bt_trades_C"),
+            _p("regime_bt_perf_windows"),
+        ],
+    )
+
+
 def _latest_s3_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[RunSpec]:
     specs: list[RunSpec] = []
     requested_token = _as_yyyymmdd(asof_date)
@@ -273,6 +318,41 @@ def _latest_s3_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[Ru
             variant_tag=tag,
         ))
     return specs
+
+
+def _latest_s3_accel_spec(asof_date: str, batch_id: str, snapshot_id: str) -> RunSpec | None:
+    token = _as_yyyymmdd(asof_date)
+    nav = _latest_path_lte(REPORTS_S3_ACCEL, "s3_accel_v01_nav_*.csv", token)
+    if nav is None:
+        return None
+    stem_suffix = nav.stem.replace("s3_accel_v01_nav_", "")
+    parts = stem_suffix.split("_")
+    start_date = _to_date_str(parts[0]) if len(parts) >= 2 else "2024-01-31"
+    end_date = _to_date_str(parts[1]) if len(parts) >= 2 else asof_date
+    holdings_path = REPORTS_S3_ACCEL / f"s3_accel_v01_holdings_{stem_suffix}.csv"
+    summary_path = REPORTS_S3_ACCEL / f"s3_accel_v01_summary_{stem_suffix}.csv"
+    artifacts = [
+        nav,
+        holdings_path,
+        REPORTS_S3_ACCEL / f"s3_accel_v01_last_{parts[-1]}.csv",
+        summary_path,
+    ]
+    return RunSpec(
+        model_code="S3_ACCEL_V01",
+        run_id=f"RUN__S3_ACCEL_V01__{token}__{stem_suffix}",
+        batch_id=batch_id,
+        snapshot_id=snapshot_id,
+        start_date=start_date,
+        end_date=end_date,
+        asof_date=asof_date,
+        outdir=REPORTS_S3_ACCEL,
+        summary_path=summary_path if summary_path.exists() else None,
+        nav_path=nav,
+        holdings_path=holdings_path,
+        trade_path=None,
+        artifacts=artifacts,
+        variant_tag="stable_accel_v01",
+    )
 
 
 def _latest_etf_specs(asof_date: str, batch_id: str, snapshot_id: str) -> list[RunSpec]:
@@ -372,6 +452,11 @@ def _ingest_etf_allocation(core_con: sqlite3.Connection, detail_con: sqlite3.Con
         h = h[h['ticker'].fillna('').astype(str).str.strip() != ''].copy()
         h['ticker'] = h['ticker'].astype(str).str.zfill(6)
     if not h.empty:
+        # Rebuilt ETF allocation files can contain the same ticker more than once
+        # for a rebalance date when source sleeves overlap. The detail table stores
+        # one holding row per run/date/ticker, so keep the highest-weight row.
+        h = h.sort_values([date_col, "weight"], ascending=[True, False])
+        h = h.drop_duplicates(subset=[date_col, "ticker"], keep="first").copy()
         h['rank_no'] = h.groupby(date_col)['weight'].rank(method='first', ascending=False)
         hold_rows = [(
             spec.run_id,
@@ -589,8 +674,11 @@ def _ingest_s2(core_con: sqlite3.Connection, detail_con: sqlite3.Connection, spe
         ticker = str(row.ticker)
         if ticker == "CASH":
             continue
-        date = str(getattr(row, "trade_date", getattr(row, "rebalance_date", "")))
-        rebalance_date = str(getattr(row, "rebalance_date", date))
+        # Holdings history is a rebalance snapshot, not an execution ledger.
+        # Some S2 exports can map multiple rebalance snapshots to one final
+        # trade_date, so use rebalance_date as the stable snapshot key.
+        date = str(getattr(row, "rebalance_date", getattr(row, "trade_date", "")))
+        rebalance_date = date
         fund_asof_date = str(getattr(row, "fund_asof_date", "") or "")
         if not fund_asof_date:
             try:
@@ -618,9 +706,9 @@ def _ingest_s2(core_con: sqlite3.Connection, detail_con: sqlite3.Connection, spe
     trade_rows = [(
         spec.run_id,
         f"{spec.run_id}__{idx}",
-        str(row.trade_date),
+        str(getattr(row, "trade_date", getattr(row, "buy_date", getattr(row, "rebalance_date", "")))),
         str(row.ticker),
-        str(row.action),
+        str(getattr(row, "action", getattr(row, "side", ""))),
         _safe_float(getattr(row, "qty", None)),
         None,
         None,
@@ -679,7 +767,7 @@ def _ingest_s3_like(core_con: sqlite3.Connection, detail_con: sqlite3.Connection
     for row in h.itertuples(index=False):
         date = str(row.date)
         hold_rows.append((spec.run_id, date, str(row.ticker), _safe_int(getattr(row, "rank_no", None)), None, _safe_float(getattr(row, "s3_score", None)), None, None, _safe_float(getattr(row, "close", None)), None, None))
-        if spec.model_code == "S3":
+        if spec.model_code in {"S3", "S3_ACCEL_V01"}:
             s3_rows.append((spec.run_id, date, str(row.ticker), _safe_float(getattr(row, "s3_score", None)), _safe_float(getattr(row, "mom20", None)), None, _safe_float(getattr(row, "vol_ratio_20", None)), None, _safe_int(getattr(row, "breakout60", None)), _safe_float(getattr(row, "ma60", None)), _safe_float(getattr(row, "ma120", None)), _safe_float(getattr(row, "ma60_slope", None)), _safe_float(getattr(row, "growth_score", None)), _safe_float(getattr(row, "fund_accel_score", None))))
         else:
             gate_open, gate_breadth = gate_map.get(date, (None, None))
@@ -696,9 +784,13 @@ def ingest(asof_date: str, core_db_path: Path = CORE_DB, detail_db_path: Path = 
     snapshot_id = f"SNAPSHOT__{_as_yyyymmdd(asof_date)}__001"
     specs = [
         _latest_s2_spec(asof_date, batch_id, snapshot_id),
+        _latest_s2_pit_spec(asof_date, batch_id, snapshot_id),
         *_latest_s3_specs(asof_date, batch_id, snapshot_id),
         *_latest_etf_specs(asof_date, batch_id, snapshot_id),
     ]
+    s3_accel_spec = _latest_s3_accel_spec(asof_date, batch_id, snapshot_id)
+    if s3_accel_spec is not None:
+        specs.append(s3_accel_spec)
 
     core_con = sqlite3.connect(str(core_db_path))
     detail_con = sqlite3.connect(str(detail_db_path))
@@ -709,9 +801,9 @@ def ingest(asof_date: str, core_db_path: Path = CORE_DB, detail_db_path: Path = 
         for spec in specs:
             _delete_existing_run_core(core_con, spec.run_id)
             _delete_existing_run_detail(detail_con, spec.run_id)
-            if spec.model_code == "S2":
+            if spec.model_code in {"S2", "S2_PIT_V01"}:
                 _ingest_s2(core_con, detail_con, spec)
-            elif spec.model_code in {"S3", "S3_CORE2"}:
+            elif spec.model_code in {"S3", "S3_CORE2", "S3_ACCEL_V01"}:
                 _ingest_s3_like(core_con, detail_con, spec)
             else:
                 _ingest_etf_allocation(core_con, detail_con, spec)

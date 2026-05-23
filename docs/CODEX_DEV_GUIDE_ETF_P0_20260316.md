@@ -1,5 +1,7 @@
 # CODEX_DEV_GUIDE_ETF_P0 (ETF 반영 P0 개발 기본방향)
 
+> 2026-04-18 운영 메모: 이 문서는 초기 P0 설계 기록입니다. 현재 운영 ETF universe/price 수집은 KRX OpenAPI 기준이며, 구 pykrx/FDR ETF 가격 collector는 `D:/Quant/archive/legacy_scripts/20260418/`로 격리 보관되었습니다. 운영 절차는 `D:/Quant/docs/BACKTEST_COMMAND_20260311.md`와 `D:/Quant/docs/LEGACY_BACKFILL_SCRIPT_ARCHIVE_20260418.md`를 우선합니다.
+
 ## 0) 목적
 주식 전용 퀀트 시스템을 깨지 않고, ETF를 시스템에 반영하기 위한 P0(최소 기능) 데이터 기반을 구축한다.
 

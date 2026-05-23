@@ -28,7 +28,11 @@ CREATE TABLE IF NOT EXISTS ts_threshold_profiles (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ts_threshold_profiles_current
-ON ts_threshold_profiles (model_code, profile_code, asof_date);
+  ON ts_threshold_profiles (model_code, profile_code, asof_date);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ts_threshold_profiles_one_current
+  ON ts_threshold_profiles (model_code, profile_code)
+  WHERE is_current = 1;
 
 CREATE TABLE IF NOT EXISTS ts_runs (
   ts_run_id              TEXT PRIMARY KEY,
@@ -77,6 +81,9 @@ CREATE TABLE IF NOT EXISTS ts_candidates_latest (
   market                 TEXT,
   asset_class            TEXT,
   group_key              TEXT,
+  role_key               TEXT,
+  role_confidence        REAL,
+  role_reason            TEXT,
   theme_bucket           TEXT,
   theme_name_kr          TEXT,
   is_s2_overlap          INTEGER,
@@ -106,6 +113,9 @@ CREATE TABLE IF NOT EXISTS ts_candidates_history (
   market                 TEXT,
   asset_class            TEXT,
   group_key              TEXT,
+  role_key               TEXT,
+  role_confidence        REAL,
+  role_reason            TEXT,
   theme_bucket           TEXT,
   theme_name_kr          TEXT,
   stage1_prob            REAL,
@@ -165,6 +175,9 @@ CREATE TABLE IF NOT EXISTS ts_rolling_watchlist_latest (
   market                 TEXT,
   asset_class            TEXT,
   group_key              TEXT,
+  role_key               TEXT,
+  role_confidence        REAL,
+  role_reason            TEXT,
   theme_bucket           TEXT,
   theme_name_kr          TEXT,
   is_s2_overlap          INTEGER,

@@ -19,8 +19,8 @@ class S4BaseWeights:
         default_factory=lambda: {
             "equity_kr_broad": 0.45,
             "equity_kr_growth": 0.35,
-            "equity_sector_momentum": 0.15,
-            "CASH": 0.05,
+            "equity_sector_momentum": 0.00,
+            "CASH": 0.20,
         }
     )
 
@@ -40,7 +40,7 @@ class S4BoundsConfig:
         default_factory=lambda: {
             "equity_kr_broad": 0.60,
             "equity_kr_growth": 0.50,
-            "equity_sector_momentum": 0.30,
+            "equity_sector_momentum": 0.20,
             "CASH": 0.20,
             "bond_short": 0.20,
         }
