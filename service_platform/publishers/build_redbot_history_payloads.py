@@ -42,6 +42,14 @@ TRADING_WINDOWS = {
     "6m": 126,
     "1y": 252,
 }
+CALENDAR_WINDOWS = {
+    "1w": pd.DateOffset(weeks=1),
+    "2w": pd.DateOffset(weeks=2),
+    "1m": pd.DateOffset(months=1),
+    "3m": pd.DateOffset(months=3),
+    "6m": pd.DateOffset(months=6),
+    "1y": pd.DateOffset(years=1),
+}
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -209,6 +217,22 @@ def _build_nav_history_series(
     work = work.dropna(subset=["date", "nav"]).sort_values("date").reset_index(drop=True)
     if len(work) < 2:
         return []
+
+    def _window_start_idx(idx: int, label: str) -> int | None:
+        target_date = work.at[idx, "date"] - CALENDAR_WINDOWS[label]
+        candidates = work.index[(work.index < idx) & (work["date"] <= target_date)]
+        if len(candidates) == 0:
+            return None
+        return int(candidates[-1])
+
+    def _annualized_sharpe(seg: pd.DataFrame) -> float | None:
+        returns = seg["nav"].pct_change().dropna()
+        if returns.empty or float(returns.std(ddof=0)) <= 0:
+            return None
+        elapsed_days = max((seg["date"].iloc[-1] - seg["date"].iloc[0]).days, 1)
+        periods_per_year = max(len(returns) / elapsed_days * 365.25, 1.0)
+        return round(float(returns.mean() / returns.std(ddof=0) * (periods_per_year ** 0.5)), 6)
+
     rows: list[dict[str, Any]] = []
     for idx in range(1, len(work)):
         latest_nav = float(work.at[idx, "nav"])
@@ -222,21 +246,19 @@ def _build_nav_history_series(
             "cagr": cagr,
             "metric_basis": metric_basis,
         }
-        for label, steps in TRADING_WINDOWS.items():
-            start_idx = idx - steps
-            if start_idx < 0:
+        for label in CALENDAR_WINDOWS:
+            start_idx = _window_start_idx(idx, label)
+            if start_idx is None:
                 row[f"trailing_{label}"] = None
                 continue
             start_nav = float(work.at[start_idx, "nav"])
             row[f"trailing_{label}"] = None if start_nav == 0 else round(latest_nav / start_nav - 1.0, 6)
-        peak = work.loc[max(0, idx - 252) : idx, "nav"].cummax()
-        dd = work.loc[max(0, idx - 252) : idx, "nav"] / peak - 1.0
+        one_year_start = work.at[idx, "date"] - CALENDAR_WINDOWS["1y"]
+        one_year_seg = work.loc[(work["date"] >= one_year_start) & (work.index <= idx), ["date", "nav"]].copy()
+        peak = one_year_seg["nav"].cummax()
+        dd = one_year_seg["nav"] / peak - 1.0
         row["mdd_1y"] = round(float(dd.min()), 6) if not dd.empty else None
-        ret_window = work.loc[max(0, idx - 252) : idx, "nav"].pct_change().dropna()
-        if ret_window.empty or float(ret_window.std(ddof=0)) <= 0:
-            row["sharpe_1y"] = None
-        else:
-            row["sharpe_1y"] = round(float(ret_window.mean() / ret_window.std(ddof=0) * (252.0 ** 0.5)), 6)
+        row["sharpe_1y"] = _annualized_sharpe(one_year_seg)
         row["itd_return"] = None if first_nav == 0 else round(latest_nav / first_nav - 1.0, 6)
         rows.append(row)
     return [row for row in rows if row["asof_date"] <= asof_date]

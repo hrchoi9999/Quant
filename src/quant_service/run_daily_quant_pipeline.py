@@ -25,6 +25,26 @@ PIPELINE_STARTED_AT: datetime | None = None
 PIPELINE_START_MONO: float | None = None
 
 
+def _resume_hint_for_group(group_name: str) -> str:
+    hints = {
+        "prep": "Fix the data/prep issue, then rerun --data-refresh-only for the same asof.",
+        "models": "Fix the model issue, then rerun --model-run-only for the same asof after QM handoff is ready.",
+        "router_reports": "Rerun --model-run-only for the same asof, or manually rerun router/report commands and downstream publish steps.",
+        "tseries_shadow": "Rerun the failed T-series refresh command, then continue from I-series/publish steps.",
+        "iseries_shadow": "Rerun the failed I-series refresh command, then continue from publish steps.",
+        "publish_ingest": "Rerun ingest/publish for the same asof, then rebuild web/admin current payloads.",
+        "web_snapshot": "Rerun web snapshot/history payload commands for the same asof, then validate contract.",
+        "admin_tracker": "Rerun admin tracker build/validation for the same asof, then continue AI/trading/contract steps.",
+        "ai_overlay": "Rerun the failed AI overlay command, then continue remaining AI/trading/contract steps.",
+        "trading_sign": "Rerun trading_sign generation and validation for the same asof, then validate contract.",
+        "contract": "Inspect the contract report, fix missing/stale payloads, then rerun validate_daily_pipeline_contract.py.",
+        "remote_publish": "Rerun GCS publish only after local contract validation passes.",
+        "generated_csv_db_sync": "Rerun sync_generated_csv_to_db.py for the same asof.",
+        "generated_cleanup": "Rerun cleanup_generated_files.py for the same asof if archival cleanup is required.",
+    }
+    return hints.get(group_name, "Fix the failed command, then rerun the same stage or downstream commands for the same asof.")
+
+
 def _command_label(cmd: list[str]) -> str:
     if not cmd:
         return ""
@@ -120,12 +140,30 @@ def _write_timing_report() -> None:
     if PIPELINE_START_MONO is not None:
         wall_elapsed = round(time.perf_counter() - PIPELINE_START_MONO, 3)
     status = "interrupted_or_failed" if PIPELINE_STATUS == "running" else PIPELINE_STATUS
+    failed_rows = [row for row in rows if int(row.get("return_code") or 0) != 0]
+    failed_row = failed_rows[0] if failed_rows else None
+    last_completed = next((row for row in reversed(rows) if int(row.get("return_code") or 0) == 0), None)
+    failure = None
+    if failed_row is not None:
+        failed_group = str(failed_row.get("group") or "unknown")
+        failure = {
+            "group": failed_group,
+            "item": failed_row.get("item"),
+            "label": failed_row.get("label"),
+            "return_code": failed_row.get("return_code"),
+            "command": failed_row.get("command"),
+            "resume_hint": _resume_hint_for_group(failed_group),
+        }
     payload = {
         "status": status,
         "started_at": PIPELINE_STARTED_AT.isoformat(timespec="seconds") if PIPELINE_STARTED_AT else None,
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "wall_elapsed_seconds": wall_elapsed,
         "command_count": len(rows),
+        "completed_command_count": len([row for row in rows if int(row.get("return_code") or 0) == 0]),
+        "failed_command_count": len(failed_rows),
+        "last_completed_command": last_completed,
+        "failure": failure,
         "summed_command_seconds": total,
         "group_elapsed_seconds_sum": by_group,
         "group_wall_elapsed_seconds": group_wall,
@@ -143,6 +181,8 @@ def _run(cmd: list[str], cwd: Path, group_name: str = "serial", item_name: str =
     print(f"[RUN] {' '.join(cmd)}")
     return_code = _run_timed(cmd, cwd, group_name, item_name or _command_label(cmd))
     if return_code != 0:
+        print(f"[FAIL:{group_name}] rc={return_code} label={_command_label(cmd)}")
+        print(f"[RESUME_HINT] {_resume_hint_for_group(group_name)}")
         raise subprocess.CalledProcessError(return_code, cmd)
 
 
@@ -340,6 +380,7 @@ def build_commands(
     full_validation: bool,
     pipeline_mode: str,
 ) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[str], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
+    token = asof.replace("-", "")
     prep_cmds: list[list[str]] = [[
         python_exe,
         str(PROJECT_ROOT / r"src\pipelines\rebuild_mix_universe_and_refresh_dbs.py"),
@@ -440,14 +481,9 @@ def build_commands(
             "full" if full_validation else "quick",
         ],
     ]
-    if pipeline_mode == "research_full":
-        admin_new_entry_cmds.append(
-            [python_exe, str(PROJECT_ROOT / r"scripts\build_internal_model_validation_current.py"), "--asof", asof]
-        )
-
     ai_overlay_cmds: list[list[str]] = []
     if include_ai_overlay:
-        ai_overlay_common_cmds = [
+        ai_daily_light_cmds = [
             [
                 python_exe,
                 str(PROJECT_ROOT / r"scripts\build_ai_overlay_v01.py"),
@@ -469,20 +505,24 @@ def build_commands(
             ],
             [python_exe, str(PROJECT_ROOT / r"scripts\compare_ai_common_vs_model_specific.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_ai_shadow_observation_payload.py"), "--asof", asof],
-            [python_exe, str(PROJECT_ROOT / r"scripts\build_downside_risk_ai_v01.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_downside_risk_ai_shadow_tracker.py"), "--shadow-asof", "all", "--performance-asof", asof],
+            [python_exe, str(PROJECT_ROOT / r"scripts\build_ai_learning_models_admin_payload.py"), "--asof", asof],
+        ]
+        ai_training_cmds = [
+            [python_exe, str(PROJECT_ROOT / r"scripts\build_downside_risk_ai_v01.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_candidate_rank_delta_ai_v01.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_theme_persistence_ai_v01.py"), "--asof", asof],
-            [python_exe, str(PROJECT_ROOT / r"scripts\build_e_series_etf_role_taxonomy.py"), "--asof", asof],
         ]
-        e_series_daily_cmds = [
+        e_series_research_cmds = [
+            [python_exe, str(PROJECT_ROOT / r"scripts\build_e_series_etf_role_taxonomy.py"), "--asof", asof],
+            [python_exe, str(PROJECT_ROOT / r"scripts\build_etf_tseries_pit_backfill_v1.py"), "--run-date", token, "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_e_series_etf_mart_v2.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_e_series_etf_sleeve_selection_ai_v1.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\run_e_series_etf_sleeve_portfolio_backtest.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_etf_ai_shadow_portfolio.py"), "--asof", asof],
             [python_exe, str(PROJECT_ROOT / r"scripts\build_ai_learning_models_admin_payload.py"), "--asof", asof],
         ]
-        ai_research_full_cmds = [
+        e_series_policy_research_cmds = [
             [python_exe, str(PROJECT_ROOT / r"scripts\fetch_krx_etf_distributions.py"), "--asof", asof, "--max-dates", "1"],
             [python_exe, str(PROJECT_ROOT / r"scripts\fetch_issuer_etf_distributions.py"), "--asof", asof, "--providers", "kodex,tiger,ace,sol,csv", "--kodex-pages", "2", "--max-notices", "20", "--provider-sleep", "0.8"],
             [python_exe, str(PROJECT_ROOT / r"scripts\run_e_series_etf_total_return_adjustment_check.py"), "--asof", asof],
@@ -505,29 +545,28 @@ def build_commands(
             ],
         ]
         if pipeline_mode == "research_full":
+            e_series_distribution_cmds = e_series_policy_research_cmds[:2]
+            e_series_total_return_cmds = e_series_policy_research_cmds[2:3]
+            e_series_walk_forward_cmds = e_series_policy_research_cmds[3:12]
+            ai_overlay_operational_backtest_cmds = e_series_policy_research_cmds[12:]
             ai_overlay_cmds = (
-                ai_overlay_common_cmds
-                + [
-                    ai_research_full_cmds[0],
-                    ai_research_full_cmds[1],
-                    e_series_daily_cmds[0],
-                    ai_research_full_cmds[2],
-                    e_series_daily_cmds[1],
-                    e_series_daily_cmds[2],
-                ]
-                + ai_research_full_cmds[3:]
-                + [
-                    e_series_daily_cmds[3],
-                    e_series_daily_cmds[4],
-                ]
+                ai_training_cmds
+                + ai_daily_light_cmds[:6]
+                + e_series_distribution_cmds
+                + e_series_research_cmds[:3]
+                + e_series_total_return_cmds
+                + e_series_research_cmds[3:5]
+                + e_series_walk_forward_cmds
+                + ai_overlay_operational_backtest_cmds
+                + e_series_research_cmds[5:]
             )
             if include_ai_research:
                 ai_overlay_cmds.insert(
-                    len(ai_overlay_common_cmds) + 6,
+                    len(ai_training_cmds) + len(ai_daily_light_cmds[:6]) + len(e_series_distribution_cmds) + 5,
                     [python_exe, str(PROJECT_ROOT / r"scripts\run_e_series_etf_selection_policy_ablation.py"), "--asof", asof],
                 )
         else:
-            ai_overlay_cmds = ai_overlay_common_cmds + e_series_daily_cmds
+            ai_overlay_cmds = ai_daily_light_cmds
 
     trading_sign_cmds: list[list[str]] = [
         [
@@ -543,9 +582,14 @@ def build_commands(
         [python_exe, str(PROJECT_ROOT / r"scripts\validate_trading_sign_snapshots.py"), "--asof", asof],
     ]
 
-    prepublish_contract_cmds: list[list[str]] = [
-        [python_exe, str(PROJECT_ROOT / r"scripts\validate_daily_pipeline_contract.py"), "--asof", asof],
-    ]
+    prepublish_contract_cmds: list[list[str]] = []
+    if pipeline_mode == "research_full":
+        prepublish_contract_cmds.append(
+            [python_exe, str(PROJECT_ROOT / r"scripts\build_internal_model_validation_current.py"), "--asof", asof]
+        )
+    prepublish_contract_cmds.append(
+        [python_exe, str(PROJECT_ROOT / r"scripts\validate_daily_pipeline_contract.py"), "--asof", asof]
+    )
 
     remote_publish_cmds: list[list[str]] = []
     if include_remote_current_publish:
@@ -624,8 +668,8 @@ def main() -> None:
         choices=["daily_light", "research_full"],
         default="daily_light",
         help=(
-            "daily_light runs operational current payload updates; research_full also runs "
-            "heavy E-series/AI walk-forward validation jobs."
+            "daily_light runs operational current payload updates only; research_full also runs "
+            "AI retraining, E-series full rebuilds, backtests, and walk-forward validation jobs."
         ),
     )
     ap.add_argument(

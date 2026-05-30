@@ -37,6 +37,15 @@ T_BUCKET_RANK = {
     "confirmed": 3,
 }
 RETURN_HORIZONS = (("1w", 5), ("2w", 10), ("1m", 21), ("2m", 42), ("3m", 63), ("6m", 126), ("1y", 252))
+CALENDAR_WINDOWS = {
+    "1w": pd.DateOffset(weeks=1),
+    "2w": pd.DateOffset(weeks=2),
+    "1m": pd.DateOffset(months=1),
+    "2m": pd.DateOffset(months=2),
+    "3m": pd.DateOffset(months=3),
+    "6m": pd.DateOffset(months=6),
+    "1y": pd.DateOffset(years=1),
+}
 WEIGHT_EPS = 1e-8
 ACTUAL_LIVE_START_DATES = {
     "user_models": {
@@ -376,16 +385,19 @@ def _safe_float(value: Any) -> float | None:
         return None
 
 
-def _calc_nav_window_stats(nav_df: pd.DataFrame, lookback_days: int) -> tuple[float | None, float | None]:
+def _calc_nav_window_stats(nav_df: pd.DataFrame, label: str) -> tuple[float | None, float | None]:
     if nav_df.empty:
         return None, None
-    start_idx = max(len(nav_df) - (lookback_days + 1), 0)
-    seg = nav_df.iloc[start_idx:].copy()
+    latest_date = nav_df["date"].iloc[-1]
+    start_date = latest_date - CALENDAR_WINDOWS[label]
+    seg = nav_df.loc[nav_df["date"] >= start_date].copy()
     if len(seg) < 2:
         return None, None
-    seg["ret"] = seg["nav"].pct_change().fillna(0.0)
-    vol = float(seg["ret"].std(ddof=0)) if len(seg) > 1 else 0.0
-    sharpe = None if vol <= 0 else float((seg["ret"].mean() / vol) * (252.0 ** 0.5))
+    returns = seg["nav"].pct_change().dropna()
+    vol = float(returns.std(ddof=0)) if len(returns) > 1 else 0.0
+    elapsed_days = max((seg["date"].iloc[-1] - seg["date"].iloc[0]).days, 1)
+    periods_per_year = max(len(returns) / elapsed_days * 365.25, 1.0)
+    sharpe = None if vol <= 0 else float((returns.mean() / vol) * (periods_per_year ** 0.5))
     peak = seg["nav"].cummax()
     mdd = float((seg["nav"] / peak - 1.0).min())
     return mdd, sharpe
@@ -410,19 +422,20 @@ def _build_nav_summary_payload(
         return None
     latest_nav = float(nav["nav"].iloc[-1])
     periods: dict[str, float | None] = {}
-    period_steps = {"1w": 5, "2w": 10, "1m": 21, "2m": 42, "3m": 63, "6m": 126, "1y": 252}
-    for label, steps in period_steps.items():
-        start_idx = len(nav) - (steps + 1)
-        if start_idx < 0:
+    for label, offset in CALENDAR_WINDOWS.items():
+        target_date = nav["date"].iloc[-1] - offset
+        candidates = nav.index[(nav.index < len(nav) - 1) & (nav["date"] <= target_date)]
+        if len(candidates) == 0:
             periods[label] = None
             continue
+        start_idx = int(candidates[-1])
         start_nav = float(nav["nav"].iloc[start_idx])
         periods[label] = None if start_nav == 0 else round(latest_nav / start_nav - 1.0, 6)
     first_nav = float(nav["nav"].iloc[0])
     itd_return = None if first_nav == 0 else round(latest_nav / first_nav - 1.0, 6)
     elapsed_years = max((nav["date"].iloc[-1] - nav["date"].iloc[0]).days / 365.25, 1.0 / 252.0)
     cagr = None if first_nav <= 0 else round((latest_nav / first_nav) ** (1.0 / elapsed_years) - 1.0, 6)
-    mdd_1y, sharpe_1y = _calc_nav_window_stats(nav, 252)
+    mdd_1y, sharpe_1y = _calc_nav_window_stats(nav, "1y")
     return {
         "model_code": model_code,
         "display_name": display_name,

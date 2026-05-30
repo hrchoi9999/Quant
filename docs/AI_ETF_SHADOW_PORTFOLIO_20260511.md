@@ -11,9 +11,9 @@
 - legacy alias: `AI-ETF-SHADOW-PORTFOLIO-V01`
 - role model: `AI-ETF-ROLE-ALLOCATION-V01` (ETF역할배분AI), quality gate `no_watch_plus`
 - template model: `AI-ETF-ROLE-WEIGHT-TEMPLATE-V01` (ETF비중템플릿AI), quality gate `aum_p20`
-- as-of: `2026-05-21`
-- role signal date: `2026-05-21`
-- template signal date: `2026-05-21`
+- as-of: `2026-05-28`
+- role signal date: `2026-05-22`
+- template signal date: `2026-05-22`
 - regime mode: `risk_off`
 - selected role: `SECTOR_THEME`
 - selected template: `ON_THEME_TILT`
@@ -23,7 +23,7 @@
 
 | variant | observations | avg 1M ret | win rate | avg MDD | avg risk adj | worst 1M | compounded |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| `hybrid_b50_ai50_top3_role` | 28 | 2.19% | 60.71% | -3.13% | 0.63% | -7.50% | 76.32% |
+| `hybrid_b50_ai50_top3_role` | 27 | 2.27% | 62.96% | -3.24% | 0.65% | -7.50% | 76.32% |
 | `role_ai_no_watch_plus_top1` | 27 | 4.28% | 62.96% | -4.78% | 1.89% | -35.13% | 144.60% |
 | `template_ai_aum_p20_top1` | 27 | 3.06% | 55.56% | -3.51% | 1.30% | -15.42% | 99.27% |
 | `mode_default_aum_p20` | 27 | 2.28% | 70.37% | -2.64% | 0.96% | -3.97% | 75.97% |
@@ -38,6 +38,6 @@
 ## Outputs
 
 - `D:\Quant\service_platform\web\admin_data\current\etf_ai_shadow_portfolio_current.json`
-- `D:\Quant\reports\etf_ai_role_allocation_v01\etf_ai_shadow_portfolio_holdings_20260521.csv`
-- `D:\Quant\reports\etf_ai_role_allocation_v01\etf_ai_shadow_portfolio_backtest_20260521.csv`
-- `D:\Quant\reports\etf_ai_role_allocation_v01\etf_ai_shadow_portfolio_20260521.json`
+- `D:\Quant\reports\etf_ai_role_allocation_v01\etf_ai_shadow_portfolio_holdings_20260528.csv`
+- `D:\Quant\reports\etf_ai_role_allocation_v01\etf_ai_shadow_portfolio_backtest_20260528.csv`
+- `D:\Quant\reports\etf_ai_role_allocation_v01\etf_ai_shadow_portfolio_20260528.json`
