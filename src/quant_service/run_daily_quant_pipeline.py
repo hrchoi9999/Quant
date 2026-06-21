@@ -3,14 +3,13 @@ from __future__ import annotations
 import argparse
 import atexit
 import csv
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import date
-from datetime import datetime
 import json
 import subprocess
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(r"D:\Quant")

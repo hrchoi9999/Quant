@@ -30,6 +30,7 @@ googleapis-common-protos==1.72.0
 httplib2==0.31.2
 idna==3.11
 ImageIO==2.37.2
+iniconfig==2.3.0
 ipython==8.37.0
 ipywidgets==8.1.8
 jedi==0.19.2
@@ -59,6 +60,7 @@ peewee==3.18.3
 pillow==12.0.0
 platformdirs==4.5.1
 plotly==6.5.0
+pluggy==1.6.0
 prompt_toolkit==3.0.52
 proto-plus==1.27.0
 protobuf==6.33.2
@@ -70,6 +72,7 @@ pycparser==2.23
 Pygments==2.19.2
 pykrx==1.2.3
 pyparsing==3.2.5
+pytest==9.0.3
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
 pytz==2025.2
@@ -80,6 +83,7 @@ requests-file==3.0.1
 requests-oauthlib==2.0.0
 rich==14.2.0
 rsa==4.9.1
+ruff==0.15.15
 schedule==1.2.2
 scikit-learn==1.7.2
 scipy==1.15.3
@@ -88,6 +92,7 @@ six==1.17.0
 soupsieve==2.8
 stack-data==0.6.3
 threadpoolctl==3.6.0
+tomli==2.4.1
 tornado==6.5.2
 tqdm==4.67.1
 traitlets==5.14.3

@@ -3,8 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import sqlite3
+import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,21 @@ USER_MODEL_META = {
 }
 INTERNAL_MODEL_CODES = ("S2", "S2_PIT_V01", "S3", "S3_CORE2", "S3_ACCEL_V01", "S4", "S5", "S6")
 ISERIES_MODEL_CODES = ("I-STOCK-STRONG-RSI-V01",)
+
+
+def _replace_with_retry(tmp_path: Path, out_path: Path, attempts: int = 6, sleep_seconds: float = 1.5) -> None:
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            tmp_path.replace(out_path)
+            return
+        except PermissionError as exc:
+            last_error = exc
+            if attempt == attempts:
+                break
+            time.sleep(float(sleep_seconds))
+    if last_error is not None:
+        raise last_error
 TSERIES_MODEL_CODES = ("T-STOCK-V01", "T-ETF-V01")
 T_BUCKET_RANK = {
     "observe": 1,
@@ -1109,7 +1125,6 @@ def build_tseries_weekly_rank_rows(asof: str) -> list[dict[str, Any]]:
     if latest.empty:
         return []
     latest["event_date"] = pd.to_datetime(latest["event_date"]).dt.strftime("%Y-%m-%d")
-    latest_dates = latest.groupby("model_code")["event_date"].max().to_dict()
     rows: list[dict[str, Any]] = []
     for model_code, frame in snapshots.groupby("model_code"):
         frame["week_end"] = frame["event_date"].map(lambda value: _week_end(value, asof))
@@ -1325,7 +1340,6 @@ def _simulate_ranked_proxy_nav(
         period = returns.loc[(returns.index > start) & (returns.index <= end), chosen]
         if period.empty:
             continue
-        weight = 1.0 / float(len(chosen))
         for day, day_ret in period.iterrows():
             nav *= 1.0 + float(day_ret.fillna(0.0).mean() if len(chosen) > 0 else 0.0)
             rows.append({"date": day, "nav": nav})
@@ -1436,7 +1450,7 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     tmp_path = OUT_PATH.with_name(f"{OUT_PATH.name}.tmp")
     tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp_path.replace(OUT_PATH)
+    _replace_with_retry(tmp_path, OUT_PATH)
     print(
         json.dumps(
             {

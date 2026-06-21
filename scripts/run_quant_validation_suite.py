@@ -9,7 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "reports" / "data_quality" / "validation_suite"
 

@@ -1,0 +1,24 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+exclude = [
+  ".git",
+  ".venv",
+  "venv",
+  "venv64",
+  "archive",
+  "data",
+  "reports",
+  "service_platform/web/public_data/current",
+  "service_platform/web/admin_data/current",
+  "trading_sign/service_platform/web/public_data/current",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
