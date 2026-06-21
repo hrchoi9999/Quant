@@ -19,6 +19,28 @@ function Write-Log([string]$Message) {
     Add-Content -Path $logPath -Value $line -Encoding UTF8
 }
 
+function Remove-PathWithRetry([string]$Path, [string]$Label, [switch]$Recurse, [int]$Attempts = 6, [int]$SleepSeconds = 10) {
+    $lastError = $null
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            if ($Recurse) {
+                Remove-Item -LiteralPath $Path -Recurse -Force
+            } else {
+                Remove-Item -LiteralPath $Path -Force
+            }
+            Write-Log "Deleted $Label"
+            return
+        } catch {
+            $lastError = $_
+            Write-Log "Delete retry $attempt/$Attempts failed for ${Label}: $($_.Exception.Message)"
+            if ($attempt -lt $Attempts) {
+                Start-Sleep -Seconds $SleepSeconds
+            }
+        }
+    }
+    throw "Failed to delete ${Label}: $($lastError.Exception.Message)"
+}
+
 New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 New-Item -ItemType Directory -Force -Path $stagingRoot | Out-Null
@@ -100,8 +122,7 @@ $oldBackups = Get-ChildItem -Path $BackupRoot -Filter 'Quant_*.zip' |
     Select-Object -Skip $KeepLatest
 
 foreach ($old in $oldBackups) {
-    Remove-Item -Force $old.FullName
-    Write-Log "Deleted old backup: $($old.Name)"
+    Remove-PathWithRetry -Path $old.FullName -Label "old backup: $($old.Name)"
 }
 
 $oldBundles = Get-ChildItem -Path $BackupRoot -Filter 'Quant_git_*.bundle' |
@@ -109,11 +130,16 @@ $oldBundles = Get-ChildItem -Path $BackupRoot -Filter 'Quant_git_*.bundle' |
     Select-Object -Skip $KeepLatest
 
 foreach ($old in $oldBundles) {
-    Remove-Item -Force $old.FullName
-    Write-Log "Deleted old git bundle: $($old.Name)"
+    Remove-PathWithRetry -Path $old.FullName -Label "old git bundle: $($old.Name)"
 }
 
-Remove-Item -Recurse -Force $stagingPath
+Remove-PathWithRetry -Path $stagingPath -Label "current staging directory: $(Split-Path -Leaf $stagingPath)" -Recurse
+
+$staleStagingDirs = Get-ChildItem -Path $stagingRoot -Directory -ErrorAction SilentlyContinue
+foreach ($stale in $staleStagingDirs) {
+    Remove-PathWithRetry -Path $stale.FullName -Label "stale staging directory: $($stale.Name)" -Recurse
+}
+
 Write-Log "Backup completed. zip=$zipPath git_head=$gitHead git_bundle_created=$bundleCreated"
 Write-Output "Backup created: $zipPath"
 if ($bundleCreated) {

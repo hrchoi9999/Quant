@@ -21,9 +21,26 @@ if (-not (Test-Path -LiteralPath $BackupRoot)) {
     exit 1
 }
 
-$latestZip = Get-ChildItem -LiteralPath $BackupRoot -Filter 'Quant_*.zip' -File |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
+$latestInfo = Join-Path $BackupRoot 'latest_quant_backup.txt'
+$latestZipPath = $null
+$latestBundlePath = $null
+if (Test-Path -LiteralPath $latestInfo) {
+    foreach ($line in Get-Content -LiteralPath $latestInfo) {
+        if ($line -like 'zip=*') {
+            $latestZipPath = $line.Substring(4)
+        } elseif ($line -like 'git_bundle=*') {
+            $latestBundlePath = $line.Substring(11)
+        }
+    }
+}
+
+$latestZip = if ($latestZipPath -and (Test-Path -LiteralPath $latestZipPath)) {
+    Get-Item -LiteralPath $latestZipPath
+} else {
+    Get-ChildItem -LiteralPath $BackupRoot -Filter 'Quant_*.zip' -File |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+}
 
 if (-not $latestZip) {
     $errors.Add("No Quant_*.zip backup found under $BackupRoot")
@@ -71,9 +88,13 @@ try {
     $errors.Add("Unable to read latest ZIP backup: $($_.Exception.Message)")
 }
 
-$latestBundle = Get-ChildItem -LiteralPath $BackupRoot -Filter 'Quant_git_*.bundle' -File |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
+$latestBundle = if ($latestBundlePath -and (Test-Path -LiteralPath $latestBundlePath)) {
+    Get-Item -LiteralPath $latestBundlePath
+} else {
+    Get-ChildItem -LiteralPath $BackupRoot -Filter 'Quant_git_*.bundle' -File |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+}
 
 $bundleOk = $false
 if (-not $latestBundle) {
