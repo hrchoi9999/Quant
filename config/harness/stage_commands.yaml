@@ -1,0 +1,70 @@
+stages:
+  WD01_QUANT_FRONT:
+    thread: Quant
+    action: "주중 파이프라인 전반부"
+    command: "python scripts/harness/safe_echo.py --message WD01_QUANT_FRONT"
+    working_dir: "D:/Quant"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "초기 안전 실행용 placeholder. 실제 Quant 전반부 command는 추후 연결."
+
+  WD02_MARKET_COLLECT:
+    thread: QuantMarketData
+    action: "시장 데이터 수집"
+    command: "python D:/Quant/scripts/harness/safe_echo.py --message WD02_MARKET_COLLECT"
+    working_dir: "D:/QuantMarket"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "초기 안전 실행용 placeholder."
+
+  WD03_MARKET_ANALYSIS:
+    thread: QuantMarket
+    action: "마켓 분석"
+    command: "python D:/Quant/scripts/harness/safe_echo.py --message WD03_MARKET_ANALYSIS"
+    working_dir: "D:/QuantMarket"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "진단용 placeholder. 실제 prompt 범위에서는 historical target을 immutable history로 검증하고 newer live current는 별도 coherence 검사한다. 과거 target으로 current를 롤백하거나 WD02의 동일 target publish를 중복 실행하지 않는다."
+
+  WD04_QUANT_REAR:
+    thread: Quant
+    action: "주중 파이프라인 후반부"
+    command: "python scripts/harness/safe_echo.py --message WD04_QUANT_REAR"
+    working_dir: "D:/Quant"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "진단용 placeholder. 실제 prompt 범위의 daily_light 후반부 체인은 30분 timebox를 사용한다. 중단 시 timing report의 마지막 성공 command 이후 admin/AI/trading-sign/contract만 선택 복구하고 모델 전체를 재실행하지 않는다."
+
+  WD05_PORTFOLIO_ANALYSIS:
+    thread: QuantAnalysis
+    action: "투자 포트폴리오 분석"
+    command: "python D:/Quant/scripts/harness/safe_echo.py --message WD05_PORTFOLIO_ANALYSIS"
+    working_dir: "D:/QuantAnalysis"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "초기 안전 실행용 placeholder. 실제 prompt 범위에는 portfolio_pipeline 실행/publish 확인과 포트폴리오 성과 거버넌스(selection history, top10/top3, benchmark-relative, model attribution, 개선 후보 보고)가 포함된다."
+
+  WD06_PRE_GCS_PUBLISH:
+    thread: Quant
+    action: "pre-GCS publish gate"
+    command: "python scripts/harness/safe_echo.py --message WD06_PRE_GCS_PUBLISH"
+    working_dir: "D:/Quant"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "초기 안전 실행용 placeholder. 실제 publish는 prompt harness의 검증 gate에서 수행."
+
+  WE01_QUANT_WEEKEND_PIPELINE:
+    thread: Quant
+    action: "주말 Quant 모델/AI 검증 통합 파이프라인"
+    command: "python scripts/harness/safe_echo.py --message WE01_QUANT_WEEKEND_PIPELINE"
+    working_dir: "D:/Quant"
+    safe_run: true
+    risk_level: low
+    expected_artifacts: []
+    notes: "초기 안전 실행용 placeholder."

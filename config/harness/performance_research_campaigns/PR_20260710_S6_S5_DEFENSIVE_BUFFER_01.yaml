@@ -1,0 +1,157 @@
+performance_research_contract:
+  schema_version: 1
+  campaign_id: "PR_20260710_S6_S5_DEFENSIVE_BUFFER_01"
+  frozen_at: "2026-07-10T21:07:13+09:00"
+  owner: "Quant Model"
+  target_thread: "Quant"
+  objective: >-
+    Evaluate one role-compatible S5 buffer inside the S6 risk-off ETF sleeve without
+    replacing S6, changing operating policy, or tuning the candidate after freeze.
+
+  role_contract:
+    baseline_role: "ETF_DEFENSIVE_CORE"
+    baseline_policy: "S6_DEFENSIVE_V1"
+    baseline_trigger: "Router risk_off ETF sleeve call"
+    primary_goal: "preserve drawdown, volatility, liquidity, and acute-loss defense"
+    return_is_secondary_but_required_to_improve: true
+    pure_s5_replacement_allowed: false
+    pure_s5_rejection_reason: >-
+      S5_NEUTRAL_V1 is ETF_BALANCED_CORE for neutral regimes, has no inverse hedge,
+      and is not a full risk-off transition model.
+
+  frozen_candidate:
+    policy: "S6_S5_DEFENSIVE_BUFFER_85_15_FROZEN"
+    decision_frequency: "monthly"
+    decision_information_cutoff: "decision date close; no later data"
+    execution: "next trading day using existing ETF allocation execution convention"
+    acute_trigger: "S6 allocator diagnostic crash == true OR vol_expand == true"
+    acute_target:
+      S6_DEFENSIVE_V1: 1.00
+      S5_NEUTRAL_V1: 0.00
+    non_acute_risk_off_target:
+      S6_DEFENSIVE_V1: 0.85
+      S5_NEUTRAL_V1: 0.15
+    combination_method: >-
+      Run the unchanged S6 and S5 allocators on the same decision date and core universe,
+      then linearly combine final ticker and implicit cash target weights. Aggregate duplicate
+      tickers before turnover and cost calculation.
+    rule_change_allowed: false
+    parameter_tuning_allowed: false
+    alternative_mix_search_allowed: false
+    trigger_change_allowed: false
+    additional_candidate_search_allowed: false
+
+  locked_inputs:
+    price_db: "D:/Quant/data/db/price.db"
+    core_universe: "the same point-in-time ETF core universe used by the S5/S6 source runs"
+    s5_config: "D:/Quant/src/backtest/configs/s5_neutral_config.py"
+    s6_config: "D:/Quant/src/backtest/configs/s6_defensive_config.py"
+    s5_allocator: "D:/Quant/src/backtest/portfolio/s5_neutral_allocator.py"
+    s6_allocator: "D:/Quant/src/backtest/portfolio/s6_defensive_allocator.py"
+    source_asof: "2026-07-08"
+    historical_start: "2023-06-08"
+    historical_end: "2026-07-08"
+    rebalance: "M"
+    fee_bps: 5
+    slippage_bps: 5
+    one_way_cost_bps: 10
+    turnover_definition: "0.5 * sum(abs(weight_t - weight_t_minus_1)), including cash"
+    source_sha256:
+      s5_neutral_config.py: "e9a2ca7afef46ab0ca230cc282e8f503f802ed070e94e372690b9a946261b7ef"
+      s6_defensive_config.py: "cf2b94594e766e43c601f95c99c0753fa67a8daead88154a920394ca20fac6c5"
+      s5_neutral_allocator.py: "c5f4667653957246ca532947191e0ae0f26aaadf356f18871b26b847c520e08e"
+      s6_defensive_allocator.py: "25ced5b739c231be5e41fd0d7297995f486466162e6122ff185ef63309c28673"
+
+  evidence_chronology:
+    candidate_origin: >-
+      The 2026-07-10 performance review observed S5 historical superiority and therefore
+      influenced candidate formation.
+    historical_period_status: "E0/E1 diagnostic only; post-selection contaminated"
+    untouched_temporal_holdout_available_now: false
+    post_freeze_oos_start: "strictly after frozen_at"
+
+  required_initial_work:
+    - "Implement one shadow-only evaluator for the frozen candidate; do not modify S5, S6, Router, WD04, or operating policy."
+    - "Recompute S5 and S6 allocations from unchanged point-in-time inputs instead of blending published aggregate returns."
+    - "Produce historical diagnostic results for baseline and the single frozen candidate using identical inputs, timing, and costs."
+    - "Separate acute trigger and non-acute observations and report transition costs into acute S6-only mode."
+    - "Initialize post-freeze monthly shadow state with deterministic rule and input hashes."
+    - "Preserve missing assets and unavailable groups as cash under the existing allocator rules."
+    - "Add tests for 85/15 blending, acute 100% S6 override, duplicate ticker aggregation, cash-inclusive turnover, no lookahead, idempotency, and no operating-output mutation."
+
+  historical_diagnostic_gate:
+    approval_credit: false
+    required_metrics:
+      - "CAGR and cumulative net return"
+      - "MDD, volatility, Sharpe, worst month, and lower-tail monthly return"
+      - "acute and non-acute risk-off return separately"
+      - "monthly turnover and 10/20/30bp cost sensitivity"
+      - "paired monthly block-bootstrap interval"
+      - "gain concentration and leave-one-period-out stability"
+    reject_setup_if:
+      - "candidate does not become 100% S6 when crash or vol_expand is true"
+      - "candidate uses data after the decision date"
+      - "operating S5, S6, Router, model registry, or public output is mutated"
+
+  minimum_post_freeze_evidence_gate:
+    monthly_decision_observations: 24
+    actual_router_risk_off_decisions: 12
+    acute_crash_or_vol_expand_decisions: 4
+    non_acute_risk_off_decisions: 8
+    paired_mean_net_return_delta_ci95_low_pp_gt: 0
+    paired_median_net_return_delta_pp_gte: 0
+    candidate_mdd_worsening_tolerance_pp: 0.50
+    acute_worst_return_worsening_tolerance_pp: 0.25
+    lower_tail_monthly_return_worsening_tolerance_pp: 0.50
+    mean_monthly_turnover_delta_pp_lte: 5
+    cost_sensitivity_bps_one_way:
+      - 10
+      - 20
+      - 30
+    top_three_gain_concentration_lte: 0.50
+    minimum_shadow_elapsed_months: 12
+    all_gates_required: true
+
+  initial_campaign_gate:
+    performance_decision_allowed_now: false
+    allowed_final_states:
+      - "shadow_initialized_waiting_oos"
+      - "historical_role_guard_failed"
+      - "blocked_missing_canonical_sources"
+      - "reject_setup_invalid"
+    operating_approval_state_allowed: false
+
+  prohibited_actions:
+    - "pure S5 replacement"
+    - "S6 operating replacement or reduction"
+    - "85/15 weight tuning"
+    - "acute trigger tuning"
+    - "alternative candidate search"
+    - "model state or Router policy change"
+    - "GCS or public publish"
+    - "automatic trading"
+
+  required_report_fields:
+    - "campaign_id"
+    - "status"
+    - "role_contract_validation"
+    - "implemented_shadow_components"
+    - "rule_hash"
+    - "input_hash_validation"
+    - "historical_diagnostic_only"
+    - "baseline_vs_candidate"
+    - "acute_vs_non_acute"
+    - "paired_uncertainty"
+    - "cost_sensitivity"
+    - "gain_concentration"
+    - "post_freeze_shadow_state"
+    - "operating_output_mutation_check"
+    - "tests"
+    - "manual_command"
+    - "future_we01_hook_recommendation"
+    - "evidence_state"
+    - "recommended_next_action"
+    - "changed_files"
+    - "evidence_files"
+    - "known_issues"
+    - "elapsed_time"

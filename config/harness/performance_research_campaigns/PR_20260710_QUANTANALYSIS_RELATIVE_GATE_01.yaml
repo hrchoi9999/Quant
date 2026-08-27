@@ -1,0 +1,127 @@
+performance_research_contract:
+  schema_version: 1
+  campaign_id: "PR_20260710_QUANTANALYSIS_RELATIVE_GATE_01"
+  frozen_at: "2026-07-10T20:44:17+09:00"
+  owner: "QuantAnalysis"
+  target_thread: "QuantAnalysis"
+  objective: >-
+    Initialize a reproducible shadow-only comparison between the existing
+    stock_reactivity_v1_20260528 top-three ranking and one frozen relative_gate
+    reranking rule. Do not change the operating ranking or portfolio.
+
+  research_question: >-
+    For signals published after the freeze, does the frozen relative gate
+    improve five-session net return, benchmark-relative return, and top-three
+    separation without worsening investable NAV drawdown or turnover?
+
+  canonical_baseline:
+    policy: "stock_reactivity_v1_20260528"
+    selection: "published top 3, equal weight"
+    canonical_signal_source: "GCS admin/history/investment_portfolio_*.json"
+    structured_candidate_source: "D:/QuantAnalysis/analysis.db: portfolio_runs, portfolio_stock_candidates"
+    price_source: "D:/Quant/data/db/price.db"
+    benchmark_source: "D:/QuantMarket/data/db/market_analysis.db"
+    latest_overwrite_file_is_canonical: false
+    mixed_horizon_selection_history_is_canonical: false
+
+  frozen_candidate:
+    policy: "relative_gate_v1_frozen_20260710"
+    source_population: "the exact published baseline top 10 for each signal"
+    final_score: "existing reactivity score plus relative gate adjustment"
+    score_adjustments:
+      rel5d_lt_0: -12
+      rel5d_missing: -3
+      rel5d_0_to_lt_2: 1
+      rel5d_2_to_15: 5
+      rel5d_gt_15_to_25: 1
+      rel5d_gt_25: -4
+    tie_break_order:
+      - "existing reactivity score descending"
+      - "existing rank ascending"
+    top_n: 3
+    equal_weight: true
+    rule_change_allowed: false
+    parameter_tuning_allowed: false
+    combination_with_flow_allowed: false
+    combination_with_model_attribution_allowed: false
+    combination_with_pullback_allowed: false
+    additional_candidate_search_allowed: false
+
+  timing_and_cost_contract:
+    eligible_signal: "published_at strictly after frozen_at"
+    entry: "next trading day open after public signal"
+    exit: "fifth trading session close counted from entry"
+    timezone: "Asia/Seoul"
+    one_way_cost_bps: 10
+    turnover_definition: "0.5 * sum(abs(weight_t - weight_t_minus_1)), including cash"
+    overlapping_episode_use: "paired outcome only"
+    annualize_overlapping_episodes: false
+    compounded_nav_from_overlapping_episodes: false
+    mdd_source: "non-overlapping investable portfolio NAV only"
+
+  benchmark_contract:
+    matching: "match each stock to KOSPI or KOSDAQ at signal time, then equal-weight the selected top 3"
+    benchmark_relative_only_is_not_success: true
+
+  required_setup_work:
+    - "Create a shadow-only tracker that never changes the operating top 3 or allocation."
+    - "Record the frozen rule and a deterministic rule hash."
+    - "Capture the actual published signal path, publication timestamp, and object hash when available."
+    - "Store baseline top 10, baseline top 3, and candidate top 3 as they were knowable at signal time."
+    - "Keep pending observations until next-open entry and fifth-session-close exit prices are available."
+    - "Preserve missing, halted, and delisted observations with explicit status instead of dropping them."
+    - "Calculate paired outcomes, turnover, costs, benchmark, and non-overlapping NAV using the frozen definitions."
+    - "Provide a manual command and a future WD05 hook recommendation, but do not add automatic execution in this campaign."
+    - "Add focused tests for scoring boundaries, ties, post-freeze eligibility, pending maturation, and no operating-output mutation."
+    - "Historical backfill may be shown only as E0/E1 diagnostic evidence and cannot satisfy the new OOS gate."
+
+  minimum_evidence_gate:
+    unique_new_entry_dates: 60
+    top3_position_observations: 180
+    non_overlapping_five_session_cohorts: 12
+    weak_regime_dates_market_grade_1_to_3: 20
+    neutral_strong_regime_dates_market_grade_4_to_5: 20
+    paired_block_bootstrap_ci95_low_pp_gt: 0
+    paired_median_delta_pp_gte: 0
+    benchmark_relative_candidate_gte: 0
+    top3_minus_rank4_10_pp_gt: 0
+    non_overlapping_nav_mdd_must_not_worsen: true
+    turnover_delta_pp_lte: 10
+
+  initial_campaign_gate:
+    required_status: "shadow_initialized_waiting_oos"
+    performance_decision_allowed_now: false
+    allowed_final_states:
+      - "shadow_initialized_waiting_oos"
+      - "blocked_missing_canonical_signal"
+      - "reject_setup_invalid"
+
+  prohibited_actions:
+    - "operating ranking change"
+    - "portfolio allocation change"
+    - "model inclusion or exclusion change"
+    - "candidate tuning after freeze"
+    - "automatic pipeline execution"
+    - "GCS or public publish"
+    - "automatic trading"
+
+  required_report_fields:
+    - "campaign_id"
+    - "status"
+    - "implemented_shadow_components"
+    - "rule_hash"
+    - "canonical_signal_binding"
+    - "timing_contract_validation"
+    - "data_lineage"
+    - "initial_shadow_state"
+    - "historical_diagnostic_only"
+    - "operating_output_mutation_check"
+    - "tests"
+    - "manual_command"
+    - "future_wd05_hook_recommendation"
+    - "evidence_state"
+    - "recommended_next_action"
+    - "changed_files"
+    - "evidence_files"
+    - "known_issues"
+    - "elapsed_time"

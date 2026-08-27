@@ -1,0 +1,72 @@
+run_namespace_policy:
+  namespaces:
+    test_fixture:
+      description: "fixture/dummy/synthetic test runs"
+      include_in_real_readiness: false
+    dry_run:
+      description: "dry-run validation runs"
+      include_in_real_readiness: false
+    safe_run:
+      description: "safe_echo or safe command test runs"
+      include_in_real_readiness: false
+    operational_pilot:
+      description: "manual operational pilot runs"
+      include_in_real_readiness: true
+    approval_gated_operational:
+      description: "approval-gated operational cycle runs"
+      include_in_real_readiness: true
+    unknown:
+      description: "unclassified runs"
+      include_in_real_readiness: false
+
+  test_indicators:
+    run_id_contains:
+      - "fixture"
+      - "dummy"
+      - "test"
+      - "block"
+      - "blocked"
+    command_contains:
+      - "safe_echo.py"
+    mode_values:
+      - "dry-run"
+      - "plan"
+
+  dry_run_indicators:
+    run_id_contains:
+      - "dryrun"
+      - "dry_run"
+    mode_values:
+      - "dry-run"
+      - "plan"
+
+  safe_run_indicators:
+    run_id_contains:
+      - "safe"
+    command_contains:
+      - "safe_echo.py"
+
+  real_indicators:
+    execution_type:
+      - "manual_operational_cycle_pilot"
+      - "approval_gated_operational_cycle_pilot"
+    mode_values:
+      - "execute"
+    approval_based_execution: true
+
+  superseded_real_runs:
+    - run_id: "20260627_weekday_first_real_pilot"
+      superseded_by: "20260627_weekday_first_real_pilot_retry1"
+      reason: "Initial pilot failed due to harness Python interpreter mapping; retry completed after command mapping fix."
+    - run_id: "20260627_weekday_first_real_pilot_retry1"
+      superseded_by: "pending_full_order_weekday_run"
+      reason: "Incomplete weekday pilot scope: WD01_QUANT_FRONT and WD04_QUANT_REAR were excluded, so the run is not valid as a full weekday operational cycle."
+    - run_id: "20260627_weekday_clean_pilot_02"
+      superseded_by: "pending_full_order_weekday_run"
+      reason: "Incomplete weekday pilot scope: WD01_QUANT_FRONT and WD04_QUANT_REAR were excluded, so the run is not valid as a full weekday operational cycle."
+    - run_id: "20260626_weekday_harness_run_01"
+      superseded_by: "pending_full_order_weekday_run"
+      reason: "Incomplete weekday harness run: WD01_QUANT_FRONT and WD04_QUANT_REAR were skipped, so downstream WD02/WD03/WD05 did not represent the full ordered cycle."
+    - run_id: "20260627_weekend_pilot_01"
+      superseded_by: "pending_full_order_weekend_run"
+      reason: "Superseded by the revised weekend prompt harness scope: weekend now runs as one Quant-only WE01_QUANT_WEEKEND_PIPELINE request."

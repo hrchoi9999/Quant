@@ -1,0 +1,22 @@
+manual_approval_policy:
+  allowed_target_statuses:
+    - approved_for_manual_execute
+
+  blocked_target_statuses:
+    - approved_for_harness_execute
+
+  required_before_manual_approval:
+    - cycle_quality_gate_passed
+    - thread_file_alignment_passed
+    - stage_preflight_passed
+    - operational_dry_run_completed
+    - no_blocked_pattern
+
+  disallow_manual_approval_risk_levels:
+    - high
+    - critical
+
+  notes:
+    - "TASK_UPDATE_HARNESS_06 prepares approval packets only."
+    - "It does not promote commands automatically."
+    - "It never grants approved_for_harness_execute."

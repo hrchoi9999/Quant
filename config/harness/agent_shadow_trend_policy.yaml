@@ -1,0 +1,63 @@
+agent_shadow_trend_policy:
+  mode: "shadow_trend_only"
+  default_lookback_runs: 10
+  minimum_runs_for_trend: 2
+
+  allowed_actions:
+    - "read_shadow_reviews"
+    - "compare_runs"
+    - "classify_repeated_issues"
+    - "detect_stage_instability"
+    - "detect_artifact_missing_patterns"
+    - "detect_runtime_anomalies"
+    - "evaluate_approval_readiness"
+    - "generate_trend_report"
+
+  forbidden_actions:
+    - "execute_command"
+    - "rerun_stage"
+    - "rerun_cycle"
+    - "change_approval"
+    - "promote_command"
+    - "publish_gcs"
+    - "sync_db"
+    - "run_trading_sign"
+    - "place_order"
+    - "modify_source_code"
+
+  repeated_issue_thresholds:
+    warning_repeat_count: 2
+    error_repeat_count: 1
+    critical_repeat_count: 1
+    artifact_missing_repeat_count: 1
+    failed_stage_repeat_count: 1
+    blocked_stage_repeat_count: 1
+
+  runtime_anomaly:
+    enabled: true
+    warning_ratio: 1.5
+    critical_ratio: 2.0
+    minimum_baseline_runs: 3
+
+  approval_readiness_rules:
+    require_no_critical: true
+    require_no_failed_required_stage: true
+    require_no_blocked_required_stage: true
+    require_no_missing_required_artifacts: true
+    require_operation_safe_to_continue: true
+    allow_warnings_with_manual_review: true
+    minimum_clean_runs: 2
+
+  recommendation_rules:
+    ready_for_approval_harness:
+      meaning: "최근 run에서 critical/error/blocker가 없고 승인 체계 설계로 이동 가능"
+    continue_shadow_review:
+      meaning: "추가 shadow run 누적 필요"
+    fix_repeated_stage_issues:
+      meaning: "반복 stage 이슈 보완 필요"
+    fix_artifact_contracts:
+      meaning: "반복 누락 산출물 또는 artifact contract 보완 필요"
+    fix_preflight_or_approval:
+      meaning: "preflight/approval 정책 또는 파일 정합성 보완 필요"
+    do_not_proceed:
+      meaning: "승인 체계로 이동 금지"

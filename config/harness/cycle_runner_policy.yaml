@@ -1,0 +1,54 @@
+cycle_runner_policy:
+  default_mode: "dry-run"
+
+  allowed_modes:
+    - "plan"
+    - "dry-run"
+    - "execute-safe"
+
+  stage_success_statuses:
+    - "completed"
+    - "validated"
+
+  stage_dry_run_success_statuses:
+    - "dry_run_completed"
+
+  stop_on_statuses:
+    - "failed"
+    - "blocked"
+
+  allow_operational_execute: false
+
+  require_approved_for_harness_execute: true
+
+  blocked_risk_levels:
+    - "critical"
+
+  blocked_patterns:
+    - "publish_public_current_to_gcs"
+    - "run_trading_sign_from_quant_pipeline"
+    - "sync_generated_csv_to_db"
+    - "sync_multiasset_metadata"
+    - "order"
+    - "trade"
+    - "buy"
+    - "sell"
+    - "broker"
+    - "kiwoom"
+    - "upbit"
+
+cycle_types:
+  weekday:
+    stages:
+      - WD01_QUANT_FRONT
+      - WD02_MARKET_COLLECT
+      - WD03_MARKET_ANALYSIS
+      - WD04_QUANT_REAR
+      - WD05_PORTFOLIO_ANALYSIS
+      - WD06_PRE_GCS_PUBLISH
+      - WD07_HARNESS_CLOSE
+
+  weekend:
+    stages:
+      - WE01_QUANT_WEEKEND_PIPELINE
+      - WE06_HARNESS_CLOSE

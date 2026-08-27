@@ -1,0 +1,42 @@
+prompt_thread_targets:
+  host_id: "local"
+  threads:
+    Quant:
+      thread_id: "019f4742-7bae-7943-88ea-a460f600925d"
+      title: "Quant OS"
+      cwd: "D:/Quant"
+      role: "Quant operating task for WD01/WD04/WD06/WD07 and WE01/WE06; if the default exec helper fails, use require_escalated with D:/Quant/tools/pwsh/pwsh.exe -NoProfile"
+    QuantMarket:
+      thread_id: "01a0278f-6467-7d52-8d1a-f5e9cda7ea14"
+      title: "QuantMarket 마켓분석 개발"
+      cwd: "D:/QuantMarket"
+      role: "QuantMarket market analysis thread for WD03; if the default exec helper fails, use require_escalated with D:/Quant/tools/pwsh/pwsh.exe -NoProfile"
+    QuantMarketData:
+      thread_id: "019e6e24-09eb-7d33-af71-d9cf281b897d"
+      title: "시장데이터수집 작업"
+      cwd: "D:/QuantMarket"
+      role: "QuantMarket market data collection thread for WD02"
+    QuantAnalysis:
+      thread_id: "019e78cd-419e-7fa2-8324-8017a32c0ca5"
+      title: "QuantAnalysis 작업내용 파악"
+      cwd: "D:/QuantAnalysis"
+      role: "QuantAnalysis operation review thread for WD05"
+
+  dispatch_policy:
+    mode: "codex_thread_prompt_dispatch"
+    user_intervention_required_between_stages: false
+    direct_file_execution_by_harness: false
+    auto_repeat_allowed: false
+    weekday_weekend_combined_run_forbidden: true
+    stage_completion_source: "read_thread_final_report"
+
+  stage_targets:
+    WD01_QUANT_FRONT: "Quant"
+    WD02_MARKET_COLLECT: "QuantMarketData"
+    WD03_MARKET_ANALYSIS: "QuantMarket"
+    WD04_QUANT_REAR: "Quant"
+    WD05_PORTFOLIO_ANALYSIS: "QuantAnalysis"
+    WD06_PRE_GCS_PUBLISH: "Quant"
+    WD07_HARNESS_CLOSE: "Quant"
+    WE01_QUANT_WEEKEND_PIPELINE: "Quant"
+    WE06_HARNESS_CLOSE: "Quant"

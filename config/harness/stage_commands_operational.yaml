@@ -1,0 +1,84 @@
+stages:
+  WD01_QUANT_FRONT:
+    thread: Quant
+    action: "주중 파이프라인 전반부"
+    command: "D:/Quant/venv64/Scripts/python.exe D:/Quant/src/quant_service/run_daily_quant_pipeline.py --asof {asof} --include-etf --data-refresh-only"
+    working_dir: "D:/Quant"
+    safe_run: false
+    risk_level: medium
+    command_status: "candidate_found"
+    confidence: "high"
+    expected_artifacts: []
+    notes: "prompt 범위와 정합: 주중 전반부 data-refresh/freshness 확인. full model, research_full, 정책 변경, publish 확정 제외."
+
+  WD02_MARKET_COLLECT:
+    thread: QuantMarketData
+    action: "시장 데이터 수집"
+    command: null
+    working_dir: "D:/QuantMarket"
+    safe_run: false
+    risk_level: medium
+    command_status: "manual_prompt_only"
+    confidence: "none"
+    expected_artifacts: []
+    notes: "prompt 범위는 market_analysis public payload/remote publish, US/global environment, market context mart current, forecast calibrated current, 3축 그래프 입력 freshness, 최신 가용 Quant handoff 생성/검증이다. 하네스 asof는 요청/운영일, data_asof는 최신 가용 데이터 기준일로 분리한다. 운영 mart refresh는 run_daily_market_ai_training_update.py --profile operational만 허용하고 --profile full/AI v1.1 학습/비교는 WD02에서 실행하지 않는다. 단일 command가 이 범위를 대표하지 못하므로 command harness는 manual_prompt_only로 유지."
+
+  WD03_MARKET_ANALYSIS:
+    thread: QuantMarket
+    action: "마켓 분석"
+    command: null
+    working_dir: "D:/QuantMarket"
+    safe_run: false
+    risk_level: medium
+    command_status: "manual_prompt_only"
+    confidence: "none"
+    expected_artifacts: []
+    notes: "prompt 범위는 기존 직접 지시의 마켓분석 진행이다. target보다 live current가 최신이면 current를 롤백하지 않고 WD02 remote publish report의 immutable history를 검증하며, live current endpoint coherence를 별도로 확인한다. 동일 target은 중복 current publish하지 않고 history evidence를 재사용한다. GCS current/history 판단이 필요하므로 command harness 직접 실행 후보에서는 제외하고 prompt gate로만 운영."
+
+  WD04_QUANT_REAR:
+    thread: Quant
+    action: "주중 파이프라인 후반부"
+    command: null
+    working_dir: "D:/Quant"
+    safe_run: false
+    risk_level: high
+    command_status: "manual_prompt_only"
+    confidence: "none"
+    expected_artifacts: []
+    notes: "prompt 범위는 model_scope_gate 적용 후 daily_light 후반부 current 산출/필수 검증과 Quant user/model snapshot report/current/history payload freshness 확인이다. 정상 단일 체인에는 30분을 허용한다. 중단 시 timing report의 마지막 성공 command 이후 admin/AI/trading-sign/contract만 선택 복구하고 장시간 모델 명령은 재실행하지 않는다. command harness 후보에서는 제외."
+
+  WD05_PORTFOLIO_ANALYSIS:
+    thread: QuantAnalysis
+    action: "투자 포트폴리오 업데이트/분석"
+    command: null
+    working_dir: "D:/QuantAnalysis"
+    safe_run: false
+    risk_level: medium
+    command_status: "manual_prompt_only"
+    confidence: "none"
+    expected_artifacts: []
+    notes: "prompt 범위는 D:/Quant/venv64/Scripts/python.exe D:/QuantAnalysis/portfolio_pipeline.py --asof <target_asof> 실행, 기본 GCS publish 결과 확인, 운영 리뷰, selection history/top10/top3/benchmark-relative/model attribution 기반 포트폴리오 성과 점검과 개선 후보 보고다. 정책 변경/비중 변경/모델 제외 확정은 하지 않는다. command harness 직접 실행 후보에서는 제외하고 prompt gate로만 운영한다."
+
+  WD06_PRE_GCS_PUBLISH:
+    thread: Quant
+    action: "pre-GCS publish gate"
+    command: null
+    working_dir: "D:/Quant"
+    safe_run: false
+    risk_level: critical
+    command_status: "manual_prompt_only"
+    confidence: "none"
+    expected_artifacts: []
+    notes: "prompt 범위는 pre_gcs_publish 검증 통과 후 canonical public current GCS publish까지다. GCS current overwrite가 있어 command harness 직접 실행 후보에서는 제외하고 prompt gate로만 운영한다."
+
+  WE01_QUANT_WEEKEND_PIPELINE:
+    thread: Quant
+    action: "주말 Quant 모델/AI 검증 통합 파이프라인"
+    command: null
+    working_dir: "D:/Quant"
+    safe_run: false
+    risk_level: medium
+    command_status: "manual_prompt_only"
+    confidence: "none"
+    expected_artifacts: []
+    notes: "prompt 범위는 Quant 모델 스레드 내 주말 모델/AI 검증 통합 파이프라인이다. 단일 command가 이 범위를 정확히 대표하지 못하므로 command harness 후보에서 제외."

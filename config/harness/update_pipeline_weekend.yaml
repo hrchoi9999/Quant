@@ -1,0 +1,6 @@
+cycle_type: weekend
+stages:
+  - stage_id: WE01_QUANT_WEEKEND_PIPELINE
+    thread: Quant
+  - stage_id: WE06_HARNESS_CLOSE
+    thread: Quant

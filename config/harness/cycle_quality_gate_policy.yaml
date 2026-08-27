@@ -1,0 +1,61 @@
+cycle_quality_gate:
+  required_run_files:
+    - cycle_state.json
+    - cycle_plan.md
+    - cycle_plan.json
+    - cycle_readiness.md
+    - cycle_readiness.json
+    - cycle_summary.md
+    - cycle_summary.json
+    - final_summary.md
+
+  required_stage_files:
+    - result.json
+    - stage_report.md
+    - handoff.md
+
+  final_summary_required_sections:
+    - "## Overall Status"
+    - "## Completed Stages"
+    - "## Failed / Blocked Stages"
+    - "## Files to Review"
+    - "## Next Recommended Step"
+
+  cycle_summary_required_sections:
+    - "## Run"
+    - "## Stage Results"
+    - "## Stop Reason"
+    - "## Issues"
+    - "## Generated Files"
+    - "## Next Action"
+
+  allowed_cycle_statuses:
+    - completed
+    - failed
+    - blocked
+    - partial_completed
+
+  pass_cycle_statuses:
+    - completed
+
+  stage_success_by_mode:
+    dry-run:
+      - dry_run_completed
+    execute-safe:
+      - completed
+      - validated
+    plan:
+      - planned
+
+  close_stage_success_statuses:
+    - completed
+    - planned
+
+  fail_stage_statuses:
+    - failed
+    - blocked
+
+  require_no_skipped_for_pass: true
+  require_no_error_message_for_pass: true
+  require_final_summary_file_match: true
+  block_operational_execute_safe: true

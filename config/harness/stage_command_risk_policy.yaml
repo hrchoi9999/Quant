@@ -1,0 +1,37 @@
+risk_policy:
+  low:
+    allow_dry_run: true
+    allow_preflight: true
+    allow_execute: true
+    requires_manual_approval: false
+
+  medium:
+    allow_dry_run: true
+    allow_preflight: true
+    allow_execute: false
+    requires_manual_approval: true
+
+  high:
+    allow_dry_run: true
+    allow_preflight: true
+    allow_execute: false
+    requires_manual_approval: true
+
+  critical:
+    allow_dry_run: true
+    allow_preflight: false
+    allow_execute: false
+    requires_manual_approval: true
+
+blocked_patterns:
+  - "publish_public_current_to_gcs"
+  - "run_trading_sign_from_quant_pipeline"
+  - "sync_generated_csv_to_db"
+  - "sync_multiasset_metadata"
+  - "order"
+  - "trade"
+  - "buy"
+  - "sell"
+  - "broker"
+  - "kiwoom"
+  - "upbit"

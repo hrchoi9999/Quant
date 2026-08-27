@@ -1,0 +1,99 @@
+agent_shadow_review_policy:
+  mode: "shadow_only"
+
+  allowed_actions:
+    - "read_reports"
+    - "classify_status"
+    - "summarize_issues"
+    - "recommend_next_action"
+    - "generate_review_report"
+
+  forbidden_actions:
+    - "execute_command"
+    - "rerun_stage"
+    - "rerun_cycle"
+    - "change_approval"
+    - "promote_command"
+    - "publish_gcs"
+    - "sync_db"
+    - "run_trading_sign"
+    - "place_order"
+    - "modify_source_code"
+
+  severity_levels:
+    - "info"
+    - "warning"
+    - "error"
+    - "critical"
+
+  status_classification:
+    completed:
+      severity: "info"
+      meaning: "정상 완료"
+    manual_dry_run_completed:
+      severity: "info"
+      meaning: "수동 dry-run 완료"
+    approved:
+      severity: "warning"
+      meaning: "승인/계획 확인, 실제 stage 결과 없음"
+    approved_for_manual_cycle:
+      severity: "warning"
+      meaning: "cycle 승인 확인, 실제 운영 실행 결과 아님"
+    partial_completed:
+      severity: "warning"
+      meaning: "일부 stage만 완료"
+    failed:
+      severity: "error"
+      meaning: "실행 실패"
+    blocked:
+      severity: "error"
+      meaning: "정책 또는 승인 조건에 의해 차단"
+    skipped:
+      severity: "warning"
+      meaning: "선행 실패 또는 정책상 미실행"
+    skipped_deferred:
+      severity: "info"
+      meaning: "optional/deferred stage로 미실행"
+
+  log_scan_patterns:
+    error:
+      - "ERROR"
+      - "Exception"
+      - "Traceback"
+      - "failed"
+      - "FAILED"
+    warning:
+      - "WARNING"
+      - "WARN"
+      - "skipped"
+      - "partial"
+    critical:
+      - "database is locked"
+      - "permission denied"
+      - "access denied"
+      - "file not found"
+      - "No such file"
+      - "schema mismatch"
+
+  recommendation_rules:
+    completed_no_errors:
+      recommendation: "proceed_to_manual_review"
+      meaning: "운영 결과를 사람이 검토"
+    completed_with_warnings:
+      recommendation: "review_warnings"
+      meaning: "경고 항목을 사람이 확인"
+    partial_completed:
+      recommendation: "prepare_next_manual_cycle"
+      meaning: "미실행 stage의 사유 확인 후 다음 수동 cycle 준비"
+    failed:
+      recommendation: "fix_failed_stage"
+      meaning: "실패 stage 수정 전 다음 단계 진행 금지"
+    blocked:
+      recommendation: "resolve_blocked_stage"
+      meaning: "승인/정책 차단 원인 해소 필요"
+    artifact_missing:
+      recommendation: "fix_missing_artifacts"
+      meaning: "산출물 계약 또는 경로 보완 필요"
+    do_not_continue:
+      recommendation: "do_not_continue"
+      meaning: "critical/error 해소 전 진행 금지"

@@ -1,0 +1,16 @@
+threads:
+  Quant:
+    root: "D:/Quant"
+    role: "Quant pipeline front/rear execution"
+
+  QuantMarket:
+    root: "D:/QuantMarket"
+    role: "Market analysis"
+
+  QuantMarketData:
+    root: "D:/QuantMarket"
+    role: "Market data collection"
+
+  QuantAnalysis:
+    root: "D:/QuantAnalysis"
+    role: "Investment portfolio analysis"

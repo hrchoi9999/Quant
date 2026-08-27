@@ -1,0 +1,118 @@
+performance_research_contract:
+  schema_version: 1
+  campaign_id: "PR_20260710_E_SERIES_STRESS_TAIL_01"
+  frozen_at: "2026-07-10T00:00:00+09:00"
+  owner: "Quant Model"
+  target_thread: "Quant"
+  objective: >-
+    Determine whether mode_switch_stress_tail_asset has enough independent and
+    robust evidence to continue as a frozen shadow candidate versus
+    baseline_top3_role. This campaign cannot approve operational adoption.
+
+  research_question: >-
+    Does the frozen stress-tail mode switch improve cost-adjusted return and
+    tail-loss control without unacceptable turnover across independent periods
+    and market regimes?
+
+  frozen_comparison:
+    strategy_model_code: "E-ETF-V01"
+    sleeve_model_code: "AI-E-ETF-SLEEVE-SELECTION-V01"
+    baseline: "baseline_top3_role"
+    candidate: "mode_switch_stress_tail_asset"
+    candidate_rule_change_allowed: false
+    candidate_tuning_allowed: false
+    additional_candidate_search_allowed: false
+    primary_cost_bps_one_way: 10
+    cost_sensitivity_bps_one_way: [20, 30]
+    rebalance_frequency: "monthly"
+    comparison_basis: "same periods, universe, rebalance schedule, return source, and cost definition"
+
+  canonical_evidence:
+    summary_current: "D:/Quant/service_platform/web/admin_data/current/e_series_etf_mode_switch_cost_adjusted_current.json"
+    selected_periods: "D:/Quant/reports/e_series_etf/e_series_etf_mode_switch_policy_walk_forward_selected_20260704.csv"
+    period_returns: "D:/Quant/reports/e_series_etf/e_series_etf_mode_switch_cost_adjusted_periods_20260704.csv"
+    cost_summary: "D:/Quant/reports/e_series_etf/e_series_etf_mode_switch_cost_adjusted_summary_20260704.csv"
+    stability_review: "D:/Quant/reports/e_series_etf/e_series_etf_mode_switch_stability_check_20260704.json"
+    operational_hardening: "D:/Quant/reports/e_series_etf/e_series_etf_operational_hardening_20260704.json"
+    stress_rule_decision: "D:/Quant/docs/models/e_series/E_SERIES_ETF_STRESS_RULE_RECALIBRATION_20260513.md"
+
+  current_evidence_snapshot:
+    as_of_date: "2026-07-04"
+    priced_periods: 26
+    baseline_avg_net_1m_return: 0.024534
+    candidate_avg_net_1m_return: 0.026502
+    avg_net_1m_return_delta: 0.001968
+    baseline_win_rate: 0.615385
+    candidate_win_rate: 0.653846
+    baseline_worst_net_1m_return: -0.077132
+    candidate_worst_net_1m_return: -0.033995
+    baseline_compounded_net_return: 0.797325
+    candidate_compounded_net_return: 0.901162
+    baseline_avg_one_way_turnover: 0.665385
+    candidate_avg_one_way_turnover: 0.698718
+    evidence_caveat: >-
+      The representative candidate was identified after reviewing the existing
+      26 walk-forward periods, so those periods are not automatically an
+      independent post-selection holdout.
+
+  required_work:
+    - "Reconstruct and report the candidate-selection chronology."
+    - "Identify any period that was untouched by stress-rule recalibration, policy selection, or hardening."
+    - "Do not relabel an already reviewed period as an independent holdout."
+    - "If a genuinely untouched temporal holdout exists, compare only the frozen baseline and frozen candidate on it."
+    - "Run paired block-bootstrap uncertainty on existing periods as robustness evidence, not as independent validation."
+    - "Report performance separately for stress, risk-off non-stress, and normal periods where sample support exists."
+    - "Run 10bp, 20bp, and 30bp one-way cost sensitivity with identical turnover definitions."
+    - "Report leave-one-period-out concentration and whether a small number of periods explains most of the gain."
+    - "Reuse existing stability and hardening outputs; do not create new variants."
+
+  primary_metrics:
+    - "paired average net 1M return delta"
+    - "worst net 1M return delta"
+  diagnostic_metrics:
+    - "net win-rate delta"
+    - "risk-adjusted return delta"
+    - "compounded net return delta"
+    - "gain concentration by period and regime"
+  guardrails:
+    - "average one-way turnover delta <= 0.05"
+    - "candidate worst net 1M return is not worse than baseline"
+    - "candidate does not rely on stale or post-period market context"
+    - "no material regression at 20bp and 30bp cost sensitivity"
+
+  evidence_gate:
+    independent_holdout_required_for_approval_eligibility: true
+    minimum_monthly_priced_periods: 24
+    paired_bootstrap_ci_required: true
+    regime_breakdown_required: true
+    cost_sensitivity_required: true
+    allowed_final_states:
+      - "continue_frozen_shadow"
+      - "reject"
+      - "insufficient_evidence"
+    approval_eligible_state_allowed: false
+
+  prohibited_actions:
+    - "policy change"
+    - "model promotion or retirement"
+    - "candidate parameter tuning"
+    - "new candidate search"
+    - "public publish"
+    - "GCS current update"
+    - "automatic trading"
+
+  required_report_fields:
+    - "campaign_id"
+    - "status"
+    - "selection_chronology"
+    - "untouched_holdout_inventory"
+    - "baseline_vs_candidate"
+    - "paired_uncertainty"
+    - "regime_robustness"
+    - "cost_sensitivity"
+    - "gain_concentration"
+    - "guardrail_results"
+    - "evidence_state"
+    - "recommended_next_action"
+    - "evidence_files"
+    - "known_issues"

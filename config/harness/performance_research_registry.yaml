@@ -1,0 +1,75 @@
+performance_research:
+  schema_version: 1
+  orchestration_owner: "Harness"
+  policy_owner: "Quant Model or QuantAnalysis"
+  user_approval_required: true
+  heavy_execution_during_update_cycle_forbidden: true
+  max_active_campaigns_per_owner: 1
+  auto_repeat_allowed: false
+  default_evidence_states:
+    - "E0_diagnostic"
+    - "E1_comparable_backtest"
+    - "E2_frozen_oos_or_walk_forward"
+    - "E3_shadow_or_live"
+    - "E4_approved_operating"
+    - "E5_post_change_validated"
+  campaigns:
+    - campaign_id: "PR_20260710_E_SERIES_STRESS_TAIL_01"
+      title: "E-series stress-tail mode switch independent evidence review"
+      owner: "Quant Model"
+      target_thread: "Quant"
+      status: "completed_insufficient_evidence"
+      heavy_execution: true
+      priority: 1
+      baseline: "baseline_top3_role"
+      candidate: "mode_switch_stress_tail_asset"
+      current_evidence_state: "E2_frozen_oos_or_walk_forward_provisional"
+      requested_decision: "continue_frozen_shadow | reject | insufficient_evidence"
+      contract_file: "config/harness/performance_research_campaigns/PR_20260710_E_SERIES_STRESS_TAIL_01.yaml"
+      policy_change_allowed: false
+      public_publish_allowed: false
+      started_at: "2026-07-10T20:34:04+09:00"
+      completed_at: "2026-07-10T20:38:35+09:00"
+      final_decision: "insufficient_evidence"
+      next_review_condition: "Accumulate 6-12 post-freeze monthly periods without changing the baseline, candidate, or cost definitions."
+      evidence_gate_file: "reports/harness_performance_research/PR_20260710_E_SERIES_STRESS_TAIL_01/evidence_gate.json"
+    - campaign_id: "PR_20260710_QUANTANALYSIS_RELATIVE_GATE_01"
+      title: "QuantAnalysis relative gate frozen shadow"
+      owner: "QuantAnalysis"
+      target_thread: "QuantAnalysis"
+      status: "completed_shadow_initialized_waiting_oos"
+      heavy_execution: false
+      priority: 2
+      baseline: "stock_reactivity_v1_20260528_top3_equal_weight"
+      candidate: "relative_gate_v1_frozen_20260710"
+      current_evidence_state: "E1_shadow_setup_initialized_waiting_E2_oos"
+      requested_decision: "shadow_initialized_waiting_oos | blocked_missing_canonical_signal | reject_setup_invalid"
+      contract_file: "config/harness/performance_research_campaigns/PR_20260710_QUANTANALYSIS_RELATIVE_GATE_01.yaml"
+      policy_change_allowed: false
+      public_publish_allowed: false
+      automatic_execution_allowed: false
+      started_at: "2026-07-10T20:44:17+09:00"
+      completed_at: "2026-07-10T20:56:49+09:00"
+      final_decision: "shadow_initialized_waiting_oos"
+      next_review_condition: "Ingest only canonical post-freeze GCS history objects, then review after all minimum OOS evidence gates pass."
+      evidence_gate_file: "reports/harness_performance_research/PR_20260710_QUANTANALYSIS_RELATIVE_GATE_01/evidence_gate.json"
+    - campaign_id: "PR_20260710_S6_S5_DEFENSIVE_BUFFER_01"
+      title: "S6 role-compatible S5 defensive buffer frozen shadow"
+      owner: "Quant Model"
+      target_thread: "Quant"
+      status: "completed_shadow_initialized_waiting_oos"
+      heavy_execution: true
+      priority: 3
+      baseline: "S6_DEFENSIVE_V1"
+      candidate: "S6_S5_DEFENSIVE_BUFFER_85_15_FROZEN"
+      current_evidence_state: "E1_historical_diagnostic_plus_shadow_initialized_waiting_E2_oos"
+      requested_decision: "shadow_initialized_waiting_oos | historical_role_guard_failed | blocked_missing_canonical_sources | reject_setup_invalid"
+      contract_file: "config/harness/performance_research_campaigns/PR_20260710_S6_S5_DEFENSIVE_BUFFER_01.yaml"
+      policy_change_allowed: false
+      public_publish_allowed: false
+      automatic_execution_allowed: false
+      started_at: "2026-07-10T21:07:13+09:00"
+      completed_at: "2026-07-10T21:19:43+09:00"
+      final_decision: "shadow_initialized_waiting_oos"
+      next_review_condition: "Preserve the frozen rule and accumulate all required post-freeze monthly, actual risk-off, acute, and non-acute observations before review."
+      evidence_gate_file: "reports/harness_performance_research/PR_20260710_S6_S5_DEFENSIVE_BUFFER_01/evidence_gate.json"

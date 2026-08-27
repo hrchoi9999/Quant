@@ -1,0 +1,296 @@
+model_scope_registry:
+  version: "2026-08-22"
+  owner_thread: "Quant Model"
+  purpose: "Harness pre-pipeline model scope gate. The harness reads this file and current payloads, but does not change model status."
+
+  model_version_boundary:
+    operating_model_version: "Quant 1.0"
+    excluded_model_versions:
+      - "Quant 1.1"
+      - "Quant 2.x"
+    rules:
+      - "The default weekday and weekend harness scope is Quant 1.0 operating models only."
+      - "Quant 1.1/2.x research, shadow, handoff, payload, validation, promotion, and publish are excluded unless the user gives a separate explicit version-specific instruction."
+      - "An excluded-version artifact must not become a Quant 1.0 operating input, model scope gate input, portfolio attribution source, public payload, or GCS publish candidate."
+      - "A mention of an excluded version in evidence or known_issues does not authorize its execution or promotion."
+
+  operating_scope_contract:
+    schema_version: 1
+    resolution_mode: "legacy_static"
+    activation_state: "inactive"
+    fail_closed: true
+    dry_run_allowed: true
+    authority: "Resolved model_code and operating_revision from an approved Quant OS operating manifest. The global operating_model_version is a legacy compatibility label only."
+    legacy_compatibility:
+      scope_id: "quant_1_0_canonical"
+      scope_status: "legacy_compatible_fail_closed"
+      operating_revision: "quant_1_0_canonical"
+    quant_os_manifest:
+      path: "D:/Quant/reports/quant_os/operating_scope/approved_operating_manifest.json"
+      required_schema_version: 1
+      manifest_type: "quant_os_operating_scope"
+      required_status: "approved_8_of_8"
+      required_model_count: 8
+      require_operating_mutation_allowed: true
+      require_user_final_approval: true
+      required_model_codes:
+        - "S2"
+        - "S3"
+        - "S3_CORE2"
+        - "S3_ACCEL_V01"
+        - "S4"
+        - "S5"
+        - "S6"
+        - "T-STOCK-V01"
+      model_code_aliases:
+        T_STOCK_V01: "T-STOCK-V01"
+      allowed_decisions:
+        - "adopt_candidate_revision"
+        - "keep_current_revision"
+      pinned_models:
+        T-STOCK-V01:
+          required_decision: "keep_current_revision"
+          required_revision: "quant_1_0_canonical"
+      live_shadow_gate:
+        frozen_asof: "2026-08-22"
+        minimum_calendar_days: 180
+        earliest_review_date: "2027-02-18"
+        required_risk_gate_status: "passed"
+        require_risk_evidence_path: true
+        candidate_requirements:
+          S2:
+            cadence: "weekly"
+            minimum_decision_count: 26
+          S3:
+            cadence: "weekly"
+            minimum_decision_count: 26
+          S3_CORE2:
+            cadence: "weekly"
+            minimum_decision_count: 26
+          S3_ACCEL_V01:
+            cadence: "weekly"
+            minimum_decision_count: 26
+          S4:
+            cadence: "monthly"
+            minimum_decision_count: 6
+          S5:
+            cadence: "monthly"
+            minimum_decision_count: 6
+          S6:
+            cadence: "monthly"
+            minimum_decision_count: 6
+    research_candidate_observation:
+      path: "D:/Quant/reports/quant1_2/operational_readiness/selection_freeze_manifest.json"
+      rule: "Read-only diagnostic input. research_only or operating_mutation=false artifacts can never activate harness operating scope."
+    activation_rules:
+      - "Both resolution_mode=quant_os_manifest and activation_state=active are required."
+      - "The Quant OS manifest must have the required schema and a non-empty scope_id, approve exactly 8/8 required model codes, and include a non-empty operating_revision for every model; adopt_candidate_revision rows also require source_candidate_id."
+      - "Every model approval_status must be approved and the manifest must include final user approval with a non-empty approval reference."
+      - "T-STOCK-V01 must remain keep_current_revision at quant_1_0_canonical."
+      - "Each of the seven adoption candidates requires live shadow evidence from the 2026-08-22 freeze for at least 180 calendar days, with at least 26 weekly decisions or 6 monthly decisions as configured."
+      - "The earliest review date is 2027-02-18; insufficient elapsed time, decisions, data, or risk evidence delays eligibility."
+      - "Every adoption candidate must pass its predefined return, MDD, volatility, and turnover risk gates before activation."
+      - "A research selection freeze, readiness report, candidate label, or version string alone never authorizes activation."
+      - "If any field, model, revision, approval, or manifest is missing or invalid, retain the legacy Quant 1.0 scope."
+
+  operating_rule:
+    - "Model status changes, promotion, downgrade, retirement, and policy changes are handled only by the Quant Model thread."
+    - "Harness may exclude only models explicitly marked retired, research_archive, or excluded from default operation."
+    - "REVIEW means warning/research candidate, not automatic exclusion."
+    - "If an active model is stale or REVIEW, the harness reports it as known_issues or policy_candidates and asks the Quant Model thread to decide."
+    - "T-ETF-V01 is a reference/validation model, not an investment strategy model, unless explicitly promoted into a separate ST-ETF strategy model after approval."
+    - "T-STOCK-V01 remains in the active model set for now; this T-ETF reference-only decision does not apply to T-STOCK-V01."
+
+  performance_governance:
+    purpose: "Harness model performance governance. The harness consolidates current validation outputs and directs Quant Model review, but does not change model state."
+    final_goal: "Improve the user's investment returns by expanding high-performing strategy/AI models, reducing weak models, and proposing new model research with explicit return-improvement hypotheses."
+    standard_inputs:
+      - "D:/Quant/service_platform/web/admin_data/current/internal_model_validation_current.json"
+      - "D:/Quant/service_platform/web/admin_data/current/ai_learning_models_current.json"
+      - "D:/Quant/reports/ai_overlay_v01/*shadow*"
+      - "D:/Quant/reports/model_compare/*"
+      - "D:/Quant/reports/model_upgrade_research/*"
+      - "D:/Quant/config/quant1_2/operational_readiness_requirements.json"
+      - "D:/Quant/reports/quant1_2/operational_readiness/*/readiness_report.json"
+      - "D:/Quant/reports/quant1_2/forward_shadow/<model_code>/risk_evaluation.json"
+      - "D:/Quant/reports/quant1_2/forward_shadow/<model_code>/observations.json"
+    decision_labels:
+      strategy_models:
+        - "keep"
+        - "improve"
+        - "review"
+        - "downgrade_candidate"
+        - "retire_candidate"
+        - "reference_validation_only"
+      ai_learning_models:
+        - "operating_core"
+        - "observation"
+        - "refresh_needed"
+        - "archive_candidate"
+    harness_judgment_rules:
+      - "High-performing models are prioritized for expansion, improvement experiments, and stronger monitoring."
+      - "Low-performing models are reported as downgrade or archive candidates with evidence and required confirmation conditions."
+      - "T-ETF-V01 may remain refreshed and visible for ETF diagnostics, but is excluded from investment strategy allocation and portfolio promotion."
+      - "Stale AI models are reported as refresh_needed or observation/archive candidates, depending on operational tier and use in decisions."
+      - "New model candidates must include a clear hypothesis for improving return, drawdown, hit-rate, turnover, or regime stability versus current operating models."
+      - "Any model promotion, downgrade, retirement, or policy change must remain a Quant Model thread decision and requires user approval before operational adoption."
+    default_report_outputs:
+      - "reports/harness_model_governance/<run_id>/model_governance_review.json"
+      - "reports/harness_model_governance/<run_id>/model_governance_review.md"
+
+  quant_1_2_parallel_performance_observation:
+    purpose: "Compare each frozen Quant 1.2 candidate with the same-model Quant 1.0 canonical baseline without adding Quant 1.2 to operating scope."
+    state: "research_shadow_only"
+    active_scope_impact: "none"
+    candidate_version_state: "frozen_immutable"
+    semantic_change_target_version: "Quant 1.3"
+    candidate_model_codes:
+      - "S2"
+      - "S3"
+      - "S3_CORE2"
+      - "S3_ACCEL_V01"
+      - "S4"
+      - "S5"
+      - "S6"
+    comparison_fields:
+      - "total_return"
+      - "mdd"
+      - "annual_vol"
+      - "avg_turnover"
+      - "calendar_days"
+      - "decision_count"
+      - "risk_gate_status"
+    rules:
+      - "Use only frozen same-input live-shadow evidence produced after 2026-08-22."
+      - "Before accepting comparison evidence, require candidate_immutable_fingerprint_matches from the latest Quant 1.2 readiness report."
+      - "Quant 1.2 logic, parameters, universe-selection rules, scoring, rebalancing, and risk rules are immutable during shadow. Any output-affecting change must be created as a separate Quant 1.3 candidate and must not reset or overwrite the Quant 1.2 shadow."
+      - "Only routine input-data refresh, reproducible execution, performance recording, and non-semantic monitoring or harness maintenance are allowed in the Quant 1.2 shadow scope."
+      - "Report Quant 1.0 baseline, Quant 1.2 candidate, and candidate-minus-baseline delta separately; never substitute historical research backtests for missing live metrics."
+      - "Missing live observations are reported as waiting_live_metrics, not zero performance and not an operating failure."
+      - "Quant 1.2 comparison results never enter current/admin/public payloads, portfolio attribution, GCS publish, or operating model selection before all activation gates and final user approval."
+      - "A stale or missing Quant 1.2 comparison is a governance known issue and does not block completion of the Quant 1.0 weekend operating pipeline."
+      - "An immutable fingerprint mismatch invalidates the affected Quant 1.2 comparison as blocked_quant_1_2_immutable_fingerprint_mismatch, routes the proposed semantic change to Quant 1.3 research, and never changes active scope."
+    report_output: "reports/harness_model_governance/<run_id>/model_governance_review.json:quant_1_2_vs_quant_1_0_live_comparison"
+
+  portfolio_performance_governance:
+    purpose: "Harness portfolio performance governance. The harness consolidates QuantAnalysis portfolio current, selection history, and DB summaries to direct portfolio improvement review, but does not change portfolio policy."
+    final_goal: "Improve realized investment returns by checking whether QuantAnalysis stock/ETF/cash allocation and selected candidates are producing acceptable absolute and benchmark-relative performance."
+    standard_inputs:
+      - "D:/QuantAnalysis/outputs/investment_portfolio_latest.json"
+      - "D:/QuantAnalysis/outputs/daily_portfolio_selection_history_*.json"
+      - "D:/QuantAnalysis/analysis.db: portfolio_runs, portfolio_stock_candidates, stock_selection_summary, model_selection_events"
+    decision_labels:
+      portfolio_status:
+        - "operating_ok"
+        - "watch"
+        - "improve"
+        - "blocked_needs_history"
+      candidate_quality:
+        - "keep"
+        - "improve"
+        - "reduce"
+        - "review"
+    harness_judgment_rules:
+      - "WD05 must report portfolio freshness and GCS publish status, plus portfolio performance quality."
+      - "Absolute return, benchmark-relative return, win-rate, top10 quality, and top3 quality must be reported separately."
+      - "A positive benchmark-relative return is not enough if absolute return and top-ranked candidate quality are weak."
+      - "Source model attribution must flag high-performing model exposure, REVIEW/weak model exposure, and retired/excluded model exposure."
+      - "Improvement candidates may include stock/ETF/cash allocation tests, top3 filtering, relative-to-index filters, drawdown/turnover metrics, and weak-model exposure reduction."
+      - "Portfolio policy changes, allocation changes, and model inclusion/exclusion must remain QuantAnalysis or Quant Model thread decisions and require user approval before operational adoption."
+    default_report_outputs:
+      - "reports/harness_portfolio_governance/<run_id>/portfolio_governance_review.json"
+      - "reports/harness_portfolio_governance/<run_id>/portfolio_governance_review.md"
+
+  evidence_sources:
+    strategy_registry:
+      - "D:/Quant/data/db/quant_service.db: meta_models, meta_model_versions"
+      - "D:/Quant/data/db/tseries_operational.db: ts_meta_models, ts_threshold_profiles"
+      - "D:/Quant/service_platform/web/admin_data/current/internal_model_validation_current.json"
+    ai_registry:
+      - "D:/Quant/config/ai_model_operational_tiers.json"
+      - "D:/Quant/service_platform/web/admin_data/current/ai_learning_models_current.json"
+
+  strategy_models:
+    active_operational:
+      - "S2"
+      - "S3"
+      - "S3_CORE2"
+      - "S3_ACCEL_V01"
+      - "S4"
+      - "S5"
+      - "S6"
+      - "T-STOCK-V01"
+    reference_validation_only:
+      - "T-ETF-V01"
+    reference_validation_rule:
+      - "T-ETF-V01 remains refreshable for diagnostics, ETF model governance, AI overlay training, and candidate discovery evidence."
+      - "T-ETF-V01 is excluded from investment strategy selection, portfolio ranking promotion, and core strategy performance leaderboards."
+      - "If T-ETF evidence improves enough for strategy use, create a separate ST-ETF strategy code such as ST-ETF-V01 instead of reusing the T-ETF reference code."
+    retired_excluded_from_default:
+      - "S2_PIT_V01"
+      - "I-STOCK-STRONG-RSI-V01"
+    review_state_handling:
+      rule: "Do not remove from the pipeline automatically. Report as downgrade_or_redesign_candidate for Quant Model review."
+      latest_review_candidates_as_of_2026_07_07:
+        - "S2"
+        - "S3"
+        - "S3_CORE2"
+        - "S3_ACCEL_V01"
+        - "S6"
+        - "T-STOCK-V01"
+      latest_reference_validation_only_as_of_2026_07_12:
+        - "T-ETF-V01"
+      latest_pass_observation_as_of_2026_07_07:
+        - "S4"
+        - "S5"
+
+  strategy_research_observation:
+    purpose: "Track frozen research-only strategy candidates beside operating models in governance reports without adding them to the operating model scope."
+    state_rules:
+      - "continuous_observation means research-only monitoring; it is not an operating promotion, allocation change, or automatic model run."
+      - "A candidate may be reported with strategy governance, but must remain excluded from model_scope_gate active_operational lists until explicit Quant Model and user approval."
+      - "Promotion requires a frozen post-design shadow record, common-window comparison, and sufficient post-freeze OOS evidence."
+    candidates:
+      - model_code: "SAI-S1-GUARDED-V02"
+        model_family: "SAI-S1"
+        role: "stock_ai_alpha_return_candidate"
+        state: "continuous_observation"
+        baseline: "SAI-S1:v01"
+        evidence_state: "E1_comparable_backtest_provisional"
+        observation_priority: 1
+        performance_focus: "return-oriented; compare common-window return, MDD, turnover, and post-freeze shadow observations."
+        evidence_files:
+          - "reports/sai/sai_s1_stock_alpha_v01/20260710/guarded_v02/sai_s1_stock_alpha_v01_guarded_v02_research_20260710.json"
+          - "reports/model_performance_comparison/common_layer/20260710/common_model_performance_layer_20260710.csv"
+      - model_code: "SAI-S1-GUARDED-CASH-V03"
+        model_family: "SAI-S1"
+        role: "stock_ai_alpha_defensive_candidate"
+        state: "continuous_observation"
+        baseline: "SAI-S1:v01"
+        evidence_state: "E1_comparable_backtest_provisional"
+        observation_priority: 1
+        performance_focus: "defense-oriented; compare common-window MDD, return, cash exposure, turnover, and post-freeze shadow observations."
+        evidence_files:
+          - "reports/sai/sai_s1_stock_alpha_v01/20260710/guarded_cash_v03/sai_s1_stock_alpha_v01_guarded_cash_v03_research_20260710.json"
+          - "reports/model_performance_comparison/common_layer/20260710/common_model_performance_layer_20260710.csv"
+
+  ai_learning_models:
+    operating_core:
+      - "AI-GROWTH-VALUATION-V01"
+      - "AI-DOWNSIDE-RISK-V01"
+      - "AI-CANDIDATE-RANK-DELTA-V01"
+      - "E-ETF-V01"
+    observation:
+      - "AI-CANDIDATE-VALIDATION-V01"
+      - "AI-THEME-PERSISTENCE-V01"
+    research_archive_excluded_from_default:
+      - "AI-MODEL-SELECTION-V01"
+      - "QM_FULL_FEATURE_SET_EXPERIMENTS"
+    excluded_from_default:
+      - "LOW_RETURN_AI_VARIANTS"
+      - "DUPLICATE_SHADOW_TRACKERS"
+      - "DAILY_RESEARCH_ABLATIONS"
+    freshness_rule:
+      - "A operating core AI must have a current or explicitly accepted as_of_date before completed status."
+      - "Stale A core AI is not automatically disabled; report blocked_needs_ai_core_freshness_decision or known_issues."
+      - "B observation AI may be stale only if reported as observation_stale and not used for operational decisions."

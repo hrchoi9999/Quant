@@ -1,0 +1,16 @@
+cycle_type: weekday
+stages:
+  - stage_id: WD01_QUANT_FRONT
+    thread: Quant
+  - stage_id: WD02_MARKET_COLLECT
+    thread: QuantMarketData
+  - stage_id: WD03_MARKET_ANALYSIS
+    thread: QuantMarket
+  - stage_id: WD04_QUANT_REAR
+    thread: Quant
+  - stage_id: WD05_PORTFOLIO_ANALYSIS
+    thread: QuantAnalysis
+  - stage_id: WD06_PRE_GCS_PUBLISH
+    thread: Quant
+  - stage_id: WD07_HARNESS_CLOSE
+    thread: Quant

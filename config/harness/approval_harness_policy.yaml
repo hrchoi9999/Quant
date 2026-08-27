@@ -1,0 +1,83 @@
+approval_harness_policy:
+  mode: "human_approval_only"
+
+  allowed_approval_scopes:
+    - "single_stage_manual_pilot"
+    - "manual_operational_cycle_dry_run"
+    - "manual_operational_cycle_pilot"
+    - "first_real_weekday_pilot"
+    - "first_full_weekday_pilot"
+    - "manual_stage_execute"
+    - "manual_cycle_execute"
+
+  forbidden_approval_scopes:
+    - "auto_execute"
+    - "auto_approval"
+    - "approved_for_harness_execute"
+    - "publish_automation"
+    - "trading_automation"
+
+  approval_statuses:
+    - "requested"
+    - "approved"
+    - "rejected"
+    - "deferred"
+    - "revoked"
+    - "expired"
+
+  executable_approval_statuses:
+    - "approved"
+
+  non_executable_approval_statuses:
+    - "requested"
+    - "rejected"
+    - "deferred"
+    - "revoked"
+    - "expired"
+
+  max_risk_level_for_manual_approval:
+    - "low"
+    - "medium"
+    - "high"
+
+  blocked_risk_levels:
+    - "critical"
+
+  blocked_patterns:
+    - "publish_public_current_to_gcs"
+    - "run_trading_sign_from_quant_pipeline"
+    - "sync_generated_csv_to_db"
+    - "sync_multiasset_metadata"
+    - "order"
+    - "trade"
+    - "buy"
+    - "sell"
+    - "broker"
+    - "kiwoom"
+    - "upbit"
+
+  readiness_gate:
+    allowed_readiness:
+      - "ready"
+      - "ready_with_warnings"
+    blocked_readiness:
+      - "not_ready"
+      - "insufficient_data"
+    require_human_note_when_ready_with_warnings: true
+
+  approval_expiry:
+    enabled: true
+    default_hours: 24
+
+  required_fields:
+    - "approval_id"
+    - "request_type"
+    - "target_run_id"
+    - "target_cycle_type"
+    - "target_stage_ids"
+    - "approval_scope"
+    - "risk_level"
+    - "requested_at"
+    - "requested_by"
+    - "readiness_status"
+    - "agent_recommendation"
