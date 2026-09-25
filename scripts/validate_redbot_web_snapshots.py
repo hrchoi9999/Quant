@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from service_platform.publishers.build_user_facing_snapshots import main as build_main
+from src.quant2.operations import ai_retirement
 
 CURRENT_DIR = ROOT / "service_platform" / "web" / "public_data" / "current"
 REQUIRED = [
@@ -39,13 +40,14 @@ def main() -> None:
     parser.add_argument("--asof", default=None, help="Snapshot date to rebuild before validation. Defaults to current manifest as_of_date.")
     parser.add_argument("--skip-build", action="store_true", help="Validate existing current files without rebuilding them.")
     args = parser.parse_args()
+    ai_retirement.load()
 
     asof = args.asof or _default_asof()
     if not args.skip_build:
         sys.argv = [sys.argv[0], "--asof", asof]
         build_main()
 
-    missing = [name for name in REQUIRED if not (CURRENT_DIR / name).exists()]
+    missing = [name for name in REQUIRED if name != "quantservice_tseries_discovery.json" and not (CURRENT_DIR / name).exists()]
     if missing:
         raise SystemExit("Missing snapshot files: " + ", ".join(missing))
 
@@ -54,7 +56,11 @@ def main() -> None:
     performance = json.loads((CURRENT_DIR / "user_performance_summary.json").read_text(encoding="utf-8"))
     changes = json.loads((CURRENT_DIR / "user_recent_changes.json").read_text(encoding="utf-8"))
     change_history = json.loads((CURRENT_DIR / "user_model_change_history.json").read_text(encoding="utf-8"))
-    tseries = json.loads((CURRENT_DIR / "quantservice_tseries_discovery.json").read_text(encoding="utf-8"))
+    manifest = json.loads((CURRENT_DIR / "publish_manifest.json").read_text(encoding="utf-8"))
+    if (manifest.get("ai_model_lifecycle") != ai_retirement.portfolio_lifecycle()
+            or "quantservice_tseries_discovery.json" in manifest.get("files", [])):
+        raise SystemExit("retired T-series current snapshot still advertised")
+    tseries = {}
 
     assert len(catalog.get("models", [])) == 3
     assert len(reports.get("reports", [])) == 3
@@ -72,8 +78,8 @@ def main() -> None:
                 raise SystemExit(f"Expected 3 models in {bucket_name} change history bucket: {bucket}")
 
     tseries_models = tseries.get("models", [])
-    assert len(tseries_models) == 2
-    expected_tseries_codes = {"T-STOCK-V01", "T-ETF-V01"}
+    assert len(tseries_models) == 0
+    expected_tseries_codes = set()
     actual_tseries_codes = {row.get("model_code") for row in tseries_models}
     if actual_tseries_codes != expected_tseries_codes:
         raise SystemExit(f"Unexpected T-series model set: {sorted(actual_tseries_codes)}")
@@ -177,7 +183,7 @@ def main() -> None:
     print("validated_performance_models=3")
     print("validated_changes=3")
     print("validated_change_history=ok")
-    print("validated_tseries_models=2")
+    print("tseries=retired")
     print("validated_korean_text=clean")
     print("validated_security_code=ok")
     print("validated_compliance_language=ok")

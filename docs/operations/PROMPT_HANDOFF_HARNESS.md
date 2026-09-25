@@ -1,5 +1,11 @@
 # Prompt Handoff Harness
 
+## AI 폐지 및 WD05 영구 소비 호환 (2026-09-25)
+
+- 승인된 Quant 1.0 AI/T 영구 폐지가 아래 과거 AI freshness·주말 학습 안내보다 우선한다. 현재 비AI 모델은 S2/S3/S3_CORE2/S3_ACCEL_V01/S4/S5이며 T 모델과 AI current 파일을 실행/필수 입력으로 요구하지 않는다. 과거 기록은 보존한다.
+- 신규 승인 WD05는 기존 cycle 입력 pin과 함께 `--ai-retirement-operating-compatibility-manifest D:/QuantAnalysis/reports/ai_retirement_20260925/operating_compatibility_manifest.json --ai-retirement-operating-compatibility-sha256 e1961e4574b3385dddef98503a8f990acb934fe068c8cd957022610dd6cfbdee`를 전달한다. 실행 전 QA compiled pin/파일/proof를 재대조하며 불일치는 해당 단계만 보류한다.
+- 영구 호환 gate는 일회성 release activation과 별개다. 이전 payload SHA/generation을 새 cycle에 고정하지 않으며, 이 연결은 새 수집/게시 승인이나 일회성 게시 완료 선언이 아니다.
+
 ## 목적
 
 `Quant`, `QuantMarket`, `QuantAnalysis` 스레드가 주중 업데이트를 프롬프트 기반으로 순서대로 진행하도록 상태와 다음 지시문을 관리한다. 주말 업데이트는 Quant 모델/AI 검증 중심이므로 Quant 모델 스레드만 사용한다.

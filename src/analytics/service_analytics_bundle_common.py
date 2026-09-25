@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+
+from src.quant2.operations import ai_retirement, standalone_retirement
 
 ROOT = Path(r'D:\Quant')
 ANALYTICS_DB = ROOT / 'data' / 'db' / 'service_analytics.db'
@@ -17,6 +18,16 @@ def _read_one(conn: sqlite3.Connection, query: str) -> object:
 
 
 def build_common_meta(asof: str, bundle: str, pages: list[str]) -> dict[str, object]:
+    ai_retirement.load()
+    if ANALYTICS_DB.exists():
+        with sqlite3.connect(ANALYTICS_DB) as source:
+            models = [row[0] for row in source.execute(
+                'SELECT DISTINCT model_code FROM analytics_model_run_overview'
+            )]
+        retired = [str(code) for code in models if ai_retirement.is_retired_model(code)
+                   or not standalone_retirement.active(code)]
+        if retired:
+            raise ValueError('Retired model in current service analytics: ' + ', '.join(sorted(retired)))
     built_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
     analytics_db_mtime = datetime.fromtimestamp(ANALYTICS_DB.stat().st_mtime, tz=timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z') if ANALYTICS_DB.exists() else None
     freshness = {

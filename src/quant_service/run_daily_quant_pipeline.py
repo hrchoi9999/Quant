@@ -13,6 +13,8 @@ from datetime import date, datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(r"D:\Quant")
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 DEFAULT_QM_MARKET_CONTEXT_DIR = Path(
     r"D:\QuantMarket\service_platform\quant_model_handoff\market_context\current"
 )
@@ -379,6 +381,11 @@ def build_commands(
     full_validation: bool,
     pipeline_mode: str,
 ) -> tuple[list[list[str]], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[str], list[str], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]], list[list[str]]]:
+    from src.quant2.operations import ai_retirement
+
+    ai_retirement.load()
+    include_tseries_shadow = include_ai_overlay = include_ai_research = False
+    include_generated_cleanup = False
     token = asof.replace("-", "")
     prep_cmds: list[list[str]] = [[
         python_exe,
@@ -620,6 +627,8 @@ def build_commands(
             [python_exe, str(PROJECT_ROOT / r"scripts\cleanup_generated_files.py"), "--asof", asof, "--execute", "--write-manifest"],
         ]
 
+    trading_sign_cmds[0].append("--exclude-tseries")
+
     return (
         prep_cmds,
         s2_cmd,
@@ -756,10 +765,10 @@ def main() -> None:
         "  service_analytics="
         f"{bool(args.include_service_analytics) and not bool(args.skip_service_analytics)}"
     )
-    print(f"  tseries_shadow={not bool(args.skip_tseries_shadow)}")
+    print(f"  tseries_shadow={bool(tseries_shadow_cmds)}")
     print(f"  iseries_shadow={not bool(args.skip_iseries_shadow)}")
-    print(f"  ai_overlay={not bool(args.skip_ai_overlay)}")
-    print(f"  ai_research={bool(args.include_ai_research)}")
+    print(f"  ai_overlay={bool(ai_overlay_cmds)}")
+    print("  ai_research=False (retired)")
     print(f"  trading_sign={not bool(args.skip_trading_sign)}")
     print(f"  remote_current_publish={not bool(args.skip_remote_current_publish)}")
     print(f"  generated_csv_db_sync={not bool(args.skip_generated_csv_db_sync)}")

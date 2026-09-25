@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from harness_common import ROOT, now_stamp, read_json, read_yaml, write_json
+from retirement_policy import retired_model
 
 REGISTRY_PATH = ROOT / "config" / "harness" / "model_scope_registry.yaml"
 ADMIN_CURRENT = ROOT / "service_platform" / "web" / "admin_data" / "current"
@@ -84,6 +85,8 @@ def _strategy_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for model in payload.get("models") or []:
         if not isinstance(model, dict):
+            continue
+        if retired_model(str(model.get("model_code") or "")):
             continue
         score = model.get("validation_score") or {}
         backtest = model.get("current_backtest_metrics") or {}
@@ -367,9 +370,9 @@ def build_review(
 ) -> dict[str, Any]:
     registry = read_yaml(registry_path)
     internal = read_json(internal_validation_path)
-    ai_learning = read_json(ai_learning_path)
     strategy_rows = _strategy_rows(internal)
-    ai_rows = _ai_rows(ai_learning, registry, asof)
+    # Current AI files are historical archives after retirement, not required inputs.
+    ai_rows = []
     high_perf = [row for row in strategy_rows if row["governance_decision"] in {"keep", "improve"}]
     low_perf = [row for row in strategy_rows if row["governance_decision"] in {"downgrade_candidate", "retire_candidate"}]
     ai_refresh = [row for row in ai_rows if row["governance_decision"] in {"refresh_needed", "archive_candidate"}]
@@ -390,9 +393,9 @@ def build_review(
         "inputs": {
             "model_scope_registry": str(registry_path),
             "internal_model_validation_current": str(internal_validation_path),
-            "ai_learning_models_current": str(ai_learning_path),
+            "ai_learning_models_current": None,
             "internal_validation_as_of_date": internal.get("as_of_date"),
-            "ai_learning_as_of_date": ai_learning.get("as_of_date"),
+            "ai_learning_as_of_date": None,
             "quant1_2_requirements": str(quant1_2_requirements_path),
             "quant1_2_readiness": quant1_2_comparison.get("readiness_path"),
         },
@@ -430,11 +433,11 @@ def build_review(
         "expected_return_improvement_hypothesis": [
             "Expanding models that pass live-first governance should improve realized return quality if drawdown and turnover remain controlled.",
             "Reducing REVIEW models should lower weak-signal drag and improve hit-rate consistency.",
-            "Refreshing stale operating AI should improve candidate ranking, downside filtering, or ETF sleeve decisions versus stale signals.",
+            "Retired AI/T signals are excluded; historical evidence does not authorize current consumption.",
         ],
         "next_quant_model_instructions": [
             "Confirm the governance decision for each strategy model and report keep/improve/downgrade/retire candidates with evidence.",
-            "Refresh or justify stale operating-core AI models before treating them as operational decision inputs.",
+            "Do not refresh retired AI/T models; preserve historical records and validate surviving non-AI inputs.",
             "Design new model research only when it has an explicit return, drawdown, hit-rate, turnover, or regime-stability improvement hypothesis.",
             "Do not promote, downgrade, retire, or change policy without explicit harness/user approval.",
             "Review continuous_observation strategy candidates beside active models, without adding them to operating allocation or model scope.",

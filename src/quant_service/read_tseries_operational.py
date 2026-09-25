@@ -473,6 +473,9 @@ def build_performance_summary(
 
 
 def build_snapshot(con: sqlite3.Connection, model_code: str, asof_date: str | None = None) -> dict:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active(model_code)
     latest_asof = asof_date or _latest_asof(con, model_code)
     meta = load_model_meta(con, model_code)
     profile = load_current_profile(con, model_code, latest_asof)

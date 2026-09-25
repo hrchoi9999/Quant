@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from harness_common import ROOT, now_stamp, read_json, read_yaml, write_json
+from retirement_policy import retired_model
 
 CONFIG_PATH = ROOT / "config" / "harness" / "prompt_handoff_stages.yaml"
 MODEL_SCOPE_REGISTRY_PATH = ROOT / "config" / "harness" / "model_scope_registry.yaml"
@@ -77,6 +78,9 @@ def resolve_operating_scope(
         for item in manifest_contract.get("required_model_codes") or []
     ]
     contract_blockers: list[str] = []
+    for code in required_codes:
+        if retired_model(code):
+            contract_blockers.append(f"retired_model_in_manifest_contract:{code}")
     required_count_value = int(manifest_contract.get("required_model_count") or 0)
     if contract.get("fail_closed") is not True:
         contract_blockers.append("scope_contract_not_fail_closed")
@@ -129,6 +133,7 @@ def resolve_operating_scope(
     legacy_codes = [
         str(item)
         for item in ((registry.get("strategy_models") or {}).get("active_operational") or [])
+        if not retired_model(str(item))
     ]
     legacy = contract.get("legacy_compatibility") or {}
     legacy_revision = str(legacy.get("operating_revision") or "quant_1_0_canonical")
@@ -158,7 +163,7 @@ def resolve_operating_scope(
         if manifest.get("manifest_type") != manifest_contract.get("manifest_type"):
             manifest_blockers.append("manifest_type_not_approved_operating_scope")
         if manifest.get("status") != manifest_contract.get("required_status"):
-            manifest_blockers.append("manifest_status_not_approved_8_of_8")
+            manifest_blockers.append("manifest_status_not_approved_required_scope")
         if manifest.get("research_only") is True:
             manifest_blockers.append("research_only_manifest_forbidden")
         if bool(manifest.get("operating_mutation_allowed")) is not True:
@@ -187,6 +192,8 @@ def resolve_operating_scope(
                 manifest_blockers.append(f"model_row_not_mapping:{key}")
                 continue
             code = _normalize_model_code(value.get("model_code") or key, aliases)
+            if retired_model(code):
+                manifest_blockers.append(f"retired_model_in_manifest:{code}")
             if code in normalized_rows:
                 manifest_blockers.append(f"duplicate_model_code:{code}")
                 continue
@@ -384,6 +391,7 @@ def build_initial_state(cycle: str, asof: str, run_id: str | None = None, *, ope
         ],
         "model_version_boundary": str(cfg.get("model_version_boundary") or "Quant 1.0 operating scope only."),
         "operating_scope": operating_scope,
+        "ai_retirement": deepcopy(cfg.get("ai_retirement") or {}),
         "default_timebox_minutes": int(cfg.get("default_timebox_minutes") or 10),
         "report_quality_gate": cfg.get("report_quality_gate")
         or {
@@ -483,6 +491,8 @@ def render_prompt(state: dict[str, Any]) -> str:
     fields = "\n".join(f"- {item}" for item in stage.get("expected_report") or [])
     required_checks = "\n".join(f"- {item}" for item in stage.get("required_checks") or [])
     execution_controls = "\n".join(f"- {item}" for item in stage.get("execution_controls") or [])
+    if state.get("ai_retirement"):
+        execution_controls += "\n- " + state["ai_retirement"]["instruction"]
     required_checks_section = (
         f"""
 ## 필수 선행/품질 점검

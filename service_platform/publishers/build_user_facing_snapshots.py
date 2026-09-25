@@ -12,6 +12,7 @@ ROOT = Path(r"D:\Quant")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.quant2.operations import ai_retirement
 from src.reporting.public_model_terms import build_public_model_metadata
 from src.reporting.render_redbot_user_report import load_mapping
 from src.quant_service.read_tseries_operational import build_snapshot as build_tseries_snapshot, connect as connect_tseries
@@ -493,6 +494,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build user-facing web snapshots")
     parser.add_argument("--asof", default=datetime.now().strftime("%Y-%m-%d"))
     args = parser.parse_args()
+    ai_retirement.load()
     mapping = load_mapping()
     generated_at = datetime.now().isoformat(timespec="seconds")
     write_json(CURRENT_DIR / "user_model_catalog.json", build_catalog(mapping, args.asof))
@@ -500,8 +502,9 @@ def main() -> None:
     write_json(CURRENT_DIR / "user_performance_summary.json", build_performance(mapping, args.asof))
     write_json(CURRENT_DIR / "user_recent_changes.json", build_changes(mapping, args.asof))
     write_json(CHANGE_HISTORY, build_change_history(mapping, args.asof, generated_at))
-    write_json(T_SERIES_DISCOVERY, build_tseries_discovery(args.asof, generated_at))
     manifest = build_manifest(args.asof, generated_at)
+    manifest["files"].remove(T_SERIES_DISCOVERY.name)
+    manifest["ai_model_lifecycle"] = ai_retirement.portfolio_lifecycle()
     write_json(CURRENT_DIR / "publish_manifest.json", manifest)
     write_json(LEGACY_MANIFEST, manifest)
     if LEGACY_REPORT.exists():

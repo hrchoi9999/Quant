@@ -159,6 +159,9 @@ def build_labels(db: Path = OUT_DB) -> pd.DataFrame:
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("AI-GROWTH-VALUATION-V01")
     parser = argparse.ArgumentParser(description="Build forward labels for AI-GROWTH-VALUATION-V01.")
     parser.add_argument("--db", default=str(OUT_DB))
     args = parser.parse_args()

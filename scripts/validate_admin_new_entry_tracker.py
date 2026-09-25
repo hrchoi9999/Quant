@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from datetime import datetime, timedelta
 
 ROOT = Path(r"D:\Quant")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.quant2.operations import ai_retirement  # noqa: E402
 PAYLOAD_PATH = ROOT / r"service_platform\web\admin_data\current\admin_new_entry_tracker.json"
 INTERNAL_MODEL_CODES = ("S2", "S2_PIT_V01", "S3", "S3_CORE2", "S3_ACCEL_V01", "S4", "S5", "S6", "I-STOCK-STRONG-RSI-V01")
 TSERIES_MODEL_CODES = ("T-STOCK-V01", "T-ETF-V01")
@@ -155,6 +159,8 @@ def _validate_actual_live_summary(payload: dict) -> tuple[dict, list[str]]:
 
     coverage: dict[str, list[dict]] = {}
     for scope_key, expected_starts in ACTUAL_LIVE_START_DATES.items():
+        if scope_key == "tseries_models" and ai_retirement.is_retired_model("T-STOCK-V01"):
+            continue
         rows = summary.get(scope_key)
         if not isinstance(rows, list):
             failures.append(f"actual_live_performance_summary missing list: {scope_key}")
@@ -218,6 +224,10 @@ def main() -> None:
     if not PAYLOAD_PATH.exists():
         raise SystemExit(f"missing payload: {PAYLOAD_PATH}")
     payload = json.loads(PAYLOAD_PATH.read_text(encoding="utf-8"))
+    ai_retirement.load()
+    retired_tseries = ai_retirement.is_retired_model("T-STOCK-V01")
+    if retired_tseries and payload.get("ai_model_lifecycle") != ai_retirement.portfolio_lifecycle():
+        raise SystemExit("Quant 1.0 AI retirement lifecycle missing")
     if payload.get("as_of_date") != args.asof:
         raise SystemExit(f"as_of_date mismatch: expected {args.asof}, got {payload.get('as_of_date')}")
     for key in ("user_models", "internal_models", "tseries_models"):
@@ -252,7 +262,11 @@ def main() -> None:
         "internal_models": _performance_coverage((model_perf.get("internal_models") or []), INTERNAL_MODEL_CODES),
         "tseries_models": _performance_coverage((model_perf.get("tseries_models") or []), TSERIES_MODEL_CODES),
     }
-    tseries_recent_8w = _tseries_recent_8w(payload)
+    if retired_tseries:
+        coverage.pop("tseries_models")
+        direct_population.pop("tseries_models")
+        performance_coverage.pop("tseries_models")
+    tseries_recent_8w = {"status": "retired"} if retired_tseries else _tseries_recent_8w(payload)
     thresholds = {
         "user_models": float(args.user_threshold),
         "internal_models": float(args.internal_threshold),
@@ -262,7 +276,7 @@ def main() -> None:
     for key, stats in coverage.items():
         if stats["match_ratio"] < thresholds[key]:
             failures.append(f"{key} coverage {stats['match_ratio']:.3f} < threshold {thresholds[key]:.3f}")
-    for scope_key in ("internal_models", "tseries_models"):
+    for scope_key in performance_coverage:
         scope_perf = performance_coverage[scope_key]
         if scope_perf["missing_models"]:
             failures.append(f"{scope_key} missing performance models: {', '.join(scope_perf['missing_models'])}")
@@ -271,7 +285,7 @@ def main() -> None:
                 failures.append(
                     f"{scope_key} {item['model_code']} performance completeness {item['required_fields_present_rate']:.3f} < 1.000"
                 )
-    if tseries_recent_8w["populated_ratio"] < 0.95:
+    if not retired_tseries and tseries_recent_8w["populated_ratio"] < 0.95:
         failures.append(
             f"tseries_recent_8w populated_ratio {tseries_recent_8w['populated_ratio']:.3f} < threshold 0.950"
         )

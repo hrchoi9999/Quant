@@ -18,7 +18,7 @@ SPEC.loader.exec_module(PROMPT)
 
 
 def _approved_scope_manifest() -> dict:
-    model_codes = ["S2", "S3", "S3_CORE2", "S3_ACCEL_V01", "S4", "S5", "S6", "T_STOCK_V01"]
+    model_codes = ["S2", "S3", "S3_CORE2", "S3_ACCEL_V01", "S4", "S5"]
     models = {}
     for code in model_codes:
         canonical_code = "T-STOCK-V01" if code == "T_STOCK_V01" else code
@@ -44,11 +44,11 @@ def _approved_scope_manifest() -> dict:
         "schema_version": 1,
         "manifest_type": "quant_os_operating_scope",
         "scope_id": "quant_os_approved_unit",
-        "status": "approved_8_of_8",
+        "status": "approved_6_of_6",
         "operating_mutation_allowed": True,
         "approval": {
-            "approved_model_count": 8,
-            "total_model_count": 8,
+            "approved_model_count": 6,
+            "total_model_count": 6,
             "user_final_approval": True,
             "user_approval_reference": "unit-final-approval",
         },
@@ -176,25 +176,20 @@ def test_scope_contract_can_resolve_approved_model_revisions_after_activation(tm
 
     assert scope["scope_status"] == "manifest_active"
     assert scope["active_scope_source"] == "quant_os_operating_manifest"
-    assert len(scope["active_models"]) == 8
-    t_stock = next(row for row in scope["active_models"] if row["model_code"] == "T-STOCK-V01")
-    assert t_stock == {
-        "model_code": "T-STOCK-V01",
-        "operating_revision": "quant_1_0_canonical",
-        "decision": "keep_current_revision",
-        "source_candidate_id": "",
-    }
+    assert len(scope["active_models"]) == 6
+    assert not any(PROMPT.retired_model(row["model_code"]) for row in scope["active_models"])
+
 
 
 def test_selection_freeze_manifest_cannot_activate_operating_scope(tmp_path: Path) -> None:
     registry_path = _scope_registry_for_test(tmp_path, active=True)
-    selection_freeze = (
-        Path(__file__).resolve().parents[1]
-        / "reports"
-        / "quant1_2"
-        / "operational_readiness"
-        / "selection_freeze_manifest.json"
-    )
+    selection_freeze = tmp_path / "selection_freeze_manifest.json"
+    selection_freeze.write_text(json.dumps({
+        "manifest_type": "synthetic_research_selection_freeze",
+        "research_only": True,
+        "operating_mutation_allowed": False,
+        "models": {},
+    }), encoding="utf-8")
 
     scope = PROMPT.resolve_operating_scope(registry_path, selection_freeze)
 
@@ -442,7 +437,7 @@ def test_wd04_prompt_requires_user_model_snapshot_freshness() -> None:
     assert "research_archive_excluded_from_default" in prompt
     assert "excluded_from_default" in prompt
     assert "REVIEW 상태 모델은 자동 제외하지 말고" in prompt
-    assert "blocked_needs_ai_core_freshness_decision" in prompt
+    assert "폐지 AI/T payload의 최신성은 완료 조건에서 제외" in prompt
     assert "redbot_user_report_<profile>_<target_asof>.json" in prompt
     assert "user_model_snapshot_report.json" in prompt
     assert "user_model_holdings_history.json" in prompt
@@ -455,13 +450,13 @@ def test_wd04_prompt_requires_user_model_snapshot_freshness() -> None:
     assert "model_improvement_experiments" in prompt
     assert "expected_return_improvement_hypothesis" in prompt
     assert "keep`, `improve`, `review`, `downgrade_candidate`, `retire_candidate" in prompt
-    assert "governance payload의 target asof와 underlying model evidence date를 분리" in prompt
+    assert "비AI 검증과 lifecycle 검수는 유지" in prompt
     assert "validate_daily_pipeline_contract.py --asof <target_asof>" in prompt
     assert "validate_trading_sign_snapshots.py --asof <target_asof>" in prompt
     assert "38-chain 또는 해당 표준 체인의 완료" in prompt
     assert "한 번의 freshness inventory" in prompt
-    assert "평일 AI live shadow의 표준 범위는 target_asof 단일 기준일" in prompt
-    assert "historical `all` 재계산을 선택 복구로 추가하지 않는다" in prompt
+    assert "폐지 AI live shadow는 신규 생성·추적·과거 재산출을 실행하지 않고" in prompt
+    assert "역사 근거로만 보존한다" in prompt
 
 
 def test_wd05_prompt_requires_portfolio_update_before_review() -> None:
@@ -469,6 +464,10 @@ def test_wd05_prompt_requires_portfolio_update_before_review() -> None:
     state["current_stage_index"] = 4
 
     prompt = PROMPT.render_prompt(state)
+    assert "--ai-retirement-operating-compatibility-manifest D:/QuantAnalysis/reports/ai_retirement_20260925/operating_compatibility_manifest.json" in prompt
+    assert "--ai-retirement-operating-compatibility-sha256 e1961e4574b3385dddef98503a8f990acb934fe068c8cd957022610dd6cfbdee" in prompt
+    assert "blocked_needs_ai_retirement_operating_compatibility" in prompt
+
 
     assert "기준일자 투자 포트폴리오 업데이트" in prompt
     assert "D:\\Quant\\venv64\\Scripts\\python.exe D:\\QuantAnalysis\\portfolio_pipeline.py --asof <target_asof>" in prompt
@@ -581,8 +580,8 @@ def test_weekend_quant_pipeline_scope_excludes_unsafe_actions() -> None:
     assert "research_archive_excluded_from_default" in prompt
     assert "excluded_from_default" in prompt
     assert "downgrade_or_redesign_candidate" in prompt
-    assert "A operating core AI가 stale이면" in prompt
-    assert "주말 모델/AI 검증 통합 파이프라인" in prompt
+    assert "폐지 AI/T 파일 부재·stale을 실패 사유나 복구 대상으로 삼지 않는다" in prompt
+    assert "주말 비AI 모델 검증 통합 파이프라인" in prompt
     assert "정책 변경 확정, 자동 publish는 하지 않는다" in prompt
     assert "asof: 2026-06-26" in prompt
     assert "주말 target_asof는 하네스 요청/운영일" in prompt

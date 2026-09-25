@@ -234,6 +234,9 @@ def build_market_context(
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("AI-GROWTH-VALUATION-V01")
     parser = argparse.ArgumentParser(description="Build market context mart for valuation AI.")
     parser.add_argument("--universe", default=str(DEFAULT_UNIVERSE))
     parser.add_argument("--start", default="2017-01-01")

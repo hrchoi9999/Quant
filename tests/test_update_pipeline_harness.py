@@ -35,7 +35,7 @@ def test_weekend_prompt_contains_research_full_and_asof() -> None:
         workflow="weekend",
         asof="2026-06-26",
         batch_type="research_full",
-        include_ai_research=True,
+        include_ai_research=False,
     )
 
     prompt = HARNESS.render_prompt(state)
@@ -45,7 +45,8 @@ def test_weekend_prompt_contains_research_full_and_asof() -> None:
     assert HARNESS.current_step(state)["id"] == "quant_weekend_pipeline"
     assert "대상 thread: Quant" in prompt
     assert "research_full" in prompt
-    assert "--include-ai-research" in prompt
+    assert "--include-ai-research" not in prompt
+    assert "--skip-remote-current-publish" in prompt
     assert "2026-06-26" in prompt
     assert "QuantMarket" not in prompt
     assert "QuantAnalysis" not in prompt

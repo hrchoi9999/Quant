@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import sqlite3
+import sys
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -11,6 +12,9 @@ from typing import Any
 
 
 ROOT = Path(r"D:\Quant")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.quant2.operations import ai_retirement  # noqa: E402
 PRICE_DB = ROOT / r"data\db\price.db"
 REGIME_DB = ROOT / r"data\db\regime.db"
 S3_FEATURE_DB = ROOT / r"data\db_s3\features_s3.db"
@@ -142,7 +146,9 @@ def _status_from_bool(ok: bool, warn: bool = False) -> str:
 
 def _check_public_payloads(asof: str) -> list[CheckResult]:
     results: list[CheckResult] = []
-    missing = [name for name in REQUIRED_PUBLIC_FILES if not (PUBLIC_CURRENT_DIR / name).exists()]
+    retired_tseries = ai_retirement.is_retired_model("T-STOCK-V01")
+    missing = [name for name in REQUIRED_PUBLIC_FILES if (not retired_tseries or name != "quantservice_tseries_discovery.json")
+               and not (PUBLIC_CURRENT_DIR / name).exists()]
     results.append(CheckResult("public_current_files_exist", _status_from_bool(not missing), {"missing": missing}))
     if missing:
         return results
@@ -153,7 +159,7 @@ def _check_public_payloads(asof: str) -> list[CheckResult]:
     performance = _load_json(PUBLIC_CURRENT_DIR / "user_performance_summary.json")
     changes = _load_json(PUBLIC_CURRENT_DIR / "user_recent_changes.json")
     history = _load_json(PUBLIC_CURRENT_DIR / "user_model_change_history.json")
-    tseries = _load_json(PUBLIC_CURRENT_DIR / "quantservice_tseries_discovery.json")
+    tseries = {} if retired_tseries else _load_json(PUBLIC_CURRENT_DIR / "quantservice_tseries_discovery.json")
 
     date_fields = {
         "publish_manifest": manifest.get("as_of_date"),
@@ -164,6 +170,8 @@ def _check_public_payloads(asof: str) -> list[CheckResult]:
         "user_model_change_history": history.get("as_of_date"),
         "quantservice_tseries_discovery": tseries.get("as_of_date"),
     }
+    if retired_tseries:
+        date_fields.pop("quantservice_tseries_discovery")
     results.append(CheckResult("public_payload_asof_match", _status_from_bool(all(v == asof for v in date_fields.values())), date_fields))
 
     profile_set = {row.get("service_profile") for row in catalog.get("models", [])}
@@ -175,6 +183,9 @@ def _check_public_payloads(asof: str) -> list[CheckResult]:
         )
     )
 
+    if retired_tseries:
+        results.append(CheckResult("tseries_payload_internal_asof_match", "retired", {"historical_records_preserved": True}))
+        return results
     tseries_models = tseries.get("models") or []
     model_asofs = {row.get("model_code"): row.get("asof_date") for row in tseries_models if isinstance(row, dict)}
     tstock_ok = model_asofs.get("T-STOCK-V01") == asof
@@ -192,7 +203,9 @@ def _check_public_payloads(asof: str) -> list[CheckResult]:
 
 def _check_history_payloads(asof: str) -> list[CheckResult]:
     results: list[CheckResult] = []
-    missing = [name for name in REQUIRED_PUBLIC_HISTORY_FILES if not (PUBLIC_HISTORY_DIR / name).exists()]
+    retired_tseries = ai_retirement.is_retired_model("T-STOCK-V01")
+    missing = [name for name in REQUIRED_PUBLIC_HISTORY_FILES if (not retired_tseries or name != "quantservice_tseries_discovery_history.json")
+               and not (PUBLIC_HISTORY_DIR / name).exists()]
     results.append(CheckResult("public_history_files_exist", _status_from_bool(not missing), {"missing": missing}))
     admin_hist = ADMIN_CURRENT_DIR / "internal_model_performance_history.json"
     results.append(
@@ -206,7 +219,7 @@ def _check_history_payloads(asof: str) -> list[CheckResult]:
         return results
     user_perf = _load_json(PUBLIC_HISTORY_DIR / "user_model_performance_history.json")
     user_holdings = _load_json(PUBLIC_HISTORY_DIR / "user_model_holdings_history.json")
-    tseries_hist = _load_json(PUBLIC_HISTORY_DIR / "quantservice_tseries_discovery_history.json")
+    tseries_hist = {} if retired_tseries else _load_json(PUBLIC_HISTORY_DIR / "quantservice_tseries_discovery_history.json")
     internal_hist = _load_json(admin_hist)
     asofs = {
         "user_model_performance_history": user_perf.get("as_of_date"),
@@ -214,6 +227,8 @@ def _check_history_payloads(asof: str) -> list[CheckResult]:
         "quantservice_tseries_discovery_history": tseries_hist.get("as_of_date"),
         "internal_model_performance_history": internal_hist.get("as_of_date"),
     }
+    if retired_tseries:
+        asofs.pop("quantservice_tseries_discovery_history")
     results.append(CheckResult("history_payload_asof_match", _status_from_bool(all(v == asof for v in asofs.values())), asofs))
     return results
 
@@ -418,12 +433,16 @@ def main() -> None:
     ap.add_argument("--asof", required=True, help="Expected operating as-of date, YYYY-MM-DD")
     ap.add_argument("--report-dir", default=str(ROOT / r"reports\data_quality\pipeline_contract"))
     args = ap.parse_args()
+    ai_retirement.load()
 
     asof = str(args.asof)
     results: list[CheckResult] = []
     results.extend(_check_data_dbs(asof))
     results.extend(_check_model_publish_db(asof))
-    results.extend(_check_tseries_db(asof))
+    if ai_retirement.is_retired_model("T-STOCK-V01"):
+        results.append(CheckResult("tseries_database_refresh", "retired", {"historical_records_preserved": True}))
+    else:
+        results.extend(_check_tseries_db(asof))
     results.extend(_check_public_payloads(asof))
     results.extend(_check_history_payloads(asof))
     results.extend(_check_admin_and_trading_payloads(asof))

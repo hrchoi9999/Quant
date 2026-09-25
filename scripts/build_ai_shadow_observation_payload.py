@@ -238,4 +238,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    from _quant1_ai_retirement_entry import reject_retired
+
+    reject_retired("AI-OVERLAY-V01")
     main()

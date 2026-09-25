@@ -66,6 +66,9 @@ def _write_timing_report(
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("AI-GROWTH-VALUATION-V01")
     parser = argparse.ArgumentParser(description="Run AI-GROWTH-VALUATION-V01 end-to-end pipeline.")
     parser.add_argument("--asof", required=True)
     parser.add_argument("--start", default="2017-01-01")

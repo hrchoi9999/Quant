@@ -359,6 +359,13 @@ def write_report(summary: pd.DataFrame, policy: pd.DataFrame, latest: pd.DataFra
 
 
 def main() -> None:
+    import sys
+
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("T-STOCK-V01")
     ap = argparse.ArgumentParser(description="Test whether I reaccel/overheat states improve T-STOCK candidate quality.")
     ap.add_argument("--asof", default="2026-04-29")
     ap.add_argument("--start", default="2017-01-01")

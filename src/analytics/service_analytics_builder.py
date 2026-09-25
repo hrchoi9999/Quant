@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.quant2.operations import ai_retirement, standalone_retirement
 
 PROJECT_ROOT = Path(r"D:\Quant")
 QUANT_SERVICE_DB = PROJECT_ROOT / "data" / "db" / "quant_service.db"
@@ -137,9 +138,14 @@ def _current_runs(db: Path) -> pd.DataFrame:
 
 
 def build_model_run_overview(source: SourceDbs) -> pd.DataFrame:
+    ai_retirement.load()
     df = _current_runs(source.quant_service)
     if df.empty:
         return df
+    # Historical run rows remain in source DBs but cannot enter current analytics bundles.
+    model_codes = df["model_code"].astype(str)
+    active = model_codes.map(lambda code: not ai_retirement.is_retired_model(code) and standalone_retirement.active(code))
+    df = df.loc[active].copy()
     df["published_at"] = pd.to_datetime(df["published_at"], errors="coerce")
     df["asof_date"] = pd.to_datetime(df["asof_date"], errors="coerce")
     df["start_date"] = pd.to_datetime(df["start_date"], errors="coerce")

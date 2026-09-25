@@ -185,6 +185,9 @@ def build_growth_flags(universe: Path, asof: str, db: Path = OUT_DB) -> pd.DataF
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("AI-GROWTH-VALUATION-V01")
     parser = argparse.ArgumentParser(description="Build growth universe flags for AI-GROWTH-VALUATION-V01.")
     parser.add_argument("--universe", default=str(DEFAULT_UNIVERSE).replace("_fundready", ""))
     parser.add_argument("--asof", required=True)

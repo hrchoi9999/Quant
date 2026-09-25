@@ -33,16 +33,21 @@ def main() -> None:
     ap.add_argument("--asof", required=True)
     args = ap.parse_args()
 
+    import sys
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from src.quant2.operations import ai_retirement
+    ai_retirement.load()
+
     user_perf = _load_json(USER_PERF)
     user_holdings = _load_json(USER_HOLDINGS)
     internal_perf = _load_json(INTERNAL_PERF)
-    tseries_hist = _load_json(TSERIES_HIST)
+    tseries_hist = None  # Retired T history is preserved, not current validation input.
 
     for name, payload in [
         ("user_model_performance_history", user_perf),
         ("user_model_holdings_history", user_holdings),
         ("internal_model_performance_history", internal_perf),
-        ("quantservice_tseries_discovery_history", tseries_hist),
     ]:
         _require(payload.get("as_of_date") == args.asof, f"{name} as_of_date mismatch: {payload.get('as_of_date')} != {args.asof}")
         _require(isinstance(payload.get("series"), list), f"{name} missing series[]")
@@ -57,17 +62,10 @@ def main() -> None:
     internal_models = {row.get("model_code") for row in internal_perf["series"]}
     _require(INTERNAL_MODEL_CODES.issubset(internal_models), f"internal performance coverage mismatch: {sorted(str(x) for x in internal_models)}")
 
-    tseries_models = {row.get("model_code") for row in tseries_hist["series"]}
-    _require(TSERIES_MODEL_CODES.issubset(tseries_models), f"tseries history coverage mismatch: {sorted(str(x) for x in tseries_models)}")
 
     for row in internal_perf["series"][:10]:
         for key in ("asof_date", "model_code", "cagr", "trailing_1y", "mdd_1y", "sharpe_1y", "itd_return", "metric_basis"):
             _require(key in row, f"internal performance missing key `{key}`")
-
-    for row in tseries_hist["series"][:10]:
-        _require("bucket_counts" in row, "tseries history missing bucket_counts")
-        _require("performance_summary" in row, "tseries history missing performance_summary")
-        _require("rolling_watchlist" in row, "tseries history missing rolling_watchlist")
 
     print(
         json.dumps(
@@ -76,7 +74,8 @@ def main() -> None:
                 "user_model_performance_rows": len(user_perf["series"]),
                 "user_model_holdings_rows": len(user_holdings["series"]),
                 "internal_model_performance_rows": len(internal_perf["series"]),
-                "tseries_history_rows": len(tseries_hist["series"]),
+                "tseries_history_rows": None,
+                "tseries_status": "retired",
                 "status": "ok",
             },
             ensure_ascii=False,

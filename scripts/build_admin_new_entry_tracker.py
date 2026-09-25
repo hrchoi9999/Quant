@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sqlite3
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,6 +13,9 @@ from typing import Any
 import pandas as pd
 
 ROOT = Path(r"D:\Quant")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.quant2.operations import ai_retirement  # noqa: E402
 REPORT_DIR = ROOT / "reports" / "redbot_user_reports"
 SERVICE_ANALYTICS_DB = ROOT / r"data\db\service_analytics.db"
 QUANT_SERVICE_DB = ROOT / r"data\db\quant_service.db"
@@ -1084,6 +1088,9 @@ def build_internal_model_performance_summary(asof: str) -> list[dict[str, Any]]:
 
 
 def build_tseries_weekly_rank_rows(asof: str) -> list[dict[str, Any]]:
+    ai_retirement.load()
+    if ai_retirement.is_retired_model("T-STOCK-V01"):
+        return []
     if not TSERIES_DB.exists():
         return []
     with sqlite3.connect(str(TSERIES_DB)) as con:
@@ -1168,6 +1175,9 @@ def build_tseries_weekly_rank_rows(asof: str) -> list[dict[str, Any]]:
 
 
 def build_tseries_rows(asof: str) -> list[dict[str, Any]]:
+    ai_retirement.load()
+    if ai_retirement.is_retired_model("T-STOCK-V01"):
+        return []
     if not TSERIES_DB.exists():
         return []
     with sqlite3.connect(str(TSERIES_DB)) as con:
@@ -1347,6 +1357,9 @@ def _simulate_ranked_proxy_nav(
 
 
 def build_tseries_model_performance_summary(asof: str, ranking_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ai_retirement.load()
+    if ai_retirement.is_retired_model("T-STOCK-V01"):
+        return []
     if not TSERIES_DB.exists():
         return []
     display_names: dict[str, str] = {}
@@ -1416,6 +1429,7 @@ def build_payload(asof: str) -> dict[str, Any]:
     }
     return {
         "source_name": "handoff:admin_new_entry_tracker",
+        "ai_model_lifecycle": ai_retirement.portfolio_lifecycle(),
         "schema_version": "v2",
         "visibility": "admin_only",
         "as_of_date": asof,

@@ -4,6 +4,7 @@ import argparse
 import json
 import math
 import sqlite3
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -11,8 +12,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-
 ROOT = Path(r"D:\Quant")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.quant2.operations import ai_retirement  # noqa: E402
+
 PRICE_DB = ROOT / r"data\db\price.db"
 QS_DB = ROOT / r"data\db\quant_service.db"
 TS_DB = ROOT / r"data\db\tseries_operational.db"
@@ -175,24 +179,11 @@ def _load_universe(asof: str) -> pd.DataFrame:
     base["market"] = base["market"].fillna(base["inst_market"])
     base = base.merge(etf_meta, on="ticker", how="left")
 
-    with sqlite3.connect(str(TS_DB)) as con:
-        labels = pd.read_sql_query(
-            """
-            SELECT ticker, theme_bucket, theme_name_kr, asof_date
-            FROM ts_theme_labels
-            WHERE asof_date <= ?
-            """,
-            con,
-            params=[asof],
-            dtype={"ticker": str},
-        )
-    if not labels.empty:
-        labels["ticker"] = labels["ticker"].map(_normalize_ticker)
-        labels = labels.sort_values(["ticker", "asof_date"]).drop_duplicates("ticker", keep="last")
-        base = base.merge(labels[["ticker", "theme_bucket", "theme_name_kr"]], on="ticker", how="left")
-    else:
-        base["theme_bucket"] = None
-        base["theme_name_kr"] = None
+    ai_retirement.load()
+    # T-derived theme labels are retired; retain source-backed ETF metadata and
+    # the existing non-AI stock-market fallback below.
+    base["theme_bucket"] = None
+    base["theme_name_kr"] = None
 
     is_etf = base["asset_type"].eq("ETF")
     etf_theme = base["group_key"].fillna(base["asset_class"]).fillna("etf_other")
@@ -446,6 +437,9 @@ def _latest_s_holdings(asof: str) -> pd.DataFrame:
 
 
 def _latest_t_candidates(asof: str) -> pd.DataFrame:
+    if ai_retirement.is_retired_model("T-STOCK-V01"):
+        ai_retirement.load()
+        return pd.DataFrame()
     frames: list[pd.DataFrame] = []
     with sqlite3.connect(str(TS_DB)) as con:
         for table, bucket_col in [("ts_candidates_latest", "candidate_bucket"), ("ts_rolling_watchlist_latest", "watch_status")]:

@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(r"D:\Quant")
 TRADING_SIGN_ROOT = PROJECT_ROOT / "trading_sign"
 TRADING_SIGN_SRC = TRADING_SIGN_ROOT / "src"
@@ -20,7 +19,14 @@ def main() -> None:
     ap.add_argument("--signal-date", required=True)
     ap.add_argument("--data-asof-date", required=True)
     ap.add_argument("--python", default=sys.executable)
+    ap.add_argument("--exclude-tseries", action="store_true", help="Run existing public-model signals without T-series AI targets.")
     args = ap.parse_args()
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
+    from src.quant2.operations import ai_retirement
+
+    ai_retirement.load()
+    args.exclude_tseries = True
 
     if not TRADING_SIGN_ROOT.exists():
         raise SystemExit(f"trading_sign root not found: {TRADING_SIGN_ROOT}")
@@ -42,6 +48,8 @@ def main() -> None:
         "--data-asof-date",
         str(args.data_asof_date),
     ]
+    if args.exclude_tseries:
+        cmd.append("--exclude-tseries")
     print(f"[RUN] {' '.join(cmd)}")
     subprocess.run(cmd, cwd=str(PROJECT_ROOT), env=env, check=True)
 

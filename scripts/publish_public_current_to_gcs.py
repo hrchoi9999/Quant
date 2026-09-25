@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import sys
 from pathlib import Path
 from urllib.parse import quote
 
@@ -11,6 +12,10 @@ from google.auth.transport.requests import Request
 from google.oauth2 import service_account
 
 PROJECT_ROOT = Path(r"D:\Quant")
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+from src.quant2.operations import ai_retirement  # noqa: E402
+
 CURRENT_DIR = PROJECT_ROOT / r"service_platform\web\public_data\current"
 PUBLIC_HISTORY_DIR = PROJECT_ROOT / r"service_platform\web\public_data\history"
 ADMIN_CURRENT_DIR = PROJECT_ROOT / r"service_platform\web\admin_data\current"
@@ -44,9 +49,21 @@ ADMIN_INTERNAL_PERF_HISTORY_OBJECT = (
     "internal_model_performance_history.json",
     "admin/current/internal_model_performance_history.json",
 )
+ADMIN_INTERNAL_VALIDATION_CURRENT_OBJECT = (
+    "internal_model_validation_current.json",
+    "admin/current/internal_model_validation_current.json",
+)
+ADMIN_INTERNAL_VALIDATION_HISTORY_OBJECT = (
+    "internal_model_validation_history.json",
+    "admin/current/internal_model_validation_history.json",
+)
 ADMIN_AI_SHADOW_OBSERVATION_OBJECT = (
     "ai_shadow_observation.json",
     "admin/current/ai_shadow_observation.json",
+)
+ADMIN_STRATEGY_RESEARCH_OBSERVATION_OBJECT = (
+    "strategy_research_observation.json",
+    "admin/current/strategy_research_observation.json",
 )
 ADMIN_AI_LEARNING_MODELS_OBJECT = (
     "ai_learning_models_current.json",
@@ -87,6 +104,88 @@ TRADING_SIGN_OBJECTS = [
 ]
 
 
+
+
+# Active exact47 legacy public write block; private and Q25 paths remain separate.
+LEGACY_PUBLIC_BLOCKED_OBJECTS = frozenset({
+    'admin/current/admin_new_entry_tracker.json',
+    'admin/current/ai_learning_models_current.json',
+    'admin/current/ai_learning_overlay_monitor_current.json',
+    'admin/current/ai_shadow_observation.json',
+    'admin/current/candidate_rank_delta_ai_current.json',
+    'admin/current/downside_risk_ai_current.json',
+    'admin/current/downside_risk_ai_shadow_tracker.json',
+    'admin/current/e_series_etf_mode_switch_cost_adjusted_current.json',
+    'admin/current/e_series_etf_mode_switch_turnover_buffer_current.json',
+    'admin/current/e_series_etf_operational_hardening_current.json',
+    'admin/current/e_series_etf_operational_policy_hierarchy_current.json',
+    'admin/current/e_series_etf_sleeve_portfolio_current.json',
+    'admin/current/e_series_etf_sleeve_selection_current.json',
+    'admin/current/e_series_etf_total_return_adjustment_current.json',
+    'admin/current/etf_ai_shadow_portfolio_current.json',
+    'admin/current/internal_model_performance_history.json',
+    'admin/current/internal_model_validation_current.json',
+    'admin/current/internal_model_validation_history.json',
+    'admin/current/internal_models_ai_overlay_shadow_current.json',
+    'admin/current/strategy_research_observation.json',
+    'admin/current/theme_persistence_ai_current.json',
+    'admin/current/valuation_ai_challenger_current.json',
+    'admin/current/valuation_ai_challenger_shadow_performance.json',
+    'admin/current/valuation_ai_shadow_monitor.json',
+    'current/publish_manifest.json',
+    'current/publish_manifest_user.json',
+    'current/user_model_catalog.json',
+    'current/user_model_snapshot_report.json',
+    'current/user_performance_summary.json',
+    'current/user_recent_changes.json',
+    'history/quantservice_tseries_discovery_history.json',
+    'history/user_model_holdings_history.json',
+    'history/user_model_performance_history.json',
+    'publish_manifest.json',
+    'publish_manifest_user.json',
+    'trading_sign/current/tradingsign_manifest.json',
+    'trading_sign/current/tradingsign_model_detail.json',
+    'trading_sign/current/tradingsign_overview.json',
+    'tseries_discovery/current/quantservice_tseries_discovery.json',
+    'tseries_discovery/history/quantservice_tseries_discovery_history.json',
+    'user_model_catalog.json',
+    'user_model_change_history.json',
+    'user_model_holdings_history.json',
+    'user_model_performance_history.json',
+    'user_model_snapshot_report.json',
+    'user_performance_summary.json',
+    'user_recent_changes.json',
+})
+
+def reject_legacy_public_write(bucket, name):
+    if bucket == "quantservice-489808-market-analysis" and name in LEGACY_PUBLIC_BLOCKED_OBJECTS:
+        raise RuntimeError("exact legacy public destination is disabled")
+
+
+def selected_legacy_objects(args):
+    if args.admin_strategy_research_observation_only:
+        return {ADMIN_STRATEGY_RESEARCH_OBSERVATION_OBJECT[1]}
+    names = set()
+    if not args.skip_user_current:
+        names.update(ROOT_OBJECTS)
+    if not args.skip_user_history:
+        names.update(pair[1] for pair in USER_HISTORY_OBJECTS)
+    if not args.skip_tseries_current:
+        names.add(T_SERIES_OBJECT[1])
+    if not args.skip_tseries_history:
+        names.add(T_SERIES_HISTORY_OBJECT[1])
+    history = {"ADMIN_INTERNAL_PERF_HISTORY_OBJECT", "ADMIN_INTERNAL_VALIDATION_HISTORY_OBJECT"}
+    if not args.skip_admin_history:
+        names.update(globals()[key][1] for key in history)
+    if not args.skip_admin_current:
+        names.update(value[1] for key, value in globals().items()
+                     if key.startswith("ADMIN_") and isinstance(value, tuple) and key not in history)
+        names.update(pair[1] for pair in ADMIN_VALUATION_AI_OBJECTS)
+    if not args.skip_trading_sign_current:
+        names.update(pair[1] for pair in TRADING_SIGN_OBJECTS)
+    return {name for name in names if not ai_retirement.is_retired_object(name)}
+
+
 def _resolve_cred_path(explicit: str | None) -> Path:
     if explicit:
         candidate = Path(explicit)
@@ -111,6 +210,7 @@ def _access_token(cred_path: Path) -> str:
 
 
 def _upload_bytes(bucket: str, object_name: str, payload: bytes, token: str, content_type: str) -> None:
+    reject_legacy_public_write(bucket, object_name)
     url = (
         f"https://storage.googleapis.com/upload/storage/v1/b/{bucket}/o"
         f"?uploadType=media&name={quote(object_name, safe='')}"
@@ -148,10 +248,71 @@ def main() -> None:
     ap.add_argument("--skip-admin-current", action="store_true")
     ap.add_argument("--skip-admin-history", action="store_true")
     ap.add_argument("--skip-trading-sign-current", action="store_true")
+    ap.add_argument(
+        "--admin-strategy-research-observation-only",
+        action="store_true",
+        help="Publish only the admin-only strategy research observation payload.",
+    )
+    ap.add_argument("--dry-run", action="store_true", help="Validate and print a local plan without credentials or network.")
+    ap.add_argument("--admin-bucket", help="Opt-in private admin destination (local preparation only).")
+    ap.add_argument("--admin-research-object", action="append", default=[], help="Explicit research filename; repeat per selected object.")
+    ap.add_argument("--public-plan", help="Opt-in pinned public12 plan; validation only unless explicitly executed.")
+    ap.add_argument("--public-plan-sha256")
+    ap.add_argument("--execute-public-plan", action="store_true")
+    ap.add_argument("--public-result-dir")
     args = ap.parse_args()
+    ai_retirement.load()
+
+    if args.public_plan:
+        import sys
+
+        sys.path.insert(0, str(PROJECT_ROOT))
+        from scripts.harness.public_publish_guard import run_cli
+
+        run_cli(args, globals())
+        return
+    if args.public_plan_sha256 or args.execute_public_plan or args.public_result_dir:
+        ap.error("public plan options require --public-plan")
+    args.skip_tseries_current = True
+    args.skip_tseries_history = True
+
+    if args.dry_run or args.admin_bucket or args.admin_research_object:
+        import sys
+
+        sys.path.insert(0, str(PROJECT_ROOT / "quant2"))
+        from src.quant2.storage.admin_publish_candidate import run_local_candidate
+
+        run_local_candidate(args, globals())
+        return
+
+    for name in selected_legacy_objects(args):
+        reject_legacy_public_write(args.bucket, name)
 
     cred_path = _resolve_cred_path(args.cred)
     token = _access_token(cred_path)
+
+    if args.admin_strategy_research_observation_only:
+        src_name, object_name = ADMIN_STRATEGY_RESEARCH_OBSERVATION_OBJECT
+        src = ADMIN_CURRENT_DIR / src_name
+        if not src.exists():
+            raise SystemExit(f"missing local strategy research observation file: {src}")
+        _upload_file(args.bucket, src, object_name, token)
+        payload = json.loads(src.read_text(encoding="utf-8"))
+        print(
+            json.dumps(
+                {
+                    "bucket": args.bucket,
+                    "object": object_name,
+                    "as_of_date": payload.get("as_of_date"),
+                    "generated_at": payload.get("generated_at"),
+                    "model_count": len(payload.get("models") or []),
+                    "credential_path": str(cred_path),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
 
     if not args.skip_user_current:
         for name in ROOT_OBJECTS:
@@ -195,62 +356,29 @@ def main() -> None:
             raise SystemExit(f"missing local admin history file: {src}")
         _upload_file(args.bucket, src, object_name, token)
 
+        src_name, object_name = ADMIN_INTERNAL_VALIDATION_HISTORY_OBJECT
+        src = ADMIN_CURRENT_DIR / src_name
+        if src.exists():
+            _upload_file(args.bucket, src, object_name, token)
+        else:
+            print(f"[WARN] missing optional admin internal validation history file: {src}")
+
     if not args.skip_admin_current:
-        src_name, object_name = ADMIN_AI_SHADOW_OBSERVATION_OBJECT
+        src_name, object_name = ADMIN_INTERNAL_VALIDATION_CURRENT_OBJECT
         src = ADMIN_CURRENT_DIR / src_name
         if src.exists():
             _upload_file(args.bucket, src, object_name, token)
         else:
-            print(f"[WARN] missing optional admin AI shadow observation file: {src}")
+            print(f"[WARN] missing optional admin internal validation current file: {src}")
 
-        src_name, object_name = ADMIN_AI_LEARNING_MODELS_OBJECT
+        src_name, object_name = ADMIN_STRATEGY_RESEARCH_OBSERVATION_OBJECT
         src = ADMIN_CURRENT_DIR / src_name
         if src.exists():
             _upload_file(args.bucket, src, object_name, token)
         else:
-            print(f"[WARN] missing optional admin AI learning models file: {src}")
+            print(f"[WARN] missing optional admin strategy research observation file: {src}")
 
-        src_name, object_name = ADMIN_DOWNSIDE_RISK_AI_OBJECT
-        src = ADMIN_CURRENT_DIR / src_name
-        if src.exists():
-            _upload_file(args.bucket, src, object_name, token)
-        else:
-            print(f"[WARN] missing optional admin downside risk AI file: {src}")
-
-        src_name, object_name = ADMIN_DOWNSIDE_RISK_AI_SHADOW_OBJECT
-        src = ADMIN_CURRENT_DIR / src_name
-        if src.exists():
-            _upload_file(args.bucket, src, object_name, token)
-        else:
-            print(f"[WARN] missing optional admin downside risk AI shadow tracker file: {src}")
-
-        src_name, object_name = ADMIN_CANDIDATE_RANK_DELTA_AI_OBJECT
-        src = ADMIN_CURRENT_DIR / src_name
-        if src.exists():
-            _upload_file(args.bucket, src, object_name, token)
-        else:
-            print(f"[WARN] missing optional admin candidate rank delta AI file: {src}")
-
-        src_name, object_name = ADMIN_THEME_PERSISTENCE_AI_OBJECT
-        src = ADMIN_CURRENT_DIR / src_name
-        if src.exists():
-            _upload_file(args.bucket, src, object_name, token)
-        else:
-            print(f"[WARN] missing optional admin theme persistence AI file: {src}")
-
-        src_name, object_name = ADMIN_ETF_AI_SHADOW_PORTFOLIO_OBJECT
-        src = ADMIN_CURRENT_DIR / src_name
-        if src.exists():
-            _upload_file(args.bucket, src, object_name, token)
-        else:
-            print(f"[WARN] missing optional admin ETF AI shadow portfolio file: {src}")
-
-        for src_name, object_name in ADMIN_VALUATION_AI_OBJECTS:
-            src = ADMIN_CURRENT_DIR / src_name
-            if src.exists():
-                _upload_file(args.bucket, src, object_name, token)
-            else:
-                print(f"[WARN] missing optional admin valuation AI file: {src}")
+        # Legacy AI current objects remain historical files, never new uploads.
 
     if not args.skip_trading_sign_current:
         for src_name, object_name in TRADING_SIGN_OBJECTS:
@@ -270,14 +398,17 @@ def main() -> None:
         "published_tseries_history": not args.skip_tseries_history,
         "published_admin_current": not args.skip_admin_current,
         "published_admin_history": not args.skip_admin_history,
-        "published_admin_ai_shadow_observation": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_AI_SHADOW_OBSERVATION_OBJECT[0]).exists(),
-        "published_admin_ai_learning_models": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_AI_LEARNING_MODELS_OBJECT[0]).exists(),
-        "published_admin_downside_risk_ai": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_DOWNSIDE_RISK_AI_OBJECT[0]).exists(),
-        "published_admin_downside_risk_ai_shadow": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_DOWNSIDE_RISK_AI_SHADOW_OBJECT[0]).exists(),
-        "published_admin_candidate_rank_delta_ai": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_CANDIDATE_RANK_DELTA_AI_OBJECT[0]).exists(),
-        "published_admin_theme_persistence_ai": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_THEME_PERSISTENCE_AI_OBJECT[0]).exists(),
-        "published_admin_etf_ai_shadow_portfolio": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_ETF_AI_SHADOW_PORTFOLIO_OBJECT[0]).exists(),
-        "published_admin_valuation_ai": not args.skip_admin_current,
+        "published_admin_internal_validation_current": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_INTERNAL_VALIDATION_CURRENT_OBJECT[0]).exists(),
+        "published_admin_internal_validation_history": not args.skip_admin_history and (ADMIN_CURRENT_DIR / ADMIN_INTERNAL_VALIDATION_HISTORY_OBJECT[0]).exists(),
+        "published_admin_ai_shadow_observation": False,
+        "published_admin_strategy_research_observation": not args.skip_admin_current and (ADMIN_CURRENT_DIR / ADMIN_STRATEGY_RESEARCH_OBSERVATION_OBJECT[0]).exists(),
+        "published_admin_ai_learning_models": False,
+        "published_admin_downside_risk_ai": False,
+        "published_admin_downside_risk_ai_shadow": False,
+        "published_admin_candidate_rank_delta_ai": False,
+        "published_admin_theme_persistence_ai": False,
+        "published_admin_etf_ai_shadow_portfolio": False,
+        "published_admin_valuation_ai": False,
         "published_trading_sign_current": not args.skip_trading_sign_current,
         "credential_path": str(cred_path),
     }, ensure_ascii=False, indent=2))

@@ -28,6 +28,8 @@ def _validation(args: str) -> str:
 
 
 def workflow_steps(workflow: str, include_ai_research: bool = False) -> list[dict[str, Any]]:
+    if include_ai_research:
+        raise ValueError("Quant 1.0 AI retired: include_ai_research is forbidden")
     if workflow == "weekday":
         return [
             {
@@ -107,14 +109,13 @@ def workflow_steps(workflow: str, include_ai_research: bool = False) -> list[dic
 
     if workflow == "weekend":
         research_command = _quant_pipeline("--asof {asof} --include-etf --model-run-only --pipeline-mode research_full")
-        if include_ai_research:
-            research_command += " --include-ai-research"
+        research_command += " --skip-remote-current-publish"
         return [
             {
                 "id": "quant_weekend_pipeline",
                 "thread": "Quant",
-                "title": "주말 Quant 모델/AI 검증 통합 파이프라인",
-                "purpose": "Quant 모델 스레드 안에서 주말 모델/AI 검증 통합 파이프라인을 한 번에 수행하고 결과를 정리한다.",
+                "title": "주말 Quant 비AI 모델 검증 통합 파이프라인",
+                "purpose": "폐지 AI/T 실행을 제외한 주말 비AI 모델 검증 결과를 정리한다.",
                 "commands": [
                     f"{_python()} D:\\Quant\\scripts\\build_sqlite_db_schema_manifest.py --asof {{asof}} --include-row-counts",
                     research_command,
@@ -125,7 +126,7 @@ def workflow_steps(workflow: str, include_ai_research: bool = False) -> list[dic
                     "schema/freshness와 주중 실패/보류 항목 확인",
                     "research_full 성공",
                     "research_validation pass 또는 실패 사유 기록",
-                    "AI/E-series policy 변경 후보는 적용이 아니라 후보로만 기록",
+                    "폐지 AI/T 학습·추론·생성·freshness 복구 금지, 과거 자료 보존",
                     "성과 개선/손실 위험 축소 근거 확인",
                     "주중 즉시 반영 금지 항목 분리",
                     "다음 주 운영 반영 후보 정리",

@@ -481,17 +481,18 @@ def main() -> None:
     parser.add_argument("--asof", default=datetime.now().strftime("%Y-%m-%d"))
     args = parser.parse_args()
 
+    from src.quant2.operations import ai_retirement
+    ai_retirement.load()
     mapping = load_mapping()
     generated_at = datetime.now().isoformat(timespec="seconds")
     user_perf = build_user_model_performance_history(mapping, args.asof, generated_at)
     user_holdings = build_user_model_holdings_history(mapping, args.asof, generated_at)
     internal_perf = build_internal_model_performance_history(args.asof, generated_at)
-    tseries_hist = build_tseries_discovery_history(args.asof, generated_at)
+    tseries_hist = None  # T models retired; preserve historical file bytes.
 
     _write_json(PUBLIC_HISTORY_DIR / "user_model_performance_history.json", user_perf)
     _write_json(PUBLIC_HISTORY_DIR / "user_model_holdings_history.json", user_holdings)
     _write_json(ADMIN_CURRENT_DIR / "internal_model_performance_history.json", internal_perf)
-    _write_json(PUBLIC_HISTORY_DIR / "quantservice_tseries_discovery_history.json", tseries_hist)
 
     print(
         json.dumps(
@@ -501,7 +502,8 @@ def main() -> None:
                 "user_model_performance_rows": len(user_perf["series"]),
                 "user_model_holdings_rows": len(user_holdings["series"]),
                 "internal_model_performance_rows": len(internal_perf["series"]),
-                "tseries_history_rows": len(tseries_hist["series"]),
+                "tseries_history_rows": None,
+                "tseries_status": "retired",
             },
             ensure_ascii=False,
             indent=2,

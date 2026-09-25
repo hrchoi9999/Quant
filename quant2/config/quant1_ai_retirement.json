@@ -1,0 +1,18 @@
+{
+  "schema_version": "quant1_ai_retirement_v1",
+  "status": "retired",
+  "decision_date": "2026-09-25",
+  "authorization": "User directed full retirement after dependency review, then instructed to proceed with the next work.",
+  "current_ai_outputs_allowed": false,
+  "historical_records_preserved": true,
+  "retired_model_ids": [
+    "AI-CANDIDATE-VALIDATION-V01", "AI-OVERLAY-V01",
+    "AI-GROWTH-VALUATION-V01", "AI-DOWNSIDE-RISK-V01",
+    "AI-CANDIDATE-RANK-DELTA-V01", "AI-THEME-PERSISTENCE-V01",
+    "AI-MODEL-SELECTION-V01", "E-ETF-V01",
+    "AI-E-ETF-PORTFOLIO-V01", "AI-ETF-SHADOW-PORTFOLIO-V01",
+    "AI-ETF-ROLE-ALLOCATION-V01", "AI-E-ETF-ROLE-ALLOCATION-V01",
+    "AI-ETF-ROLE-WEIGHT-TEMPLATE-V01", "AI-E-ETF-ROLE-WEIGHT-TEMPLATE-V01",
+    "AI-E-ETF-SLEEVE-SELECTION-V01", "T-STOCK-V01", "T-ETF-V01"
+  ]
+}

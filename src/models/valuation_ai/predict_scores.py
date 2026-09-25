@@ -156,6 +156,9 @@ def predict_scores(db: Path, asof: str, model_path: Path | None = None) -> pd.Da
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("AI-GROWTH-VALUATION-V01")
     parser = argparse.ArgumentParser(description="Predict growth valuation AI scores.")
     parser.add_argument("--db", default=str(OUT_DB))
     parser.add_argument("--asof", required=True)

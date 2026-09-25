@@ -365,6 +365,10 @@ def sync_etf(con: sqlite3.Connection) -> None:
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("T-STOCK-V01")
+    require_model_active("T-ETF-V01")
     ap = argparse.ArgumentParser(description="Sync T-series operational outputs into tseries_operational.db")
     ap.add_argument("--model", choices=["stock", "etf", "all"], default="all")
     ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD run folder.")

@@ -614,6 +614,9 @@ def build_features(universe: Path, start: str, end: str, out_db: Path = OUT_DB) 
 
 
 def main() -> None:
+    from src.quant2.operations.ai_retirement import require_model_active
+
+    require_model_active("AI-GROWTH-VALUATION-V01")
     parser = argparse.ArgumentParser(description="Build monthly features for AI-GROWTH-VALUATION-V01.")
     parser.add_argument("--universe", default=str(DEFAULT_UNIVERSE))
     parser.add_argument("--start", default="2017-01-01")

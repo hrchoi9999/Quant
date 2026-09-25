@@ -446,13 +446,23 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def build_payload(asof: str | None = None) -> dict[str, Any]:
+    import sys
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from src.quant2.operations import ai_retirement
+
+    ai_retirement.load()
     admin = _load_json(ADMIN_CURRENT / "admin_new_entry_tracker.json")
     asof_date = asof or admin.get("as_of_date")
     perf = admin.get("model_performance_summary") or {}
     rows: list[dict[str, Any]] = []
     for scope in ["internal_models", "tseries_models"]:
+        if scope == "tseries_models" and ai_retirement.is_retired_model("T-STOCK-V01"):
+            continue
         live_by_model = _live_map(admin, scope)
         for item in perf.get(scope, []) or []:
+            if ai_retirement.is_retired_model(str(item.get("model_code"))):
+                continue
             rows.append(_build_row(item, live_by_model.get(str(item.get("model_code"))), scope))
 
     payload = {

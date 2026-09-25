@@ -1,0 +1,46 @@
+{
+  "contract_version": "standalone_model_retirement_v1",
+  "namespace": "internal_standalone_models",
+  "enabled": true,
+  "retired_at": "2026-09-22T11:47:44.561061+09:00",
+  "retired_model_codes": [
+    "S6"
+  ],
+  "model_identity": {
+    "model_code": "S6",
+    "published_run_id": "RUN__S6__20260918__20260918_M_20230608_20260918__APPLIED_HOLDINGS_V1",
+    "published_at": "2026-09-20 10:03:01",
+    "display_name": "Quant S6",
+    "short_description": "Defensive ETF allocation",
+    "long_description": "Defensive ETF allocation",
+    "benchmark_code": "KOSPI",
+    "data_asof": "2026-09-18",
+    "signal_asof": "2026-09-18 00:00:00",
+    "latest_nav": 1.026914326410247,
+    "latest_drawdown": -0.1097450046921683,
+    "latest_holdings_count": 6,
+    "latest_rebalance_date": "2026-09-18 00:00:00",
+    "risk_grade": "low",
+    "disclaimer_text": "Backtest-based model data for service display. Not investment advice.",
+    "service_enabled": 1
+  },
+  "archive_root": "D:\\Quant\\quant2\\archive\\legacy_user_router\\20260922_pre_cutover",
+  "artifacts": {
+    "admin": {
+      "archive_path": "D:\\Quant\\quant2\\archive\\legacy_user_router\\20260922_pre_cutover\\admin_new_entry_tracker.json",
+      "sha256": "fdb97cf9788a0235d3165e0baf8656e845204323a710188089db7f0a7187ccc0",
+      "source_asof": "2026-09-18",
+      "source_generated_at": "2026-09-20T19:04:16"
+    },
+    "internal_performance_history": {
+      "archive_path": "D:\\Quant\\quant2\\archive\\legacy_user_router\\20260922_pre_cutover\\internal_model_performance_history.json",
+      "sha256": "d9488bdb0d60d9fdb49e66c168b8786d02ef36d0c45ce325ec40acea12b79e66",
+      "source_asof": "2026-09-18",
+      "source_generated_at": "2026-09-20T19:03:06"
+    }
+  },
+  "shared_allocator_retired": false,
+  "q25_profiles_retired": false,
+  "current_rule": "exclude exact model_code=S6 from current recommendations/ranks/performance aggregates",
+  "history_rule": "explicit admin-only archived history; original dates preserved"
+}

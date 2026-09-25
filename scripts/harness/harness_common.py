@@ -2,11 +2,18 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+try:
+    from .retirement_policy import command_retirement_reason
+except ImportError:  # Standalone CLI uses the script directory as its import root.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from retirement_policy import command_retirement_reason
 
 ROOT = Path(__file__).resolve().parents[2]
 COMMANDS_PATH = ROOT / "config" / "harness" / "stage_commands.yaml"
@@ -74,6 +81,9 @@ def load_risk_policy(path: Path = RISK_POLICY_PATH) -> dict[str, Any]:
 
 
 def command_matches_blocked_pattern(command: str, policy: dict[str, Any] | None = None) -> str | None:
+    retired = command_retirement_reason(command)
+    if retired:
+        return retired
     policy = policy or load_risk_policy()
     normalized = command.lower()
     for pattern in policy.get("blocked_patterns") or []:

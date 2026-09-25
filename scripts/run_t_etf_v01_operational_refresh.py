@@ -27,6 +27,9 @@ def run_step(script: Path, *extra: str) -> None:
 
 
 if __name__ == "__main__":
+    from _quant1_ai_retirement_entry import reject_retired
+
+    reject_retired("T-ETF-V01")
     ap = argparse.ArgumentParser(description="Refresh T-ETF-V01 operational outputs.")
     ap.add_argument("--asof", default=None, help="YYYY-MM-DD. Used for run folder naming.")
     ap.add_argument("--run-date", default=None, help="YYYYMMDD or YYYY-MM-DD. Overrides output run date.")

@@ -36,7 +36,7 @@ def test_model_scope_registry_includes_governance_rules() -> None:
     assert scope_contract["resolution_mode"] == "legacy_static"
     assert scope_contract["activation_state"] == "inactive"
     assert scope_contract["fail_closed"] is True
-    assert scope_contract["quant_os_manifest"]["required_model_count"] == 8
+    assert scope_contract["quant_os_manifest"]["required_model_count"] == 6
     assert scope_contract["quant_os_manifest"]["required_schema_version"] == 1
     live_gate = scope_contract["quant_os_manifest"]["live_shadow_gate"]
     assert live_gate["frozen_asof"] == "2026-08-22"
@@ -44,10 +44,8 @@ def test_model_scope_registry_includes_governance_rules() -> None:
     assert live_gate["earliest_review_date"] == "2027-02-18"
     assert live_gate["candidate_requirements"]["S2"]["minimum_decision_count"] == 26
     assert live_gate["candidate_requirements"]["S4"]["minimum_decision_count"] == 6
-    assert scope_contract["quant_os_manifest"]["pinned_models"]["T-STOCK-V01"] == {
-        "required_decision": "keep_current_revision",
-        "required_revision": "quant_1_0_canonical",
-    }
+    assert scope_contract["quant_os_manifest"]["pinned_models"] == {}
+
     assert quant1_2_observation["state"] == "research_shadow_only"
     assert quant1_2_observation["active_scope_impact"] == "none"
     assert quant1_2_observation["candidate_version_state"] == "frozen_immutable"
@@ -152,7 +150,7 @@ def test_build_model_governance_review_from_sample_payloads(tmp_path: Path) -> N
     assert review["summary"]["strategy_model_count"] == 2
     assert [row["model_code"] for row in review["high_performance_models_to_expand"]] == ["S4"]
     assert [row["model_code"] for row in review["low_performance_models_to_reduce_or_archive"]] == ["S2"]
-    assert {row["model_code"] for row in review["ai_models_to_refresh_or_downgrade"]} == {"AI-CORE-V01", "AI-ARCHIVE-V01"}
+    assert review["ai_models_to_refresh_or_downgrade"] == []
     assert review["new_model_research_candidates"]
     assert review["quant_1_2_vs_quant_1_0_live_comparison"]["status"] == "not_configured"
     assert review["quant_1_2_vs_quant_1_0_live_comparison"]["active_scope_impact"] == "none"
