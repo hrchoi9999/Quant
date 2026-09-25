@@ -51,3 +51,9 @@ config/*secretkey*.txt
 reports/
 logs/
 *.log
+
+# Quant 2.x canonical sources live under quant2/; these paths are junction aliases.
+/src/quant2/
+/tests/quant2/
+/data/quant2/
+/reports/quant2_0/

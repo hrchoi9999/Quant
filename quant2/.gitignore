@@ -1,0 +1,6 @@
+data/
+reports/
+_tmp/
+**/__pycache__/
+*.py[cod]
+
