@@ -10,15 +10,15 @@
 
 ## 현재 과업과 다음 작업
 
-### 9/25 현재 — 오늘 잔여 마감
+### 9/25 현재 — 오늘 잔여 마감 완료
 
-- 사용자 직접 지시: 남은 목록의 **1번 작업 진행**. 고정 완료조건은 **①현재 상태·재사용/잔여 범위 확정 ②QS 개발본/Git 및 WD04 검사 보완·담당 검증 ③총괄 검수·현재 문서·Git 마감**이다. 현재 **1/3(33%)**. WD04 보완은 완료했으나 QS 담당 실행·마감 미완료로 전체를 완료 처리하지 않는다. 단위별 완료 근거로만 진척률을 올린다.
-- QS: 이미 운영 배포한 run112 reader 수정의 개발본 연결, 기존 stash 복구의 최종 fingerprint/검사, 낡은 clean 주장 정정 및 검증된 작업의 로컬 커밋을 마감한다. 원 stash·백업·관계없는 dirty는 보존하며 QS push·새 배포는 이번 범위에 없다.
-- **QS 재개 지점:** 운영 후보와 동일 SHA의 `service_platform/web/private_portfolio_restore.py` 복사는 확인했으나 canonical app 호출 연결·현재 검증 fingerprint·정정 문서·로컬 커밋은 확인되지 않았다. HEAD는 `15bfbc4`, 정리 문서는 과거 stash/clean 주장 그대로다. 총괄 최초 배정 후 담당은 별도 메뉴명 운영 조회를 마감했고, 같은 범위 재개·과업 혼선 정정 뒤에도 완료 근거 없이 idle 종료했다. 사용자 중단 또는 도구 거절 근거는 전달받지 못했다. 다음은 QS 담당의 위 범위 실제 실행·검증 보고를 받아 총괄 검수하는 것이며, 재개 요청 전송 자체를 완료로 세지 않는다. [이번 마감 기록](../../reports/quant2_0/daily_closeout_20260925/MASTER_REVIEW.json).
-- Quant OS 검사 보완은 완료됐다. QA 후보 4개와 전체 운영 입력 6개는 별도 계약이며, 실제 결함은 합성 운영 입력에 폐지 S6까지 포함한 점이었다. 올바른 6개 입력·임시 퇴역 계약으로 고치고 범위 gate 우회 mock을 제거했다. 필수 S5 누락 거부를 포함해 15검사·Ruff/구문검사 통과, 총괄이 운영 설정 없는 Git index 격리 사본에서도 15검사를 확인했다. 생산 로직 3파일은 바이트 변경 없이 검사와 함께 최초 추적해 `2269034`로 커밋했다. [검사 마감 근거](../../../reports/prompt_handoff_runs/20260925_prompt_weekday_data_20260923/WD04_QA_EXPORTER_TEST_CLOSEOUT/REPORT.md). 기존 cycle·모델·DB는 재실행/수정하지 않았다.
-- **확인된 최신 운영 상태:** 사용자 승인 cycle `20260925_prompt_weekday_data_20260923`은 비AI 범위 WD01~07 7/7, `completed_with_deferrals`로 마감됐다. 총괄이 완료 근거 14핀과 시간 계산을 대조했다. [마감 수령 검수](../../reports/quant2_0/harness_close_receipt_20260925/MASTER_RECEIPT.json). Q25 입력 8/9·rules PARTIAL·소비 부적격 및 AI/S6 보류는 유지한다.
-- 현재 운영 revision은 `quantservice-web-run112-reader-20260925`, image digest `sha256:6fb7a207247a292c8cb02b18c8d8c34d6b14f867f91c41562318d205b16415d7`이다. 00419 위에 private reader의 분류 메타데이터 호환만 수정했다. 담당의 배포·인증 화면 근거를 재사용하며 새 총괄 원격검증으로 표현하지 않는다. 최초 전역 gate 원인 추정은 폐기됐다. [QS 배포 근거](D:/QuantService/reports/harness/run112_20260925_private_reader_schema_deploy_report.md).
-- **상시 작업 목록:** 1. 오늘 잔여 마감(**진행 중**) / 2. Q25 규칙·기업행위 검토(**보류, 항상 목록 유지**) / 3. AI 효용 분석(다음) / 4. 포트폴리오 운영방안·메뉴 통합(다음). 아래 완료 기록은 해당 시점·범위의 근거로 보존한다. 전체 관측 Live 3/4(75%)는 이번 마감과 별개다.
+- 사용자 직접 **1번 작업 진행 → 그럼 완료해** 지시 범위를 마감했다. 고정 완료조건 **①현재 상태·재사용/잔여 확정 ②QS 개발본/Git 및 WD04 검사 보완·담당 검증 ③총괄 검수·문서·Git 마감**의 **3/3(100%)**다. 전체 관측 Live 3/4(75%)와 별도 진척률이다. [총괄 마감 검수](../../reports/quant2_0/daily_closeout_20260925/MASTER_REVIEW.json).
+- **QS 개발본 반영:** 운영 run112와 동일한 strict reader를 canonical API·runtime에 연결했다. 명시적 복구 opt-in과 계약·generation·MD5/SHA 검증을 통과해야 자료를 사용하고, 오류 시 로컬 자료로 대체하지 않는다. 복원 경로의 로컬 DB 보강을 제거했고 후보10개·S6 의존 보류카드3개·null/empty 상태를 API→view→Jinja 검사로 확인했다. 관련12검사·Ruff/구문검사 통과. 실제자료는 SHA 고정 fixture로 재사용하며, 자료 부재 시 독립4검사 통과·해당 통합3검사 skip을 확인했다. 운영 이미지 전체 동일성·신규 운영 E2E 또는 전체 QS 검사 통과로 확대하지 않는다.
+- **QS 복구/Git:** 검수 스냅샷18개+직접 의존은 `c32011c`, run112 연결은 `01eed02`, 추가 검사 보존은 `875c490`으로 로컬 커밋했다. 총괄이 과거 stash→보존 커밋18/18 정규화 일치, 현재 검수범위25/25 커밋 일치와 최종 fingerprint `5b9a710a570611f0823233956fcfece6cbb50dcb07aed430d1f1fd432db7b585`를 확인했다. 기존18개 중17개는 복구 내용 그대로이고 runtime1개만 승인된 연결 변경이다. 원 stash와 백업1015개를 보존했고 잘못된 clean 주장을 정정했다. 범위 밖 dirty137개는 유지한다. [QS 마감 문서](D:/QuantService/docs/threads/QS-Master/WORKTREE_CLEANUP_20260925.md). QS push·새 배포는 수행하지 않았다.
+- **WD04 검사:** QA 후보4개와 운영 입력6개는 별도 계약이며, 합성 입력에 폐지 S6를 포함한 불일치를 수정했다. 운영 설정에 의존하지 않는 임시 퇴역 계약을 쓰고 범위 gate 우회 mock을 제거했다. 필수 S5 누락 거부를 포함한15검사·Ruff/구문검사 통과, 총괄 Git index 격리 사본도15검사 통과. 생산 로직3파일은 내용 변경 없이 검사와 함께 최초 추적해 `2269034`로 커밋·Quant origin/main push했다. [검사 마감 근거](../../../reports/prompt_handoff_runs/20260925_prompt_weekday_data_20260923/WD04_QA_EXPORTER_TEST_CLOSEOUT/REPORT.md).
+- **별도 기존 검사 문제:** QS `test_q25_no_data_display.py`가 현재 app에 없는 `_q25_changes_view`를 import하여 별도 legacy-deferred 검사 수집이 실패한다. 이번 reader/복구 검수의 실패로 섞지 않으며 미해결 항목으로 유지한다. 기존 다른 dirty 작업 및 이 검사 계약 정비를 완료했다고 주장하지 않는다.
+- **최신 운영 상태:** 사용자 승인 cycle `20260925_prompt_weekday_data_20260923`은 비AI WD01~07 7/7, `completed_with_deferrals` 마감이다. [수령 검수](../../reports/quant2_0/harness_close_receipt_20260925/MASTER_RECEIPT.json). Q25 입력8/9·rules PARTIAL·소비 부적격 및 AI/S6 보류 유지. 현재 운영 revision은 `quantservice-web-run112-reader-20260925`, digest `sha256:6fb7a207247a292c8cb02b18c8d8c34d6b14f867f91c41562318d205b16415d7`이며 기존 담당의 배포·인증 화면 근거를 재사용했다. [배포 근거](D:/QuantService/reports/harness/run112_20260925_private_reader_schema_deploy_report.md). 이번 마감에서 새 Harness·수집·DB/모델 재산출·원격 자료 게시·배포는 하지 않았다.
+- **상시 작업 목록:** 1. 오늘 잔여 마감(**완료**) / 2. Q25 규칙·기업행위 검토(**보류, 항상 유지**) / 3. AI 효용 분석(다음) / 4. 포트폴리오 운영방안·메뉴 통합(다음). 주중·주말 Harness는 사용자 직접 지시로만 시작한다. 아래 기록은 각 완료 시점·범위의 근거로 보존한다.
 
 ### 9/25 현재 — 원본 장부 의존 정리·운영 배포와 개발본 반영
 
