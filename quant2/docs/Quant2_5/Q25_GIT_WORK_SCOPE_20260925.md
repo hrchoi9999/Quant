@@ -5,6 +5,7 @@
 - 사용자 지시: 이 총괄 작업의 Git 정리도 수행한다.
 - 저장소: `D:\Quant`, `hrchoi9999/Quant`, 로컬 `main`.
 - 소스 커밋: `a5758412ea22d88f09de695c2e9a2f2f75e924e1`.
+- 문서·경로 커밋: `4e0d5f96f99e8de2848c9ef2a2e15076d748bd24`. 사용자 후속 `push 까지 진행해` 지시로 기존 선행 `1896100`까지 포함해 `origin/main`에 push했다. 잔여 마감 착수 시 원격 HEAD도 `4e0d5f9`와 일치했다.
 - 모의투자 재구성·원본 장부에서 독립한 입력·서비스 exporter와 직접/간접 Python 의존 파일 90개를 명시적으로 선별했다. 기존에 추적되지 않던 의존 파일을 포함한 최초 기준이며, 90개 각각이 오늘 새로 개발되었다는 뜻은 아니다.
 - 기존 승인 소스 4개 해시는 [원본 장부 독립화 검수](../../reports/quant2_0/q25_ledger_retirement_20260925/MASTER_REVIEW.json)와 일치한다. 소스 내용을 변경하지 않았다.
 - 미추적 파일을 숨기던 로컬 `status.showUntrackedFiles=no`를 `normal`로 바꿨다.
@@ -12,6 +13,7 @@
 
 ## 검증과 재현 경계
 
+- 후속 잔여 마감 커밋 `2269034`: QA 후보 exporter 검사 fixture와 그 재현에 필요한 미추적 소스 3개를 보존하고 `origin/main` push·원격 SHA 일치를 확인했다. `legacy_qa_candidates.py`, `standalone_retirement.py`, `src/quant_service/non_ai_scope.py`는 내용 변경 없이 최초 추적했다. 운영 설정 대신 임시 합성 계약을 사용하는 15검사가 Git index 격리 사본에서도 통과했다. 기존 90소스/25검사와 별도 범위다.
 - Git index에서 추출한 격리 사본으로 원본 입력/재구성 13개 검사를 통과했다.
 - 기존 manifest `72f00e83ec8a97b4fa30343acb4b1701b085b697543561c7d78aff6fa59607e3`와 일치하는 로컬 자료를 별도로 복사해 exporter 12개 검사를 통과했다. 해당 실제 자료는 Git에 넣지 않았다.
 - 변경 주대상과 신규 공통 의존 파일의 Ruff 및 선별 소스 구문검사 통과. 기존 소스의 끝 빈 줄 4건은 해시 보존을 위해 그대로 두었으며, 그 경고를 제외한 staged whitespace 검사는 통과했다.
@@ -24,5 +26,5 @@
 - 기존 1.0 전략·수집·하네스 변경, 문서 이동으로 보이는 삭제 221개 및 다른 미추적 연구 코드는 이번 커밋에 섞지 않았다. 원래 위치와 내용을 유지했다.
 - 루트의 기존 `AGENTS.md` 변경도 전체 누적 차이를 이번 작업에 묶지 않고 보존했다.
 - 실제 남은 dirty 수와 전체 파일별 목록은 [로컬 Git 마감 기록](../../reports/quant2_0/git_closeout_20260925/selection.json)에 기록한다. 저장소 전체 clean으로 보고하지 않는다.
-- 로컬 커밋만 수행하며 push·배포·GCS 게시·DB/모델 재산출은 이번 범위에 없다.
+- 최초 로컬 마감 기록 `selection.json`의 `push_performed=false`는 후속 push 이전 시점이다. 위 사용자 추가 지시로 Quant push는 완료했다. QS push·새 배포·GCS 게시·DB/모델 재산출로 확대하지 않는다.
 - Q25 규칙·기업행위 검토는 보류 목록에 유지한다. 주중·주말 Harness는 사용자가 직접 지시할 때만 시작한다.
